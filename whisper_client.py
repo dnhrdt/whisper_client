@@ -9,8 +9,7 @@ import keyboard
 import pyaudio
 import websocket
 import numpy as np
-import multiprocessing
-from multiprocessing import Process, Queue
+import pyperclip
 from datetime import datetime
 
 class WhisperClient:
@@ -18,17 +17,11 @@ class WhisperClient:
         self.setup_logging()
         self.recording = False
         self.recording_lock = threading.Lock()
-        self.text_queue = Queue()
         self.uid = str(uuid.uuid4())
         self.ws = None
         self.audio = pyaudio.PyAudio()
         self.stream = None
         self.ws_url = f"ws://{host}:{port}"
-        
-        # Text-Insertion Prozess starten
-        self.text_process = Process(target=self.process_text_queue, args=(self.text_queue,))
-        self.text_process.daemon = True
-        self.text_process.start()
         
         # Audio-Einstellungen
         self.chunk = 4096
@@ -259,47 +252,14 @@ class WhisperClient:
         else:
             self.stop_recording()
 
-    @staticmethod
-    def process_text_queue(queue):
-        """Text-Queue in separatem Prozess verarbeiten"""
-        import win32com.client
-        import pythoncom
-        
-        # COM für diesen Prozess initialisieren
-        pythoncom.CoInitialize()
-        shell = win32com.client.Dispatch("WScript.Shell")
-        
-        while True:
-            try:
-                # Auf Text in der Queue warten
-                if not queue.empty():
-                    text = queue.get()
-                    
-                    try:
-                        # Text einfügen
-                        time.sleep(0.2)  # Kurze Pause vor der Eingabe
-                        shell.SendKeys(text + "{ENTER}")
-                        
-                    except Exception as e:
-                        print(f"⚠️ Fehler beim Einfügen des Texts: {e}")
-                        # Shell bei Fehler zurücksetzen
-                        shell = None
-                        pythoncom.CoInitialize()
-                        shell = win32com.client.Dispatch("WScript.Shell")
-                
-                time.sleep(0.1)  # Kurze Pause um CPU zu schonen
-                
-            except Exception as e:
-                print(f"⚠️ Fehler im Text-Prozess: {e}")
-                time.sleep(1)  # Längere Pause bei Fehlern
-                
     def insert_text(self, text):
-        """Text zur Queue hinzufügen"""
+        """Text in die Zwischenablage kopieren"""
         try:
-            self.text_queue.put(text)
-            self.logger.debug("Text zur Queue hinzugefügt: " + text)
+            pyperclip.copy(text)
+            self.logger.info(f"📋 Text in Zwischenablage kopiert: {text}")
+            self.logger.info("⌨️  Drücke Strg+V zum Einfügen")
         except Exception as e:
-            self.logger.error(f"⚠️ Fehler beim Hinzufügen zur Text-Queue: {e}")
+            self.logger.error(f"⚠️ Fehler beim Kopieren in die Zwischenablage: {e}")
             
     def cleanup(self):
         """Ressourcen freigeben"""
@@ -308,8 +268,6 @@ class WhisperClient:
             self.ws.close()
         if self.audio:
             self.audio.terminate()
-        if self.text_process:
-            self.text_process.terminate()
 
 def main():
     # Disable websocket trace

@@ -1,5 +1,5 @@
 keyboard>=0.13.5
 numpy>=1.24.0
 pyaudio>=0.2.13
-pywin32>=306
+pyperclip>=1.8.2
 websocket-client>=1.7.0
