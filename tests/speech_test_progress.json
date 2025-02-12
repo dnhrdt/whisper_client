@@ -1,0 +1,122 @@
+{
+  "test_stages": [
+    {
+      "id": 1,
+      "name": "Kurze, klare Sätze",
+      "description": "Test der grundlegenden Spracherkennung",
+      "status": "in_progress",
+      "test_cases": [
+        {
+          "id": "1.1",
+          "description": "Einzelne kurze Sätze",
+          "example": "Dies ist ein Test. Das ist der zweite Satz.",
+          "expected": [
+            "Korrekte Satzgrenzen",
+            "Keine Duplikate",
+            "Korrekte Großschreibung"
+          ],
+          "results": [],
+          "status": "pending"
+        },
+        {
+          "id": "1.2",
+          "description": "Mehrere Sätze in schneller Folge",
+          "example": "Erster Satz. Zweiter Satz. Dritter Satz.",
+          "expected": [
+            "Alle Sätze werden erkannt",
+            "Korrekte Reihenfolge",
+            "Keine vermischten Sätze"
+          ],
+          "results": [],
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Sätze mit Abkürzungen",
+      "description": "Test der Abkürzungserkennung",
+      "status": "pending",
+      "test_cases": [
+        {
+          "id": "2.1",
+          "description": "Gängige Abkürzungen",
+          "example": "Dr. Müller und Prof. Schmidt arbeiten zusammen.",
+          "expected": [
+            "Abkürzungen werden nicht als Satzende interpretiert",
+            "Korrekte Zusammenführung der Satzteile"
+          ],
+          "results": [],
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Sätze mit Pausen",
+      "description": "Test des Timeout-Verhaltens",
+      "status": "pending",
+      "test_cases": [
+        {
+          "id": "3.1",
+          "description": "Lange Pausen zwischen Wörtern",
+          "example": "Dies ist... ein Test... mit Pausen.",
+          "expected": [
+            "Korrekte Zusammenführung trotz Pausen",
+            "Timeout bei zu langen Pausen"
+          ],
+          "results": [],
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Schnelle Sprache",
+      "description": "Test der Verarbeitung schneller Sprache",
+      "status": "pending",
+      "test_cases": [
+        {
+          "id": "4.1",
+          "description": "Schnell gesprochene Sätze",
+          "example": "SchnellerSatzEins! SchnellerSatzZwei! Drei!",
+          "expected": [
+            "Korrekte Satztrennung",
+            "Keine vermischten Wörter"
+          ],
+          "results": [],
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Komplexe Interpunktion",
+      "description": "Test verschiedener Satzzeichen",
+      "status": "pending",
+      "test_cases": [
+        {
+          "id": "5.1",
+          "description": "Verschiedene Satzenden",
+          "example": "Ist das ein Test? Ja! Sehr gut...",
+          "expected": [
+            "Korrekte Erkennung aller Satzzeichen",
+            "Korrekte Formatierung"
+          ],
+          "results": [],
+          "status": "pending"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "last_updated": "2024-02-12T22:20:03+01:00",
+    "current_stage": 1,
+    "current_test": "1.1",
+    "notes": [
+      "Systematisches Testen der Spracherkennung",
+      "Jeder Test muss erfolgreich sein, bevor zum nächsten übergegangen wird",
+      "Probleme werden sofort behoben und der Test wiederholt"
+    ]
+  }
+}

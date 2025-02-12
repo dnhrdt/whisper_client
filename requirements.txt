@@ -1,5 +1,11 @@
-keyboard>=0.13.5
-numpy>=1.24.0
-pyaudio>=0.2.13
-pyperclip>=1.8.2
-websocket-client>=1.7.0
+# Audio-Verarbeitung
+pyaudio==0.2.14
+numpy==1.26.3
+
+# WebSocket-Kommunikation
+websocket-client==1.7.0
+
+# System-Integration
+keyboard==0.13.5
+pywin32==306
+pyperclip==1.8.2

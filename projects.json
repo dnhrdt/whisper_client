@@ -1,0 +1,48 @@
+{
+  "project": {
+    "name": "whisper_client",
+    "path": "d:/dev/whisper_client",
+    "description": "Client für WhisperLive Server zur Spracherkennung",
+    "status": "in_development",
+    "task_history": "task_history.json",
+    "last_updated": "2024-02-12T21:48:48+01:00",
+    "features": [
+      "Spracherkennung via WhisperLive",
+      "Automatische Texteingabe",
+      "Satzweise Ausgabe",
+      "Task-Historie"
+    ],
+    "structure": {
+      "main.py": "Hauptprogramm",
+      "config.py": "Zentrale Konfiguration",
+      "src/": {
+        "audio.py": "Audio-Aufnahme und Mikrofon-Verwaltung",
+        "websocket.py": "Server-Kommunikation",
+        "text.py": "Textverarbeitung und Zwischenablage",
+        "logging.py": "Zentrales Logging-System",
+        "utils.py": "Hilfsfunktionen"
+      }
+    },
+    "dependencies": {
+      "python": ">=3.8",
+      "packages": "requirements.txt"
+    },
+    "current_tasks": [
+      {
+        "description": "Code-Restrukturierung",
+        "status": "completed",
+        "details": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+      },
+      {
+        "description": "Verbesserung der Textausgabe",
+        "status": "completed",
+        "details": "Optimierte Satzbildung, Deduplizierung und Textformatierung implementiert"
+      }
+    ]
+  },
+  "meta": {
+    "last_updated": "2024-02-12T21:48:48+01:00",
+    "format_version": "1.0",
+    "all_projects_ref": "d:/dev/Cline/all_projects.json"
+  }
+}

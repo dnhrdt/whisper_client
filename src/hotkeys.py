@@ -1,0 +1,83 @@
+"""
+Hotkey-Verwaltung für den Whisper-Client
+"""
+import win32con
+import win32api
+import win32gui
+import threading
+import time
+from src import logging
+
+logger = logging.get_logger()
+
+class HotkeyManager:
+    def __init__(self):
+        self.running = False
+        self.callbacks = {}
+        self.thread = None
+        
+        # Hotkey-Mappings
+        self.HOTKEYS = {
+            'f13': (0, win32con.VK_F13),
+            'f14': (0, win32con.VK_F14)
+        }
+    
+    def register_hotkey(self, hotkey, callback):
+        """Registriert einen Hotkey mit Callback"""
+        if hotkey not in self.HOTKEYS:
+            logger.error(f"⚠️ Unbekannter Hotkey: {hotkey}")
+            return False
+            
+        self.callbacks[hotkey] = callback
+        return True
+    
+    def _check_hotkeys(self):
+        """Prüft den Status der registrierten Hotkeys"""
+        key_states = {key: False for key in self.HOTKEYS.keys()}  # Speichert den Tastenzustand
+        
+        while self.running:
+            try:
+                for hotkey, (mods, vk_code) in self.HOTKEYS.items():
+                    # Prüfe aktuellen Tastenzustand
+                    is_pressed = bool(win32api.GetAsyncKeyState(vk_code) & 0x8000)
+                    
+                    # Taste wurde gerade gedrückt
+                    if is_pressed and not key_states[hotkey]:
+                        key_states[hotkey] = True
+                        logger.debug(f"Taste {hotkey} gedrückt")
+                        callback = self.callbacks.get(hotkey)
+                        if callback:
+                            try:
+                                callback()
+                            except Exception as e:
+                                logger.error(f"Fehler im Callback für {hotkey}: {e}")
+                    
+                    # Taste wurde losgelassen
+                    elif not is_pressed and key_states[hotkey]:
+                        key_states[hotkey] = False
+                        logger.debug(f"Taste {hotkey} losgelassen")
+                
+                time.sleep(0.05)  # Reduzierte Wartezeit für bessere Reaktion
+                
+            except Exception as e:
+                logger.error(f"Fehler bei Hotkey-Prüfung: {e}")
+                time.sleep(0.1)  # Kurze Pause bei Fehlern
+    
+    def start(self):
+        """Startet die Hotkey-Überwachung"""
+        if self.running:
+            return
+            
+        self.running = True
+        self.thread = threading.Thread(target=self._check_hotkeys)
+        self.thread.daemon = True
+        self.thread.start()
+        logger.debug("✓ Hotkey-System gestartet")
+    
+    def stop(self):
+        """Stoppt die Hotkey-Überwachung"""
+        self.running = False
+        if self.thread:
+            self.thread.join(timeout=1.0)
+            self.thread = None
+        logger.debug("✓ Hotkey-System gestoppt")
