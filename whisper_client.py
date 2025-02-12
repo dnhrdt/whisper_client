@@ -269,6 +269,13 @@ class WhisperClient:
         if self.audio:
             self.audio.terminate()
 
+def exit_handler(client):
+    """Programm sauber beenden"""
+    client.logger.info("\n🛑 Programm wird beendet...")
+    client.cleanup()
+    keyboard.unhook_all()
+    sys.exit(0)
+
 def main():
     # Disable websocket trace
     websocket.enableTrace(False)
@@ -283,18 +290,16 @@ def main():
         client.logger.info("\n=== Whisper Client ===")
         client.logger.info("🔥 Client gestartet!")
         client.logger.info("⌨️  Drücke Alt+Space zum Starten/Stoppen der Aufnahme")
-        client.logger.info("⚡ Drücke Strg+C zum Beenden")
+        client.logger.info("⚡ Drücke Strg+Q zum Beenden")
         client.logger.info("-" * 50)
         client.show_status()
         
-        try:
-            while True:
-                time.sleep(0.1)
-        except KeyboardInterrupt:
-            client.logger.info("\n🛑 Programm wird beendet...")
-            client.cleanup()
-            keyboard.unhook_all()
-            sys.exit(0)
+        # Exit-Handler registrieren
+        keyboard.add_hotkey('ctrl+q', lambda: exit_handler(client))
+        
+        # Hauptschleife
+        while True:
+            time.sleep(0.1)
             
     except Exception as e:
         print(f"\n⚠️ Kritischer Fehler: {e}")
