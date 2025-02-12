@@ -9,7 +9,9 @@ import keyboard
 import pyaudio
 import websocket
 import numpy as np
-import win32com.client
+import win32gui
+import win32con
+import win32api
 import pythoncom
 from datetime import datetime
 
@@ -261,17 +263,31 @@ class WhisperClient:
         else:
             self.stop_recording()
 
+    def send_char(self, char):
+        """Einzelnes Zeichen senden"""
+        try:
+            # Virtuelle Tastencode und Scan-Code ermitteln
+            if char == "\n":
+                vk = win32con.VK_RETURN
+            else:
+                vk = win32api.VkKeyScan(char) & 0xFF
+            
+            # Taste drücken und loslassen
+            win32api.keybd_event(vk, 0, 0, 0)  # Taste drücken
+            time.sleep(0.02)  # Kurze Pause
+            win32api.keybd_event(vk, 0, win32con.KEYEVENTF_KEYUP, 0)  # Taste loslassen
+            
+            return True
+        except Exception as e:
+            self.logger.debug(f"Fehler beim Senden von Zeichen '{char}': {e}")
+            return False
+            
     def process_text_queue(self):
         """Text-Queue in separatem Thread verarbeiten"""
-        # COM für diesen Thread initialisieren
-        pythoncom.CoInitialize()
+        self.logger.debug("Text-Thread gestartet")
         
         while True:
             try:
-                # Shell bei Bedarf initialisieren
-                if not self.shell:
-                    self.shell = win32com.client.Dispatch("WScript.Shell")
-                
                 # Auf Text in der Queue warten
                 if self.text_queue:
                     with self.text_queue_lock:
@@ -284,23 +300,22 @@ class WhisperClient:
                                 time.sleep(0.2)
                                 
                                 # Text Zeichen für Zeichen senden
+                                success = True
                                 for char in text:
-                                    try:
-                                        self.shell.SendKeys(char)
-                                        time.sleep(0.02)  # Längere Pause zwischen Zeichen
-                                    except Exception as e:
-                                        self.logger.debug(f"Fehler bei Zeichen '{char}': {e}")
-                                        continue
+                                    if not self.send_char(char):
+                                        success = False
+                                        break
                                 
-                                # Zeilenumbruch am Ende
-                                time.sleep(0.2)
-                                self.shell.SendKeys("{ENTER}")
-                                
-                                self.logger.info(f"📝 Text eingefügt: {text}")
+                                if success:
+                                    # Zeilenumbruch am Ende
+                                    time.sleep(0.2)
+                                    self.send_char("\n")
+                                    self.logger.info(f"📝 Text eingefügt: {text}")
+                                else:
+                                    self.logger.error("⚠️ Fehler beim Einfügen des Texts")
+                                    
                             except Exception as e:
                                 self.logger.error(f"⚠️ Fehler beim Einfügen des Texts: {e}")
-                                # Shell bei Fehler zurücksetzen
-                                self.shell = None
                 
                 time.sleep(0.1)  # Kurze Pause um CPU zu schonen
                 
