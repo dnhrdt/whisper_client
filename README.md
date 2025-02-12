@@ -1,85 +1,102 @@
-# Whisper Client
+# WhisperLive Client
 
-Ein Python-Client für WhisperLive zur Echtzeit-Spracherkennung.
-
-## Beschreibung
-
-Dieser Client verbindet sich mit einem WhisperLive Server und ermöglicht die Echtzeit-Transkription von Sprache über das Mikrofon. Die Transkription erfolgt in Deutsch und kann später in verschiedene Anwendungen eingefügt werden.
-
-## Funktionen
-
-- 🎤 Echtzeit-Audioaufnahme
-- 🔄 Automatische Reconnects
-- 📝 Deutsche Spracherkennung
-- 🚀 Einfache Steuerung via Hotkey
-- 📊 Status-Anzeigen und Logging
+Ein Python-Client für die Echtzeit-Spracherkennung mit WhisperLive.
 
 ## Installation
 
-1. Python 3.12+ installieren
+1. Python 3.8 oder höher installieren
 2. Repository klonen
-3. Virtuelle Umgebung erstellen:
+3. Virtuelle Umgebung erstellen und aktivieren:
 ```bash
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
+.\venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/macOS
 ```
 4. Abhängigkeiten installieren:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Konfiguration
-
-### Server-Verbindung
-- Host: localhost
-- Port: 9090
-- WebSocket URL: ws://localhost:9090
-
-### Audio-Einstellungen
-- Chunk-Größe: 4096
-- Format: paInt16
-- Kanäle: 1 (Mono)
-- Samplerate: 16000 Hz
-
-### Whisper-Konfiguration
-```json
-{
-    "language": "de",
-    "task": "transcribe",
-    "use_vad": true,
-    "backend": "faster_whisper"
-}
-```
-
 ## Verwendung
 
-1. WhisperLive Server in Docker/WSL2 starten
+1. WhisperLive Server starten (siehe Server-Repository)
+
 2. Client starten:
 ```bash
-python whisper_client.py
+python main.py
 ```
+
 3. Steuerung:
-   - Alt+Space: Aufnahme starten/stoppen
-   - Strg+C: Programm beenden
+- Alt+Space: Aufnahme starten/stoppen
+- ESC: Programm beenden
 
 ## Projektstruktur
 
 ```
 whisper_client/
-├── README.md              # Projektdokumentation
-├── requirements.txt       # Python Abhängigkeiten
-├── whisper_client.py      # Hauptprogramm
-├── docs/                  # Zusätzliche Dokumentation
-│   └── development.md     # Entwickler-Dokumentation
-└── logs/                  # Log-Dateien
-    └── whisper_client_YYYYMMDD.log
+├── main.py              # Hauptprogramm
+├── config.py            # Zentrale Konfiguration
+├── src/
+│   ├── audio.py        # Audio-Aufnahme
+│   ├── websocket.py    # Server-Kommunikation
+│   ├── text.py         # Textverarbeitung
+│   ├── logging.py      # Logging-System
+│   └── utils.py        # Hilfsfunktionen
+└── tests/
+    └── test_text_processing.py  # Testfälle
 ```
 
-## Entwicklung
+## Features
 
-Siehe [docs/development.md](docs/development.md) für detaillierte Informationen zur Weiterentwicklung.
+- Echtzeit-Spracherkennung via WhisperLive
+- Intelligente Textverarbeitung:
+  - Satzweise Ausgabe
+  - Deduplizierung
+  - Abkürzungserkennung
+  - Automatische Formatierung
+- Robuste Fehlerbehandlung
+- Ausführliches Logging
 
-## Lizenz
+## Debugging
 
-Private Nutzung
+Für detailliertere Ausgaben Debug-Level in config.py aktivieren:
+```python
+LOG_LEVEL_CONSOLE = "DEBUG"
+```
+
+Die Debug-Ausgabe zeigt:
+- 🔍 Server-Ausgabe: Rohe Segmente vom WhisperLive Server
+- 📋 Verarbeitet: Finale, formatierte Texte
+- ✓ Erfolgsmeldungen
+- ⚠️ Warnungen und Fehler
+
+## Tests
+
+Textverarbeitung testen:
+```bash
+python tests/test_text_processing.py
+```
+
+## Tipps für die Spracherkennung
+
+1. Sprachtest durchführen:
+   - Debug-Modus aktivieren in config.py
+   - Client starten: `python main.py`
+   - Verschiedene Satztypen testen (siehe unten)
+   - Debug-Ausgabe beobachten
+
+2. Testszenarios:
+   - Normale Sätze: "Dies ist ein Testatz."
+   - Abkürzungen: "Dr. Müller und Prof. Schmidt."
+   - Pausen: "Dies ist... ein Test... mit Pausen."
+   - Schnelle Sätze: "Erster Satz! Zweiter Satz! Dritter Satz!"
+
+3. Probleme identifizieren:
+   - 🔍 Server-Ausgabe zeigt Erkennungsprobleme
+   - 📋 Verarbeitet zeigt Textverarbeitungsprobleme
+   - Timing-Probleme in den Log-Zeitstempeln sichtbar
+
+4. Konfiguration anpassen:
+   - MIN_OUTPUT_INTERVAL: Pause zwischen Ausgaben
+   - MAX_SENTENCE_WAIT: Timeout für unvollständige Sätze
+   - SENTENCE_END_MARKERS: Satzende-Erkennung
