@@ -9,10 +9,8 @@ import keyboard
 import pyaudio
 import websocket
 import numpy as np
-import win32gui
-import win32con
-import win32api
-import pythoncom
+import multiprocessing
+from multiprocessing import Process, Queue
 from datetime import datetime
 
 class WhisperClient:
@@ -20,19 +18,17 @@ class WhisperClient:
         self.setup_logging()
         self.recording = False
         self.recording_lock = threading.Lock()
-        self.text_queue = []
-        self.text_queue_lock = threading.Lock()
+        self.text_queue = Queue()
         self.uid = str(uuid.uuid4())
         self.ws = None
         self.audio = pyaudio.PyAudio()
         self.stream = None
         self.ws_url = f"ws://{host}:{port}"
-        self.shell = None  # Wird später initialisiert
         
-        # Text-Insertion Thread starten
-        self.text_thread = threading.Thread(target=self.process_text_queue)
-        self.text_thread.daemon = True
-        self.text_thread.start()
+        # Text-Insertion Prozess starten
+        self.text_process = Process(target=self.process_text_queue, args=(self.text_queue,))
+        self.text_process.daemon = True
+        self.text_process.start()
         
         # Audio-Einstellungen
         self.chunk = 4096
@@ -263,72 +259,45 @@ class WhisperClient:
         else:
             self.stop_recording()
 
-    def send_char(self, char):
-        """Einzelnes Zeichen senden"""
-        try:
-            # Virtuelle Tastencode und Scan-Code ermitteln
-            if char == "\n":
-                vk = win32con.VK_RETURN
-            else:
-                vk = win32api.VkKeyScan(char) & 0xFF
-            
-            # Taste drücken und loslassen
-            win32api.keybd_event(vk, 0, 0, 0)  # Taste drücken
-            time.sleep(0.02)  # Kurze Pause
-            win32api.keybd_event(vk, 0, win32con.KEYEVENTF_KEYUP, 0)  # Taste loslassen
-            
-            return True
-        except Exception as e:
-            self.logger.debug(f"Fehler beim Senden von Zeichen '{char}': {e}")
-            return False
-            
-    def process_text_queue(self):
-        """Text-Queue in separatem Thread verarbeiten"""
-        self.logger.debug("Text-Thread gestartet")
+    @staticmethod
+    def process_text_queue(queue):
+        """Text-Queue in separatem Prozess verarbeiten"""
+        import win32com.client
+        import pythoncom
+        
+        # COM für diesen Prozess initialisieren
+        pythoncom.CoInitialize()
+        shell = win32com.client.Dispatch("WScript.Shell")
         
         while True:
             try:
                 # Auf Text in der Queue warten
-                if self.text_queue:
-                    with self.text_queue_lock:
-                        if self.text_queue:
-                            text = self.text_queue.pop(0)
-                            self.logger.debug("Text aus Queue geholt: " + text)
-                            
-                            try:
-                                # Kurze Pause vor der Eingabe
-                                time.sleep(0.2)
-                                
-                                # Text Zeichen für Zeichen senden
-                                success = True
-                                for char in text:
-                                    if not self.send_char(char):
-                                        success = False
-                                        break
-                                
-                                if success:
-                                    # Zeilenumbruch am Ende
-                                    time.sleep(0.2)
-                                    self.send_char("\n")
-                                    self.logger.info(f"📝 Text eingefügt: {text}")
-                                else:
-                                    self.logger.error("⚠️ Fehler beim Einfügen des Texts")
-                                    
-                            except Exception as e:
-                                self.logger.error(f"⚠️ Fehler beim Einfügen des Texts: {e}")
+                if not queue.empty():
+                    text = queue.get()
+                    
+                    try:
+                        # Text einfügen
+                        time.sleep(0.2)  # Kurze Pause vor der Eingabe
+                        shell.SendKeys(text + "{ENTER}")
+                        
+                    except Exception as e:
+                        print(f"⚠️ Fehler beim Einfügen des Texts: {e}")
+                        # Shell bei Fehler zurücksetzen
+                        shell = None
+                        pythoncom.CoInitialize()
+                        shell = win32com.client.Dispatch("WScript.Shell")
                 
                 time.sleep(0.1)  # Kurze Pause um CPU zu schonen
                 
             except Exception as e:
-                self.logger.error(f"⚠️ Fehler im Text-Thread: {e}")
+                print(f"⚠️ Fehler im Text-Prozess: {e}")
                 time.sleep(1)  # Längere Pause bei Fehlern
                 
     def insert_text(self, text):
         """Text zur Queue hinzufügen"""
         try:
-            with self.text_queue_lock:
-                self.text_queue.append(text)
-                self.logger.debug("Text zur Queue hinzugefügt: " + text)
+            self.text_queue.put(text)
+            self.logger.debug("Text zur Queue hinzugefügt: " + text)
         except Exception as e:
             self.logger.error(f"⚠️ Fehler beim Hinzufügen zur Text-Queue: {e}")
             
@@ -339,6 +308,8 @@ class WhisperClient:
             self.ws.close()
         if self.audio:
             self.audio.terminate()
+        if self.text_process:
+            self.text_process.terminate()
 
 def main():
     # Disable websocket trace
