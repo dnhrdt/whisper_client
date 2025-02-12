@@ -11,6 +11,7 @@ Dieser Client verbindet sich mit einem WhisperLive Server und ermöglicht die Ec
 - 🎤 Echtzeit-Audioaufnahme
 - 🔄 Automatische Reconnects
 - 📝 Deutsche Spracherkennung
+- ⌨️ Automatische Text-Insertion
 - 🚀 Einfache Steuerung via Hotkey
 - 📊 Status-Anzeigen und Logging
 
@@ -18,7 +19,8 @@ Dieser Client verbindet sich mit einem WhisperLive Server und ermöglicht die Ec
 
 1. Python 3.12+ installieren
 2. Repository klonen
-3. Virtuelle Umgebung erstellen:
+3. Windows: pywin32 wird für Text-Insertion benötigt
+4. Virtuelle Umgebung erstellen:
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac

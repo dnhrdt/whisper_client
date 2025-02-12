@@ -9,6 +9,7 @@ import keyboard
 import pyaudio
 import websocket
 import numpy as np
+import win32com.client
 from datetime import datetime
 
 class WhisperClient:
@@ -21,6 +22,7 @@ class WhisperClient:
         self.audio = pyaudio.PyAudio()
         self.stream = None
         self.ws_url = f"ws://{host}:{port}"
+        self.shell = win32com.client.Dispatch("WScript.Shell")
         
         # Audio-Einstellungen
         self.chunk = 4096
@@ -132,7 +134,7 @@ class WhisperClient:
                 for segment in data["segments"]:
                     text = segment.get("text", "").strip()
                     if text and text != self.last_transcription:
-                        self.logger.info(f"📝 {text}")
+                        self.insert_text(text)
                         self.last_transcription = text
         except json.JSONDecodeError as e:
             self.logger.error(f"⚠️ Fehler beim Dekodieren der Nachricht: {e}")
@@ -251,6 +253,15 @@ class WhisperClient:
         else:
             self.stop_recording()
 
+    def insert_text(self, text):
+        """Text in aktives Fenster einfügen"""
+        try:
+            # Aktiviere das aktuelle Fenster
+            self.shell.SendKeys(f"{text}\n")
+            self.logger.info(f"📝 Text eingefügt: {text}")
+        except Exception as e:
+            self.logger.error(f"⚠️ Fehler beim Einfügen des Texts: {e}")
+            
     def cleanup(self):
         """Ressourcen freigeben"""
         self.stop_recording()

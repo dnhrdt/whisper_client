@@ -11,12 +11,17 @@ Der Whisper Client basiert auf einer WebSocket-Verbindung zum WhisperLive Server
    - Automatische Reconnects
    - JSON-Konfiguration
 
-2. **Audio-Aufnahme**
+2. **Text-Insertion**
+   - Windows API via pywin32
+   - Automatische Fenstererkennung
+   - Tastatureingabe-Simulation
+
+3. **Audio-Aufnahme**
    - PyAudio für Mikrofonzugriff
    - Threaded Recording
    - Float32 Normalisierung
 
-3. **Logging-System**
+4. **Logging-System**
    - Datei- und Konsolenausgabe
    - Tägliche Logrotation
    - Strukturierte Fehlerbehandlung
