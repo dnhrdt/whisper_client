@@ -17,12 +17,19 @@ class WhisperClient:
         self.setup_logging()
         self.recording = False
         self.recording_lock = threading.Lock()
+        self.text_queue = []
+        self.text_queue_lock = threading.Lock()
         self.uid = str(uuid.uuid4())
         self.ws = None
         self.audio = pyaudio.PyAudio()
         self.stream = None
         self.ws_url = f"ws://{host}:{port}"
-        self.shell = win32com.client.Dispatch("WScript.Shell")
+        self.shell = None  # Wird später initialisiert
+        
+        # Text-Insertion Thread starten
+        self.text_thread = threading.Thread(target=self.process_text_queue)
+        self.text_thread.daemon = True
+        self.text_thread.start()
         
         # Audio-Einstellungen
         self.chunk = 4096
@@ -253,28 +260,58 @@ class WhisperClient:
         else:
             self.stop_recording()
 
+    def process_text_queue(self):
+        """Text-Queue in separatem Thread verarbeiten"""
+        while True:
+            try:
+                # Shell bei Bedarf initialisieren
+                if not self.shell:
+                    self.shell = win32com.client.Dispatch("WScript.Shell")
+                
+                # Auf Text in der Queue warten
+                if self.text_queue:
+                    with self.text_queue_lock:
+                        if self.text_queue:
+                            text = self.text_queue.pop(0)
+                            self.logger.debug("Text aus Queue geholt: " + text)
+                            
+                            try:
+                                # Kurze Pause vor der Eingabe
+                                time.sleep(0.2)
+                                
+                                # Text Zeichen für Zeichen senden
+                                for char in text:
+                                    try:
+                                        self.shell.SendKeys(char)
+                                        time.sleep(0.02)  # Längere Pause zwischen Zeichen
+                                    except Exception as e:
+                                        self.logger.debug(f"Fehler bei Zeichen '{char}': {e}")
+                                        continue
+                                
+                                # Zeilenumbruch am Ende
+                                time.sleep(0.2)
+                                self.shell.SendKeys("{ENTER}")
+                                
+                                self.logger.info(f"📝 Text eingefügt: {text}")
+                            except Exception as e:
+                                self.logger.error(f"⚠️ Fehler beim Einfügen des Texts: {e}")
+                                # Shell bei Fehler zurücksetzen
+                                self.shell = None
+                
+                time.sleep(0.1)  # Kurze Pause um CPU zu schonen
+                
+            except Exception as e:
+                self.logger.error(f"⚠️ Fehler im Text-Thread: {e}")
+                time.sleep(1)  # Längere Pause bei Fehlern
+                
     def insert_text(self, text):
-        """Text in aktives Fenster einfügen"""
+        """Text zur Queue hinzufügen"""
         try:
-            # Kurze Pause vor der Eingabe
-            time.sleep(0.1)
-            
-            # Text Zeichen für Zeichen senden
-            for char in text:
-                try:
-                    self.shell.SendKeys(char)
-                    time.sleep(0.01)  # Kleine Pause zwischen Zeichen
-                except:
-                    pass  # Einzelne Fehler ignorieren
-                    
-            # Zeilenumbruch am Ende
-            time.sleep(0.1)
-            self.shell.SendKeys("{ENTER}")
-            
-            self.logger.info(f"📝 Text eingefügt: {text}")
+            with self.text_queue_lock:
+                self.text_queue.append(text)
+                self.logger.debug("Text zur Queue hinzugefügt: " + text)
         except Exception as e:
-            self.logger.error(f"⚠️ Fehler beim Einfügen des Texts: {e}")
-            # Keine Exception weiterwerfen, um Programm stabil zu halten
+            self.logger.error(f"⚠️ Fehler beim Hinzufügen zur Text-Queue: {e}")
             
     def cleanup(self):
         """Ressourcen freigeben"""
