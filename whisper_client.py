@@ -256,11 +256,25 @@ class WhisperClient:
     def insert_text(self, text):
         """Text in aktives Fenster einfügen"""
         try:
-            # Aktiviere das aktuelle Fenster
-            self.shell.SendKeys(f"{text}\n")
+            # Kurze Pause vor der Eingabe
+            time.sleep(0.1)
+            
+            # Text Zeichen für Zeichen senden
+            for char in text:
+                try:
+                    self.shell.SendKeys(char)
+                    time.sleep(0.01)  # Kleine Pause zwischen Zeichen
+                except:
+                    pass  # Einzelne Fehler ignorieren
+                    
+            # Zeilenumbruch am Ende
+            time.sleep(0.1)
+            self.shell.SendKeys("{ENTER}")
+            
             self.logger.info(f"📝 Text eingefügt: {text}")
         except Exception as e:
             self.logger.error(f"⚠️ Fehler beim Einfügen des Texts: {e}")
+            # Keine Exception weiterwerfen, um Programm stabil zu halten
             
     def cleanup(self):
         """Ressourcen freigeben"""
