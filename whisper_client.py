@@ -10,6 +10,7 @@ import pyaudio
 import websocket
 import numpy as np
 import win32com.client
+import pythoncom
 from datetime import datetime
 
 class WhisperClient:
@@ -262,6 +263,9 @@ class WhisperClient:
 
     def process_text_queue(self):
         """Text-Queue in separatem Thread verarbeiten"""
+        # COM für diesen Thread initialisieren
+        pythoncom.CoInitialize()
+        
         while True:
             try:
                 # Shell bei Bedarf initialisieren
