@@ -1,6 +1,40 @@
 {
   "project": {
     "name": "whisper_client",
+    "collaboration_guidelines": {
+      "ai_permissions": {
+        "file_editing": "Allowed to edit and save files without explicit approval",
+        "decision_making": [
+          "Must consult user before:",
+          "- Marking tests as complete",
+          "- Moving to next steps",
+          "- Declaring tasks as finished",
+          "- Any status changes that affect project flow"
+        ]
+      },
+      "mindful_interaction": {
+        "environment_awareness": [
+          "Check for running program instances before starting new ones",
+          "Verify current system state before making changes",
+          "Consider side effects of operations on running processes"
+        ],
+        "communication": [
+          "Pause for user feedback after significant observations",
+          "Ask for user's interpretation before making assumptions",
+          "Allow time for user intervention between actions",
+          "Acknowledge and incorporate user's domain knowledge"
+        ],
+        "error_handling": [
+          "Understand the full context before fixing perceived issues",
+          "Verify problem understanding with user before implementing fixes",
+          "Consider that 'issues' might be intended behavior"
+        ]
+      },
+      "documentation": {
+        "projects.json": "Project overview and long-term reference",
+        "handover.json": "Current state and immediate next steps for seamless handovers"
+      }
+    },
     "path": "d:/dev/whisper_client",
     "description": "Client für WhisperLive Server zur Spracherkennung",
     "status": "in_development",

@@ -6,9 +6,7 @@ import win32api
 import win32gui
 import threading
 import time
-from src import logging
-
-logger = logging.get_logger()
+from src import logger
 
 class HotkeyManager:
     def __init__(self):
@@ -76,8 +74,25 @@ class HotkeyManager:
     
     def stop(self):
         """Stoppt die Hotkey-Überwachung"""
+        if not self.running:
+            return
+            
+        logger.debug("Beende Hotkey-System...")
         self.running = False
-        if self.thread:
-            self.thread.join(timeout=1.0)
-            self.thread = None
+        
+        # Warte kurz damit der Thread die running=False Änderung mitbekommt
+        time.sleep(0.1)
+        
+        if self.thread and threading.current_thread() != self.thread:
+            try:
+                if self.thread.is_alive():
+                    logger.debug("Warte auf Hotkey-Thread...")
+                    self.thread.join(timeout=2.0)
+                    if self.thread.is_alive():
+                        logger.warning("Hotkey-Thread reagiert nicht - Beende Thread...")
+            except RuntimeError as e:
+                logger.debug(f"Thread-Join übersprungen: {e}")
+            finally:
+                self.thread = None
+                
         logger.debug("✓ Hotkey-System gestoppt")

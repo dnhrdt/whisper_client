@@ -17,9 +17,24 @@ source venv/bin/activate  # Linux/macOS
 pip install -r requirements.txt
 ```
 
+## WhisperLive Server
+
+Der Client benötigt einen laufenden WhisperLive Server. Der Server ist ein separates Projekt:
+- Repository: https://github.com/collabora/WhisperLive
+- Lokale Installation: d:/dev/WhisperLive
+
+### Server starten (Docker)
+```bash
+# GPU Version mit Faster-Whisper Backend
+docker run -it --gpus all -p 9090:9090 ghcr.io/collabora/whisperlive-gpu:latest
+
+# CPU Version
+docker run -it -p 9090:9090 ghcr.io/collabora/whisperlive-cpu:latest
+```
+
 ## Verwendung
 
-1. WhisperLive Server starten (siehe Server-Repository)
+1. WhisperLive Server starten (siehe oben)
 
 2. Client starten:
 ```bash
@@ -27,8 +42,8 @@ python main.py
 ```
 
 3. Steuerung:
-- Alt+Space: Aufnahme starten/stoppen
-- ESC: Programm beenden
+- F13: Aufnahme starten/stoppen
+- F14: Programm beenden
 
 ## Projektstruktur
 
@@ -69,6 +84,13 @@ Die Debug-Ausgabe zeigt:
 - 📋 Verarbeitet: Finale, formatierte Texte
 - ✓ Erfolgsmeldungen
 - ⚠️ Warnungen und Fehler
+
+### Server-Logs
+Die Server-Logs sind wichtig für die Fehleranalyse:
+```bash
+# In WSL2
+docker logs -f whisperlive
+```
 
 ## Tests
 

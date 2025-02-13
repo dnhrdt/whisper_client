@@ -15,20 +15,53 @@
             "Keine Duplikate",
             "Korrekte Großschreibung"
           ],
-          "results": [],
-          "status": "pending"
+          "results": [
+            {
+              "timestamp": "2025-02-12T23:29:02.484296",
+              "success": true,
+              "notes": "d:/dev/whisper_client/venv/Scripts/Activate.ps1 && python tests/update_test_progress.py 1 1.1 true"
+            }
+          ],
+          "status": "passed"
         },
         {
           "id": "1.2",
           "description": "Mehrere Sätze in schneller Folge",
           "example": "Erster Satz. Zweiter Satz. Dritter Satz.",
+          "test_input": [
+            "Der Himmel ist blau.",
+            "Die Sonne scheint hell.",
+            "Die Vögel singen laut."
+          ],
           "expected": [
             "Alle Sätze werden erkannt",
             "Korrekte Reihenfolge",
-            "Keine vermischten Sätze"
+            "Keine vermischten Sätze",
+            "Exakte Übereinstimmung mit test_input"
           ],
-          "results": [],
-          "status": "pending"
+          "results": [
+            {
+              "timestamp": "2025-02-13T16:22:56.565644",
+              "success": false,
+              "notes": "Test-Ausgabe:\n"
+            },
+            {
+              "timestamp": "2025-02-13T16:24:19.671237",
+              "success": false,
+              "notes": "Test-Ausgabe:\n"
+            },
+            {
+              "timestamp": "2025-02-13T16:28:27.223111",
+              "success": false,
+              "notes": "Test-Ausgabe:\n"
+            },
+            {
+              "timestamp": "2025-02-13T19:52:00+01:00",
+              "success": false,
+              "notes": "Nur 2 von 3 Sätzen erkannt:\n1. 'Der Himmel ist blau.'\n2. 'Der Himmel ist blau die Sonne scheint hell.'\n3. Fehlend: 'Die Vögel singen laut.'"
+            }
+          ],
+          "status": "failed"
         }
       ]
     },
@@ -110,13 +143,54 @@
     }
   ],
   "meta": {
-    "last_updated": "2024-02-12T22:20:03+01:00",
+    "last_updated": "2025-02-13T19:52:00+01:00",
     "current_stage": 1,
-    "current_test": "1.1",
+    "current_test": "1.2",
     "notes": [
       "Systematisches Testen der Spracherkennung",
       "Jeder Test muss erfolgreich sein, bevor zum nächsten übergegangen wird",
       "Probleme werden sofort behoben und der Test wiederholt"
-    ]
+    ],
+    "test_guidelines": {
+      "preparation": [
+        "Sauberer Programmstart im bestehenden Terminal",
+        "KEINE neuen Terminals öffnen"
+      ],
+      "execution": [
+        "Test gemäß Testfall durchführen",
+        "Alle Testsätze vollständig sprechen",
+        "Nach dem letzten Satz ~1 Sekunde warten (Server braucht ~0.6s für die Verarbeitung)",
+        "Dann erst F13 drücken"
+      ],
+      "analysis": {
+        "logs": {
+          "server_log": {
+            "path": "d:/dev/whisper_client/logs/logs/server.log",
+            "note": "read_file verwenden für punktuelle Log-Analyse NACH dem Test",
+            "improvements_needed": [
+              "Timestamps in Portainer aktivieren für bessere Event-Analyse",
+              "Hilft bei Messung der Verarbeitungszeit",
+              "Ermöglicht Nachverfolgung der Event-Reihenfolge"
+            ]
+          },
+          "client_log": {
+            "path": "d:/dev/whisper_client/logs/whisper_client_%Y%m%d.log",
+            "note": "read_file verwenden für punktuelle Log-Analyse NACH dem Test"
+          }
+        },
+        "steps": [
+          "Test vollständig durchführen",
+          "Mit read_file Server-Log analysieren",
+          "Mit read_file Client-Log analysieren",
+          "Prüfen ob ALLE Sätze zurückkamen",
+          "Format der Ausgabe überprüfen"
+        ]
+      },
+      "review": [
+        "Findings dem User vorlegen",
+        "Auf User-Feedback warten (User sieht Prompt-Output und Server-Log live)",
+        "Erst nach User-Go Änderungen vorschlagen"
+      ]
+    }
   }
 }

@@ -24,15 +24,43 @@ WHISPER_BACKEND = "faster_whisper"
 LOG_DIR = "logs"
 LOG_LEVEL_FILE = "DEBUG"
 LOG_LEVEL_CONSOLE = "DEBUG"  # Temporär auf DEBUG für Tests
-LOG_FORMAT_FILE = "%(asctime)s - %(levelname)s - %(message)s"
-LOG_FORMAT_CONSOLE = "%(message)s"
+# Logging-Formate für verschiedene Ereignisse
+LOG_FORMAT_FILE = {
+    'default': "%(asctime)s - %(levelname)s - %(message)s",
+    'connection': "%(asctime)s - CONNECTION: %(message)s",
+    'audio': "%(asctime)s - AUDIO: %(message)s",
+    'text': "%(asctime)s - TEXT: %(message)s",
+    'error': "%(asctime)s - ERROR: %(message)s"
+}
+LOG_FORMAT_CONSOLE = {
+    'default': "%(message)s",
+    'connection': "🔌 %(message)s",
+    'audio': "🎤 %(message)s",
+    'text': "📝 %(message)s",
+    'error': "❌ %(message)s"
+}
 
 # Hotkey-Einstellungen
 HOTKEY_TOGGLE_RECORDING = "f13"  # Kann auf G915 programmiert werden
 HOTKEY_EXIT = "f14"  # Kann auf G915 programmiert werden
 
 # Text-Verarbeitung
-MIN_OUTPUT_INTERVAL = 0.2  # Minimaler Abstand zwischen Textausgaben in Sekunden
+MIN_OUTPUT_INTERVAL = 0.1  # Minimaler Abstand zwischen Textausgaben in Sekunden
 MAX_RECENT_TRANSCRIPTIONS = 10  # Anzahl der gespeicherten letzten Transkriptionen
-MAX_SENTENCE_WAIT = 2.0  # Maximale Wartezeit auf Satzende in Sekunden
+MAX_SENTENCE_WAIT = 1.0  # Maximale Wartezeit auf Satzende in Sekunden
 SENTENCE_END_MARKERS = ['.', '!', '?', '...']  # Satzende-Marker für Textausgabe
+
+# Ausgabe-Einstellungen
+class OutputMode:
+    """Verfügbare Ausgabemodi"""
+    CLIPBOARD = "clipboard"  # Text in Zwischenablage + Strg+V
+    PROMPT = "prompt"       # Direkte Prompt-Integration
+    BOTH = "both"          # Beide Modi gleichzeitig
+
+# Aktiver Ausgabemodus
+OUTPUT_MODE = OutputMode.BOTH
+
+# Prompt-Integration
+PROMPT_WINDOW_TITLE = "Visual Studio Code"  # Fenstertitel für Prompt-Erkennung
+PROMPT_INPUT_DELAY = 0.1        # Verzögerung zwischen Zeichen bei Prompt-Eingabe
+PROMPT_SUBMIT_DELAY = 0.2       # Verzögerung nach Enter-Taste

@@ -6,9 +6,7 @@ import json
 import os
 from datetime import datetime
 import config
-from src import logging
-
-logger = logging.get_logger()
+from src import logger
 
 def check_server_status(host=config.WS_HOST, port=config.WS_PORT):
     """Prüft ob der WhisperLive Server läuft"""
@@ -97,19 +95,35 @@ def update_task_history(description, changes, status="completed", files=None):
 
 def show_startup_message():
     """Zeigt die Startmeldung an"""
-    logger.info("\n=== Whisper Client ===")
-    logger.info("🔥 Client gestartet!")
-    logger.info(f"⌨️  Drücke {config.HOTKEY_TOGGLE_RECORDING} zum Starten/Stoppen der Aufnahme")
-    logger.info(f"⚡ Drücke {config.HOTKEY_EXIT} zum Beenden")
-    logger.info("-" * 50)
+    startup_msg = f"""
+=== Whisper Client ===
+🔥 Client gestartet!
+⌨️  Drücke {config.HOTKEY_TOGGLE_RECORDING} zum Starten/Stoppen der Aufnahme
+⚡ Drücke {config.HOTKEY_EXIT} zum Beenden
+--------------------------------------------------"""
+    
+    # Nur an Logger senden
+    for line in startup_msg.split('\n'):
+        if line.strip():
+            logger.info(line)
 
 def show_server_error():
     """Zeigt Fehlermeldung bei nicht erreichbarem Server"""
-    print("\n⚠️ WhisperLive Server ist nicht erreichbar!")
-    print("\nBitte starte den Server mit einem der folgenden Befehle:")
-    print("\n1. Direkt aus dem Quellcode:")
-    print("   cd path/to/whisperlive")
-    print("   python server.py")
-    print("\n2. Oder als Docker Container:")
-    print("   docker run -p 9090:9090 whisperlive")
-    print("\nDanach starte diesen Client erneut.")
+    error_msg = """
+⚠️ WhisperLive Server ist nicht erreichbar!
+
+Bitte starte den Server mit einem der folgenden Befehle:
+
+1. Direkt aus dem Quellcode:
+   cd path/to/whisperlive
+   python server.py
+
+2. Oder als Docker Container:
+   docker run -p 9090:9090 whisperlive
+
+Danach starte diesen Client erneut."""
+    
+    # Nur an Logger senden
+    for line in error_msg.split('\n'):
+        if line.strip():
+            logger.error(line)
