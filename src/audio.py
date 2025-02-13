@@ -151,17 +151,18 @@ class AudioManager:
             while self.recording and self.stream and self.stream.is_active():
                 try:
                     data = self.stream.read(self.chunk, exception_on_overflow=False)
-                    # Konvertiere zu float32 Array
-                    audio_array = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
+                    # # Konvertiere zu float32 Array (temporär deaktiviert für Tests)
+                    # audio_array = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
                     
-                    # Füge Daten zum Puffer hinzu
-                    buffer.append(audio_array)
+                    # Füge rohe int16 Daten zum Puffer hinzu
+                    buffer.append(np.frombuffer(data, dtype=np.int16))
                     
                     # Sende gepufferte Daten wenn genug vorhanden
+                    # Sende gepufferte Daten wenn genug vorhanden
                     if len(buffer) >= 4:  # ca. 1 Sekunde Audio
-                        combined_array = np.concatenate(buffer)
+                        combined_data = np.concatenate(buffer)
                         if self.recording:  # Nochmal prüfen vor dem Senden
-                            callback(combined_array.tobytes())
+                            callback(combined_data.tobytes())
                         buffer = []  # Puffer leeren
                         
                 except Exception as e:
@@ -172,8 +173,8 @@ class AudioManager:
             # Sende verbleibende Puffer-Daten
             if buffer:
                 try:
-                    combined_array = np.concatenate(buffer)
-                    callback(combined_array.tobytes())
+                    combined_data = np.concatenate(buffer)
+                    callback(combined_data.tobytes())
                     logger.debug(f"Letzte {len(buffer)} Puffer-Chunks gesendet")
                 except Exception as e:
                     logger.error(f"Fehler beim Senden der letzten Puffer-Daten: {e}")
