@@ -262,16 +262,26 @@ class WhisperWebSocket:
                 self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
                 log_audio(logger, "Sent END_OF_AUDIO signal")
                 
-                # Warte auf letzte Segmente
-                log_connection(logger, "Waiting for final segments (20s)...")
-                time.sleep(20.0)  # Warte 20 Sekunden auf letzte Segmente
+                # Starte Thread für Wartezeit
+                def wait_for_segments():
+                    try:
+                        # Warte auf letzte Segmente
+                        log_connection(logger, "Waiting for final segments (20s)...")
+                        time.sleep(20.0)
+                    finally:
+                        # Stoppe die Verarbeitung nach der Wartezeit
+                        self.processing_enabled = False
+                        self.last_segments = []  # Reset gespeicherte Segmente
+                        log_connection(logger, "Server message processing disabled")
+                
+                # Starte Warte-Thread
+                wait_thread = threading.Thread(target=wait_for_segments)
+                wait_thread.daemon = True
+                wait_thread.start()
+                
             except Exception as e:
                 log_error(logger, f"Error sending END_OF_AUDIO: {str(e)}")
-            finally:
-                # Stoppe die Verarbeitung erst NACH der Wartezeit
                 self.processing_enabled = False
-                self.last_segments = []  # Reset gespeicherte Segmente
-                log_connection(logger, "Server message processing disabled")
     
     def start_processing(self):
         """Startet die Verarbeitung von Server-Nachrichten"""
