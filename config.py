@@ -45,9 +45,9 @@ HOTKEY_TOGGLE_RECORDING = "f13"  # Kann auf G915 programmiert werden
 HOTKEY_EXIT = "f14"  # Kann auf G915 programmiert werden
 
 # Text-Verarbeitung
-MIN_OUTPUT_INTERVAL = 0.1  # Minimaler Abstand zwischen Textausgaben in Sekunden
+MIN_OUTPUT_INTERVAL = 0.5  # Minimaler Abstand zwischen Textausgaben in Sekunden
 MAX_RECENT_TRANSCRIPTIONS = 10  # Anzahl der gespeicherten letzten Transkriptionen
-MAX_SENTENCE_WAIT = 1.0  # Maximale Wartezeit auf Satzende in Sekunden
+MAX_SENTENCE_WAIT = 2.0  # Maximale Wartezeit auf Satzende in Sekunden
 SENTENCE_END_MARKERS = ['.', '!', '?', '...']  # Satzende-Marker für Textausgabe
 
 # Ausgabe-Einstellungen
@@ -62,5 +62,5 @@ OUTPUT_MODE = OutputMode.BOTH
 
 # Prompt-Integration
 PROMPT_WINDOW_TITLE = "Visual Studio Code"  # Fenstertitel für Prompt-Erkennung
-PROMPT_INPUT_DELAY = 0.1        # Verzögerung zwischen Zeichen bei Prompt-Eingabe
-PROMPT_SUBMIT_DELAY = 0.2       # Verzögerung nach Enter-Taste
+PROMPT_INPUT_DELAY = 0.3        # Verzögerung zwischen Zeichen bei Prompt-Eingabe
+PROMPT_SUBMIT_DELAY = 0.5       # Verzögerung nach Enter-Taste
