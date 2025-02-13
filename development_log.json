@@ -1,0 +1,140 @@
+{
+  "entries": [
+    {
+      "timestamp": "2025-02-13T23:26:00+01:00",
+      "type": "fix",
+      "component": "audio",
+      "description": "Versuch: Float32 Normalisierung deaktiviert",
+      "details": [
+        "Deaktivierung der Float32 Normalisierung",
+        "Verwendung von raw int16 Audio-Daten",
+        "Versuch die Server-Kommunikation zu reparieren",
+        "Möglicherweise rückgängig zu machen, falls nicht erfolgreich"
+      ],
+      "files_changed": [
+        "src/audio.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": ["test_server_flow.py"],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-13T22:40:40.131617",
+      "type": "refactor",
+      "component": "core",
+      "description": "Code-Restrukturierung für bessere Wartbarkeit",
+      "files_changed": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "high"
+    },
+    {
+      "timestamp": "2025-02-13T13:48:16.040903",
+      "type": "feature",
+      "component": "text",
+      "description": "Prompt-Integration implementiert",
+      "details": [
+        "Konfigurierbare Ausgabemodi (Clipboard/Prompt/Both)",
+        "Automatische Prompt-Fenstererkennung",
+        "Intelligente Texteingabe mit Verzögerungen",
+        "Robuste Fehlerbehandlung und Fallback-Mechanismen"
+      ],
+      "files_changed": [
+        "src/text.py",
+        "config.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": ["test_prompt_output.py"],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-13T13:21:28.567120",
+      "type": "feature",
+      "component": "terminal",
+      "description": "Terminal-Management implementiert",
+      "details": [
+        "Zentrale Verwaltung aller Terminals",
+        "Automatisches Schließen inaktiver Terminals",
+        "Aktivitätsverfolgung für Audio und WebSocket",
+        "Robuste Cleanup-Logik"
+      ],
+      "files_changed": [
+        "src/terminal.py",
+        "main.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-12T22:40:55+01:00",
+      "type": "improvement",
+      "component": "audio",
+      "description": "Verbesserung der Audio- und Hotkey-Steuerung",
+      "details": [
+        "Robustere Hotkey-Erkennung mit Zustandsverfolgung",
+        "Verbesserte Audio-Thread-Verwaltung und Cleanup",
+        "Detaillierteres Debug-Logging für Fehleranalyse"
+      ],
+      "files_changed": [
+        "src/hotkeys.py",
+        "src/audio.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": ["test_server_flow.py"],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-12T22:28:57+01:00",
+      "type": "improvement",
+      "component": "hotkeys",
+      "description": "Verbesserung der Hotkey-Steuerung",
+      "details": [
+        "Robustere Hotkeys mit F13/F14 statt Alt+Space/ESC",
+        "Verbesserte Tastendruckerkennung mit Loslass-Prüfung"
+      ],
+      "files_changed": [
+        "src/hotkeys.py",
+        "config.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "low"
+    }
+  ],
+  "meta": {
+    "last_updated": "2025-02-14T00:17:00+01:00",
+    "format_version": "1.0",
+    "notes": [
+      "Chronologische Entwicklungshistorie mit Fokus auf Änderungen und deren Auswirkungen",
+      "regression_potential bewertet mögliche Auswirkungen auf andere Systemteile",
+      "test_impact dokumentiert betroffene und neue Tests"
+    ]
+  }
+}
