@@ -117,17 +117,33 @@ pyinstaller --onefile --noconsole whisper_client.py
    - Konvertierung: int16 → float32 / 32768.0
    - Server erwartet normalisierte [-1.0, 1.0] Werte
 
-2. **Aufnahme-Ende**
-   - END_OF_AUDIO Signal an Server
-   - 30-Sekunden-Wartezeit für letzte Segmente
-   - Verbindung bleibt für Nachzügler-Texte offen
-   - Verarbeitung erst nach Empfang aller Texte deaktivieren
-   - Sauberes Beenden der Verbindung
+2. **Server-Streaming-Verhalten**
+   - Server sendet kontinuierlich aktualisierte Transkriptionen
+   - Jede Nachricht enthält den kompletten bisherigen Text
+   - Segmente werden schrittweise erweitert und verfeinert
+   - Beispiel:
+     ```
+     "Der Himmel..."
+     "Der Himmel ist..."
+     "Der Himmel ist blau."
+     ```
 
-3. **Status-Meldungen**
+3. **Timing-Parameter**
+   - Verbindungsaufbau:
+     * CONNECT_TIMEOUT: 5s für Socket-Verbindung
+     * READY_TIMEOUT: 10s für Server-Ready-Signal
+     * RETRY_DELAY: 2s zwischen Verbindungsversuchen
+   - Aufnahme-Ende:
+     * FINAL_WAIT: 30s für letzte Segmente
+     * THREAD_TIMEOUT: 5s für Thread-Beendigung
+   - Textverarbeitung:
+     * MIN_OUTPUT_INTERVAL: 0.5s zwischen Ausgaben
+     * MAX_SENTENCE_WAIT: 2.0s für unvollständige Sätze
+
+4. **Status-Meldungen**
    - "Aufnahme gestartet (F13)" beim Start
    - "Aufnahme gestoppt (F13)" beim Stopp
-   - "Warte auf letzte Texte..." während der 30s
+   - "Warte auf letzte Texte..." während der Wartezeit
    - "Audio-Verarbeitung beendet" nach Wartezeit
 
 ### WhisperLive Server-Logs

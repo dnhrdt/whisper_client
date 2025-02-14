@@ -7,6 +7,13 @@ WS_HOST = "localhost"
 WS_PORT = 9090
 WS_URL = f"ws://{WS_HOST}:{WS_PORT}"
 
+# WebSocket-Timing
+WS_CONNECT_TIMEOUT = 5.0   # Timeout für Verbindungsaufbau
+WS_READY_TIMEOUT = 10.0    # Timeout für Server-Ready Signal
+WS_RETRY_DELAY = 2.0       # Initiale Wartezeit zwischen Reconnects
+WS_FINAL_WAIT = 30.0       # Wartezeit auf letzte Texte nach Aufnahme-Ende
+WS_THREAD_TIMEOUT = 5.0    # Timeout für Thread-Join
+
 # Audio-Einstellungen
 AUDIO_CHUNK = 4096
 AUDIO_FORMAT = "paInt16"  # wird in audio.py zu pyaudio.paInt16 konvertiert

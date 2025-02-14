@@ -58,10 +58,9 @@ class WhisperWebSocket:
                 self.ws_thread.start()
                 
                 # Warte bis Verbindung hergestellt ist
-                timeout = 5
                 start_time = time.time()
                 while not self.ws.sock or not self.ws.sock.connected:
-                    if time.time() - start_time > timeout:
+                    if time.time() - start_time > config.WS_CONNECT_TIMEOUT:
                         raise TimeoutError("Connection timeout")
                     time.sleep(0.1)
                 
@@ -70,10 +69,9 @@ class WhisperWebSocket:
                 
                 # Warte auf Server-Ready Signal
                 log_connection(logger, "Waiting for server ready signal...")
-                timeout = 10
                 start_time = time.time()
                 while not self.server_ready:
-                    if time.time() - start_time > timeout:
+                    if time.time() - start_time > config.WS_READY_TIMEOUT:
                         raise TimeoutError("Server ready timeout")
                     time.sleep(0.1)
                 
@@ -94,7 +92,7 @@ class WhisperWebSocket:
                     
                     log_connection(logger, f"Waiting {retry_delay} seconds before retry...")
                     time.sleep(retry_delay)
-                    retry_delay *= 2  # Exponentielles Backoff
+                    retry_delay = min(retry_delay * 2, 30.0)  # Exponentielles Backoff mit Maximum
                 else:
                     log_error(logger, "Maximum retry attempts reached")
                     raise
@@ -268,9 +266,9 @@ class WhisperWebSocket:
             self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
             log_audio(logger, "Sent END_OF_AUDIO signal")
             
-            # Warte auf letzte Segmente (30 Sekunden für vollständige Verarbeitung)
-            log_connection(logger, "Waiting for final segments (30s)...")
-            time.sleep(30.0)  # Gib dem Server genug Zeit zum Verarbeiten
+            # Warte auf letzte Segmente
+            log_connection(logger, f"Waiting for final segments ({config.WS_FINAL_WAIT}s)...")
+            time.sleep(config.WS_FINAL_WAIT)  # Gib dem Server genug Zeit zum Verarbeiten
             
             return True
         except websocket.WebSocketConnectionClosedException:
@@ -286,28 +284,24 @@ class WhisperWebSocket:
         if self.processing_enabled:
             try:
                 if self.ws and self.ws.sock and self.ws.sock.connected:
-                    try:
-                        # Sende END_OF_AUDIO Signal
-                        self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
-                        log_audio(logger, "Sent END_OF_AUDIO signal")
-                        
-                        # Informiere Benutzer über Wartezeit
-                        log_connection(logger, "Warte 30 Sekunden auf mögliche weitere Texte...")
-                        
-                        # Warte auf letzte Segmente
-                        time.sleep(30.0)
-                        
-                        # Deaktiviere Audio-Verarbeitung
-                        self.processing_enabled = False
-                        self.last_segments = []  # Reset gespeicherte Segmente
-                        log_connection(logger, "Audio-Verarbeitung beendet")
-                        
-                        # Schließe Verbindung sauber
-                        log_connection(logger, "Schließe Verbindung...")
-                        self.ws.close()  # Keine Parameter, da close() nur self akzeptiert
-                    except Exception as e:
-                        log_error(logger, f"Fehler beim Beenden der Verbindung: {e}")
-                        self.ws = None  # Setze WS auf None um Reconnect zu ermöglichen
+                    # Sende END_OF_AUDIO Signal
+                    self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
+                    log_audio(logger, "Sent END_OF_AUDIO signal")
+                    
+                    # Informiere Benutzer über Wartezeit
+                    log_connection(logger, f"Warte {config.WS_FINAL_WAIT} Sekunden auf mögliche weitere Texte...")
+                    
+                    # Warte auf letzte Segmente
+                    time.sleep(config.WS_FINAL_WAIT)
+                    
+                    # Deaktiviere Audio-Verarbeitung
+                    self.processing_enabled = False
+                    self.last_segments = []  # Reset gespeicherte Segmente
+                    log_connection(logger, "Audio-Verarbeitung beendet")
+                    
+                    # Schließe Verbindung sauber
+                    log_connection(logger, "Schließe Verbindung...")
+                    self.ws.close()  # Keine Parameter, da close() nur self akzeptiert
                 else:
                     log_connection(logger, "Keine aktive Verbindung für END_OF_AUDIO")
                     self.processing_enabled = False
@@ -376,7 +370,7 @@ class WhisperWebSocket:
             
             # Warte auf Thread-Ende
             if thread and thread.is_alive():
-                thread.join(timeout=5.0)
+                thread.join(timeout=config.WS_THREAD_TIMEOUT)
                 if thread.is_alive():
                     log_error(logger, "Thread could not be terminated")
                 else:
