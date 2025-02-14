@@ -132,13 +132,23 @@ pyinstaller --onefile --noconsole whisper_client.py
    - Verbindungsaufbau:
      * CONNECT_TIMEOUT: 5s für Socket-Verbindung
      * READY_TIMEOUT: 10s für Server-Ready-Signal
-     * RETRY_DELAY: 2s zwischen Verbindungsversuchen
+     * RETRY_DELAY: 2s zwischen Verbindungsversuchen (verdoppelt sich bis max. 30s)
+     * POLL_INTERVAL: 0.1s für Verbindungsprüfung
    - Aufnahme-Ende:
-     * FINAL_WAIT: 30s für letzte Segmente
+     * FINAL_WAIT: 30s für letzte Segmente vom Server
+     * MESSAGE_WAIT: 1s für letzte Nachrichten-Verarbeitung
      * THREAD_TIMEOUT: 5s für Thread-Beendigung
    - Textverarbeitung:
      * MIN_OUTPUT_INTERVAL: 0.5s zwischen Ausgaben
      * MAX_SENTENCE_WAIT: 2.0s für unvollständige Sätze
+
+4. **Verbindungsabbau**
+   - END_OF_AUDIO Signal senden
+   - FINAL_WAIT Sekunden auf letzte Segmente warten
+   - MESSAGE_WAIT Sekunden für Nachrichtenverarbeitung
+   - Audio-Verarbeitung deaktivieren
+   - Nochmals MESSAGE_WAIT für letzte Verarbeitung
+   - Verbindung sauber schließen
 
 4. **Status-Meldungen**
    - "Aufnahme gestartet (F13)" beim Start
@@ -281,3 +291,42 @@ Beispiele:
 feat(gui): System Tray Icon hinzugefügt
 fix(audio): Overflow-Behandlung verbessert
 docs(readme): Installation aktualisiert
+```
+
+### Automatische Dokumentation
+
+Das Projekt verwendet einen pre-commit Hook, der automatisch das development_log.json aktualisiert. Der Hook:
+
+1. Extrahiert Informationen aus der Commit-Message:
+   - Typ der Änderung (feat, fix, docs, etc.)
+   - Betroffene Komponente
+   - Beschreibung der Änderung
+
+2. Erstellt einen neuen Log-Eintrag mit:
+   - Zeitstempel
+   - Geänderte Dateien
+   - Standardwerte für Test-Impact und Regression-Potential
+
+3. Fügt den Eintrag dem development_log.json hinzu
+
+Dies ermöglicht:
+- Automatische Dokumentation von Änderungen
+- Konsistente Struktur der Entwicklungshistorie
+- Minimaler manueller Aufwand
+- Basis für Analysen und Reports
+
+Die Commit-Message muss dem Format folgen:
+```
+type(scope): description
+
+- Detaillierte Beschreibung (optional)
+- Weitere Details (optional)
+```
+
+Beispiel:
+```
+fix(websocket): Verbindungsabbau optimiert
+
+- Zusätzliche Wartezeit für Nachrichten
+- Verbesserte Fehlerbehandlung
+- Status-Reset vor Verbindungsabbau

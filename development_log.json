@@ -1,6 +1,51 @@
 {
   "entries": [
     {
+      "timestamp": "2025-02-14T21:25:57.052018+01:00",
+      "type": "fix",
+      "component": "websocket",
+      "description": "Verbesserte Timing-Steuerung",
+      "details": [],
+      "files_changed": [
+        "development_log.json",
+        "docs/development.md",
+        "scripts/update_dev_log.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T21:10:00+01:00",
+      "type": "improvement",
+      "component": "websocket",
+      "description": "Timing-Parameter zentralisiert und optimiert",
+      "details": [
+        "Alle Timing-Parameter in config.py ausgelagert",
+        "Zusätzliche Wartezeiten für Nachrichtenverarbeitung",
+        "Verbesserte Polling-Intervalle für Verbindungsprüfung",
+        "Maximale Reconnect-Wartezeit begrenzt",
+        "Verbindungsabbau-Prozess optimiert",
+        "Dokumentation um Timing-Details erweitert"
+      ],
+      "files_changed": [
+        "src/websocket.py",
+        "config.py",
+        "docs/development.md"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [
+          "test_server_flow.py"
+        ],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
       "timestamp": "2025-02-14T20:23:00+01:00",
       "type": "fix",
       "component": "core",
@@ -19,7 +64,10 @@
       ],
       "commit_hash": "",
       "test_impact": {
-        "tests_affected": ["test_server_flow.py", "test_text_processing.py"],
+        "tests_affected": [
+          "test_server_flow.py",
+          "test_text_processing.py"
+        ],
         "tests_added": []
       },
       "regression_potential": "low"
@@ -38,7 +86,9 @@
       "files_changed": [],
       "commit_hash": "",
       "test_impact": {
-        "tests_affected": ["test_server_flow.py"],
+        "tests_affected": [
+          "test_server_flow.py"
+        ],
         "tests_added": []
       },
       "regression_potential": "low"
@@ -59,7 +109,9 @@
       ],
       "commit_hash": "",
       "test_impact": {
-        "tests_affected": ["test_server_flow.py"],
+        "tests_affected": [
+          "test_server_flow.py"
+        ],
         "tests_added": []
       },
       "regression_potential": "medium"
@@ -102,7 +154,9 @@
       ],
       "commit_hash": "",
       "test_impact": {
-        "tests_affected": ["test_prompt_output.py"],
+        "tests_affected": [
+          "test_prompt_output.py"
+        ],
         "tests_added": []
       },
       "regression_potential": "medium"
@@ -145,7 +199,9 @@
       ],
       "commit_hash": "",
       "test_impact": {
-        "tests_affected": ["test_server_flow.py"],
+        "tests_affected": [
+          "test_server_flow.py"
+        ],
         "tests_added": []
       },
       "regression_potential": "medium"
@@ -172,7 +228,7 @@
     }
   ],
   "meta": {
-    "last_updated": "2025-02-14T00:17:00+01:00",
+    "last_updated": "2025-02-14T21:25:57.052018+01:00",
     "format_version": "1.0",
     "notes": [
       "Chronologische Entwicklungshistorie mit Fokus auf Änderungen und deren Auswirkungen",
