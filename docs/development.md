@@ -128,44 +128,109 @@ pyinstaller --onefile --noconsole whisper_client.py
      "Der Himmel ist blau."
      ```
 
-### Timing-Parameter
+### Timing-System
 
-Der Client verwendet verschiedene Timing-Parameter für optimale Performance und Zuverlässigkeit:
+Der Client verwendet ein hierarchisches Timing-System für optimale Performance und Zuverlässigkeit:
 
-1. **WebSocket-Timing**
-   - Verbindungsaufbau und Reconnects
-   - Wartezeiten für Server-Antworten
-   - Puffer für letzte Nachrichten
-   - Beispiel: WS_FINAL_WAIT bestimmt wie lange auf letzte Texte gewartet wird
+#### 1. Basis-Konstanten
 
-2. **Audio-Timing**
-   - Pufferung der Audio-Daten
-   - Thread-Management
-   - Beispiel: AUDIO_BUFFER_SECONDS bestimmt die Größe des Audio-Puffers
+Fundamentale Zeiteinheiten, von denen sich andere Timing-Parameter ableiten:
 
-3. **Text-Timing**
-   - Ausgabe-Intervalle
-   - Satzende-Erkennung
-   - Tastatur- und Clipboard-Operationen
-   - Beispiel: MAX_SENTENCE_WAIT bestimmt wann unvollständige Sätze ausgegeben werden
+- **BASE_DELAY (0.1s)**
+  - Grundlegende Verzögerung für Polling und Checks
+  - Basis für kurze, häufige Operationen
+  - Beispiel: Tastendruck-Verzögerungen = BASE_DELAY * 0.5
 
-4. **Hotkey-Timing**
-   - Tastenerkennung
-   - Fehlerbehandlung
-   - Thread-Management
-   - Beispiel: HOTKEY_POLL_INTERVAL bestimmt die Reaktionsgeschwindigkeit
+- **BASE_TIMEOUT (2.0s)**
+  - Standardtimeout für Thread-Operationen
+  - Basis für Verbindungs- und Operationstimeouts
+  - Beispiel: WS_CONNECT_TIMEOUT = BASE_TIMEOUT * 2.5
 
-5. **Terminal-Timing**
-   - Inaktivitätserkennung
-   - Überwachungsintervalle
-   - Thread-Management
-   - Beispiel: TERMINAL_INACTIVITY_TIMEOUT bestimmt wann Terminals geschlossen werden
+- **BASE_RETRY (2.0s)**
+  - Grundlegende Wartezeit für Wiederholungsversuche
+  - Basis für exponentielles Backoff
+  - Beispiel: WS_MAX_RETRY_DELAY = BASE_RETRY * 15
 
-Alle Parameter sind in config.py zentral konfigurierbar. Dies ermöglicht:
-- Einfache Anpassung des Timing-Verhaltens
-- Schnelles Debugging von Timing-Problemen
-- Besseres Verständnis der Zusammenhänge
-- Systematische Performance-Optimierung
+- **BASE_WAIT (1.0s)**
+  - Standardwartezeit für Nachrichtenverarbeitung
+  - Basis für Puffer und Verarbeitungszeiten
+  - Beispiel: WS_FINAL_WAIT = BASE_WAIT * 30
+
+#### 2. Timing-Gruppen
+
+Verwandte Parameter mit ähnlichen Zeitskalen:
+
+1. **Thread-Management**
+   ```python
+   THREAD_TIMEOUT = BASE_TIMEOUT
+   WS_THREAD_TIMEOUT = THREAD_TIMEOUT
+   AUDIO_THREAD_TIMEOUT = THREAD_TIMEOUT
+   HOTKEY_THREAD_TIMEOUT = THREAD_TIMEOUT
+   ```
+
+2. **Polling und Checks**
+   ```python
+   POLL_INTERVAL = BASE_DELAY
+   WS_POLL_INTERVAL = POLL_INTERVAL
+   HOTKEY_POLL_INTERVAL = POLL_INTERVAL
+   ```
+
+3. **Retry-Mechanismen**
+   ```python
+   RETRY_DELAY = BASE_RETRY
+   WS_RETRY_DELAY = RETRY_DELAY
+   WS_RECONNECT_DELAY = RETRY_DELAY * 1.5
+   ```
+
+4. **Nachrichtenverarbeitung**
+   ```python
+   MESSAGE_WAIT = BASE_WAIT
+   WS_MESSAGE_WAIT = MESSAGE_WAIT
+   WS_FINAL_WAIT = BASE_WAIT * 30
+   ```
+
+#### 3. Timing-Abhängigkeiten
+
+Kritische Beziehungen zwischen Timing-Parametern:
+
+1. **Hierarchische Abhängigkeiten**
+   - Thread-Timeouts basieren auf BASE_TIMEOUT
+   - Polling-Intervalle basieren auf BASE_DELAY
+   - Retry-Delays skalieren mit BASE_RETRY
+
+2. **Kausale Abhängigkeiten**
+   - WS_FINAL_WAIT > WS_MESSAGE_WAIT (Nachrichten müssen verarbeitet sein)
+   - RETRY_DELAY < WS_MAX_RETRY_DELAY (Exponentielles Backoff)
+   - MIN_OUTPUT_INTERVAL < MAX_SENTENCE_WAIT (Satzverarbeitung)
+
+3. **Performance-Abhängigkeiten**
+   - Kürzere POLL_INTERVAL = bessere Reaktionszeit, höhere CPU-Last
+   - Längere WS_FINAL_WAIT = mehr Texte, längere Wartezeit
+   - Größerer AUDIO_BUFFER = stabilere Übertragung, höhere Latenz
+
+#### 4. Optimierungsmöglichkeiten
+
+Ansatzpunkte für Performance-Verbesserungen:
+
+1. **Reaktionszeit**
+   - POLL_INTERVAL und KEY_PRESS_DELAY für UI-Responsivität
+   - WS_POLL_INTERVAL für Verbindungsstatus
+   - HOTKEY_POLL_INTERVAL für Tastenerkennung
+
+2. **Stabilität**
+   - WS_FINAL_WAIT für Texterfassung
+   - RETRY_DELAY für Reconnect-Verhalten
+   - AUDIO_BUFFER_SECONDS für Streaming
+
+3. **Ressourcennutzung**
+   - THREAD_TIMEOUT für Thread-Cleanup
+   - TERMINAL_MONITOR_INTERVAL für Systemlast
+   - MESSAGE_WAIT für Verarbeitungspuffer
+
+4. **Benutzererfahrung**
+   - MIN_OUTPUT_INTERVAL für Textfluss
+   - MAX_SENTENCE_WAIT für Echtzeitgefühl
+   - PROMPT_INPUT_DELAY für Eingabegeschwindigkeit
 
 ### Verbindungsabbau
 
