@@ -102,13 +102,21 @@ def test_complete_text_capture():
     def toggle_recording():
         nonlocal recording
         if not recording:
+            # Erst WebSocket starten
             test.ws.start_processing()
+            time.sleep(config.TEST_SERVER_READY_DELAY)  # Warten bis Server bereit
+            # Dann Aufnahme starten
             test.audio.start_recording(test.ws.send_audio)
             recording = True
+            test.log_event("audio", "Recording started")
         else:
+            # Erst Aufnahme stoppen
             test.audio.stop_recording()
+            time.sleep(config.TEST_AUDIO_PROCESS_DELAY)  # Warten bis Audio verarbeitet
+            # Dann WebSocket stoppen
             test.ws.stop_processing()
             recording = False
+            test.log_event("audio", "Recording stopped")
     
     # Verbindung aufbauen
     test.log_event("connection", "Connecting to server")
@@ -145,13 +153,21 @@ def test_quick_stop_handling():
     def toggle_recording():
         nonlocal recording
         if not recording:
+            # Erst WebSocket starten
             test.ws.start_processing()
+            time.sleep(config.TEST_SERVER_READY_DELAY)  # Warten bis Server bereit
+            # Dann Aufnahme starten
             test.audio.start_recording(test.ws.send_audio)
             recording = True
+            test.log_event("audio", "Recording started")
         else:
+            # Erst Aufnahme stoppen
             test.audio.stop_recording()
+            time.sleep(config.TEST_AUDIO_PROCESS_DELAY)  # Warten bis Audio verarbeitet
+            # Dann WebSocket stoppen
             test.ws.stop_processing()
             recording = False
+            test.log_event("audio", "Recording stopped")
     
     # Verbindung aufbauen
     test.log_event("connection", "Connecting to server")

@@ -52,8 +52,10 @@ MAX_SENTENCE_WAIT = BASE_TIMEOUT       # Maximale Wartezeit auf Satzende
 # Terminal-Management
 TERMINAL_INACTIVITY_TIMEOUT = 300      # Timeout für inaktive Terminals (5 Minuten)
 
-# Test-Timeouts
+# Test-Timeouts und Delays
 TEST_SUITE_TIMEOUT = 120    # Timeout für Test-Suite in Sekunden
+TEST_SERVER_READY_DELAY = 0.5  # Wartezeit bis Server bereit (Sekunden)
+TEST_AUDIO_PROCESS_DELAY = 0.5  # Wartezeit für Audio-Verarbeitung (Sekunden)
 
 # WebSocket-Einstellungen
 WS_HOST = "localhost"

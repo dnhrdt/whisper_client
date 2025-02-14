@@ -9,6 +9,7 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.append(str(project_root))
 
+import config
 from src.hotkeys import HotkeyManager
 from tests.timing_tests import test_complete_text_capture, test_quick_stop_handling
 from tests.run_timing_tests import run_test_suite
