@@ -36,7 +36,14 @@ def log_connection(logger, message):
 def log_audio(logger, message):
     """Log für Audio-Ereignisse"""
     logger = logging.getLogger(logger.name)
-    logger.info(message, extra={'log_type': 'audio'})
+    if isinstance(message, str) and 'bytes' in message:
+        try:
+            size = int(message.split()[1])
+            logger.info(message, extra={'log_type': 'audio', 'size': size})
+        except:
+            logger.info(message, extra={'log_type': 'audio', 'size': 0})
+    else:
+        logger.info(message, extra={'log_type': 'audio', 'size': 0})
 
 def log_text(logger, message):
     """Log für Text-Ereignisse"""
@@ -46,7 +53,11 @@ def log_text(logger, message):
 def log_error(logger, message):
     """Log für Fehler"""
     logger = logging.getLogger(logger.name)
-    logger.error(message, extra={'log_type': 'error'})
+    logger.error(message, extra={
+        'log_type': 'error',
+        'stack': '',
+        'size': 0
+    })
 
 def get_logger():
     """Gibt die globale Logger-Instanz zurück"""
@@ -55,6 +66,10 @@ def get_logger():
     # Entferne existierende Handler
     for handler in logger.handlers[:]:
         logger.removeHandler(handler)
+        
+    # Logs-Verzeichnis erstellen
+    log_dir = os.path.dirname(config.REGRESSION_LOG_FILE)
+    os.makedirs(log_dir, exist_ok=True)
     
     try:
         # Console Handler mit UTF-8
@@ -83,11 +98,16 @@ def get_logger():
         file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
         
-        # Zusätzlicher Handler für _whisperlive_logs.txt
-        test_handler = logging.FileHandler('_whisperlive_logs.txt', encoding='utf-8', mode='a')
-        test_handler.setLevel(logging.INFO)
-        test_handler.setFormatter(WhisperFormatter())
-        logger.addHandler(test_handler)
+        # Regression Investigation Handler mit detailliertem Format
+        regression_handler = logging.FileHandler(config.REGRESSION_LOG_FILE, encoding='utf-8', mode='w')
+        regression_handler.setLevel(logging.DEBUG)
+        regression_formatter = WhisperFormatter(config.REGRESSION_LOG_FORMAT)
+        regression_handler.setFormatter(regression_formatter)
+        logger.addHandler(regression_handler)
+        logger.info("Regression Investigation Logger aktiviert", extra={
+            'log_type': 'default',
+            'details': 'Server-Logs verfügbar unter /home/michael/appdata/whisperlive/logs (WSL)'
+        })
         
     except Exception as e:
         print(f"Fehler bei Logger-Initialisierung: {e}")

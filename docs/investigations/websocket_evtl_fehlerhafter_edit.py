@@ -190,20 +190,14 @@ class WhisperWebSocket:
     def _on_close(self, ws, close_status_code, close_msg):
         """Callback wenn WebSocket-Verbindung geschlossen wird"""
         log_connection(logger, f"Connection closed (Status: {close_status_code}, Message: {close_msg})")
-        
-        # Status zurücksetzen
         self.connected = False
         self.server_ready = False
+        self.processing_enabled = False
         
-        # Versuche Reconnect wenn nicht explizit beendet
-        if close_status_code != 1000:
-            log_connection(logger, "Attempting reconnect in 3 seconds...")
-            time.sleep(3)
-            try:
-                self.connect()
-                log_connection(logger, "Reconnection successful")
-            except:
-                log_error(logger, "Reconnection failed")
+        # Beende die Verbindung bei Status 1000 (normal closure)
+        if close_status_code == 1000:
+            log_connection(logger, "Server closed connection normally")
+            self.ws = None
     
     def is_ready(self):
         """Prüft ob der Server bereit ist"""
@@ -284,30 +278,13 @@ class WhisperWebSocket:
     def stop_processing(self):
         """Stoppt die Verarbeitung von Server-Nachrichten"""
         if self.processing_enabled:
-            try:
-                # Warte kurz damit letzte Audio-Puffer gesendet werden können
-                time.sleep(0.5)
-                
-                if self.ws and self.ws.sock and self.ws.sock.connected:
-                    # Sende END_OF_AUDIO Signal
-                    self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
-                    log_audio(logger, "Sent END_OF_AUDIO signal")
-                    
-                    # Informiere Benutzer über Wartezeit
-                    log_connection(logger, "Warte 20 Sekunden auf mögliche weitere Texte...")
-                    
-                    # Warte auf letzte Segmente, aber halte Verbindung offen
-                    time.sleep(20.0)
-                else:
-                    log_connection(logger, "Keine aktive Verbindung für END_OF_AUDIO")
-                
-                # Deaktiviere nur Audio-Verarbeitung
-                self.processing_enabled = False
-                self.last_segments = []  # Reset gespeicherte Segmente
-                log_connection(logger, "Audio-Verarbeitung beendet")
-            except Exception as e:
-                log_error(logger, f"Fehler beim Stoppen der Verarbeitung: {e}")
-                self.processing_enabled = False
+            # Sende END_OF_AUDIO und warte auf letzte Segmente
+            self.send_end_of_audio()
+            
+            # Deaktiviere Verarbeitung
+            self.processing_enabled = False
+            self.last_segments = []  # Reset gespeicherte Segmente
+            log_connection(logger, "Server message processing disabled")
     
     def start_processing(self):
         """Startet die Verarbeitung von Server-Nachrichten"""
@@ -340,14 +317,16 @@ class WhisperWebSocket:
             
             # Stoppe zuerst die Verarbeitung
             log_connection(logger, "Stopping processing...")
-            self.stop_processing()
+            self.processing_enabled = False
             
-            # Sende Stop-Signal an Server
-            self.send_end_of_audio()
-            
-            # Warte auf letzte Verarbeitung (20 Sekunden für vollständige Verarbeitung)
-            log_connection(logger, "Waiting for final server responses (20s)...")
-            time.sleep(20.0)
+            # Sende Stop-Signal und warte auf letzte Segmente
+            log_connection(logger, "Sending END_OF_AUDIO and waiting for final segments (20s)...")
+            try:
+                self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
+                log_audio(logger, "Sent END_OF_AUDIO signal")
+                time.sleep(20.0)  # Warte 20 Sekunden auf letzte Segmente
+            except Exception as e:
+                log_error(logger, f"Error sending END_OF_AUDIO: {str(e)}")
             
             # Speichere Referenz für Thread-Join
             thread = self.ws_thread
@@ -356,8 +335,8 @@ class WhisperWebSocket:
             log_connection(logger, "Closing connection...")
             try:
                 self.ws.close(1000, "Client shutdown".encode('utf-8'))
-            except:
-                pass
+            except Exception as e:
+                log_error(logger, f"Error closing connection: {str(e)}")
                 
             self.ws = None
             self.connected = False

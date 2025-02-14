@@ -24,6 +24,17 @@ WHISPER_BACKEND = "faster_whisper"
 LOG_DIR = "logs"
 LOG_LEVEL_FILE = "DEBUG"
 LOG_LEVEL_CONSOLE = "DEBUG"  # Temporär auf DEBUG für Tests
+
+# Spezielle Logging-Einstellungen für Regression-Untersuchung
+REGRESSION_LOG_FILE = "logs/regression_investigation.log"
+REGRESSION_LOG_FORMAT = {
+    'default': "%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s",
+    'connection': "%(asctime)s.%(msecs)03d - CONN - %(message)s",
+    'audio': "%(asctime)s.%(msecs)03d - AUDIO - %(message)s [size=%(size)d bytes]",
+    'text': "%(asctime)s.%(msecs)03d - TEXT - %(message)s",
+    'error': "%(asctime)s.%(msecs)03d - ERROR - %(message)s\n%(stack)s"
+}
+
 # Logging-Formate für verschiedene Ereignisse
 LOG_FORMAT_FILE = {
     'default': "%(asctime)s - %(levelname)s - %(message)s",

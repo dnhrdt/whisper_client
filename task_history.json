@@ -1,0 +1,104 @@
+{
+  "tasks": [
+    {
+      "timestamp": "2025-02-14T20:26:21.255472",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-14T20:25:06.838119",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-14T20:24:03.846130",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-14T20:14:25.079155",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-14T20:03:40.068607",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    }
+  ]
+}

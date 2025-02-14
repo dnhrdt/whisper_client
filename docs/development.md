@@ -19,7 +19,9 @@ Der Whisper Client basiert auf einer WebSocket-Verbindung zum WhisperLive Server
 3. **Audio-Aufnahme**
    - PyAudio für Mikrofonzugriff
    - Threaded Recording
-   - Float32 Normalisierung
+   - Float32 Normalisierung (int16 zu float32, Division durch 32768.0)
+   - Korrekte Datentypen für Server-Verarbeitung
+   - Robuste Pufferung und Timing
 
 4. **Logging-System**
    - Datei- und Konsolenausgabe
@@ -44,6 +46,9 @@ Der Whisper Client basiert auf einer WebSocket-Verbindung zum WhisperLive Server
    - Timeout nach 5 Sekunden
    - 3 Sekunden Wartezeit vor Reconnect
    - Maximale Reconnect-Versuche: Unbegrenzt
+   - 20-Sekunden-Wartezeit für letzte Segmente
+   - Verbindung bleibt während Wartezeit offen
+   - Klare Status-Meldungen für Benutzer
 
 2. **Audio-Fehler**
    - Overflow-Ignorierung
@@ -94,6 +99,47 @@ pyinstaller --onefile --noconsole whisper_client.py
 2. Verknüpfung erstellen
 3. In Autostart-Ordner platzieren:
    `shell:startup`
+
+## Server-Integration
+
+### Audio-Verarbeitung
+
+1. **Datenformat**
+   - Client sendet normalisierte float32 Daten
+   - Konvertierung: int16 → float32 / 32768.0
+   - Server erwartet normalisierte [-1.0, 1.0] Werte
+
+2. **Aufnahme-Ende**
+   - END_OF_AUDIO Signal an Server
+   - 20-Sekunden-Wartezeit für letzte Segmente
+   - Verbindung bleibt für Nachzügler-Texte offen
+   - Nur Audio-Verarbeitung wird deaktiviert
+
+3. **Status-Meldungen**
+   - "Stoppe Aufnahme..." beim Beenden
+   - "Warte auf letzte Texte..." während der 20s
+   - "Audio-Verarbeitung beendet" nach Wartezeit
+
+### WhisperLive Server-Logs
+- **Container-Zugriff**: 
+  - Via `docker exec -it whisperlive bash`
+  - Erweitertes Logging mit Timestamps und Details
+
+- **Log-Mapping**:
+  - Container: `/app/logs`
+  - Host (WSL): `/home/michael/appdata/whisperlive/logs`
+  - Symlink für einfachen Zugriff: `/logs/logs`
+  - Volume-Mapping in Docker-Compose: `- /home/michael/appdata/whisperlive/logs:/app/logs`
+
+- **Vorteile**:
+  - Echtzeit-Log-Zugriff
+  - Persistente Logs über Container-Neustarts
+  - Vereinfachtes Debugging der Server-Komponente
+
+### Debugging-Tools
+- Server-Logs in Echtzeit verfolgen
+- Audio-Verarbeitung überwachen (VAD, Transkription)
+- Performance-Metriken sammeln
 
 ## Debugging
 

@@ -151,11 +151,11 @@ class AudioManager:
             while self.recording and self.stream and self.stream.is_active():
                 try:
                     data = self.stream.read(self.chunk, exception_on_overflow=False)
-                    # # Konvertiere zu float32 Array (temporär deaktiviert für Tests)
-                    # audio_array = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
+                    # Konvertiere zu float32 Array
+                    audio_array = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
                     
-                    # Füge rohe int16 Daten zum Puffer hinzu
-                    buffer.append(np.frombuffer(data, dtype=np.int16))
+                    # Füge normalisierte float32 Daten zum Puffer hinzu
+                    buffer.append(audio_array)
                     
                     # Sende gepufferte Daten wenn genug vorhanden
                     # Sende gepufferte Daten wenn genug vorhanden

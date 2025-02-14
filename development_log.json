@@ -1,6 +1,49 @@
 {
   "entries": [
     {
+      "timestamp": "2025-02-14T20:23:00+01:00",
+      "type": "fix",
+      "component": "core",
+      "description": "Regression behoben: Audio-Format und Verbindungshandling",
+      "details": [
+        "Float32-Normalisierung reaktiviert für korrekte Server-Verarbeitung",
+        "Verbindungshandling verbessert mit 20s Wartezeit für letzte Texte",
+        "Status-Meldungen für Benutzer klarer gestaltet",
+        "Dokumentation aktualisiert mit Audio-Format und Verbindungs-Details"
+      ],
+      "files_changed": [
+        "src/audio.py",
+        "src/websocket.py",
+        "main.py",
+        "docs/development.md"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": ["test_server_flow.py", "test_text_processing.py"],
+        "tests_added": []
+      },
+      "regression_potential": "low"
+    },
+    {
+      "timestamp": "2025-02-14T16:40:00+01:00",
+      "type": "improvement",
+      "component": "server",
+      "description": "Server-Log-Konfiguration verbessert",
+      "details": [
+        "Container-Logs mit Timestamps und Details erweitert",
+        "Volume-Mapping für persistente Logs eingerichtet: /home/michael/appdata/whisperlive/logs:/app/logs",
+        "Symlink für einfachen Log-Zugriff erstellt: /logs/logs",
+        "Ermöglicht besseres Debugging der Server-Komponente und VAD-Analyse"
+      ],
+      "files_changed": [],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": ["test_server_flow.py"],
+        "tests_added": []
+      },
+      "regression_potential": "low"
+    },
+    {
       "timestamp": "2025-02-13T23:26:00+01:00",
       "type": "fix",
       "component": "audio",

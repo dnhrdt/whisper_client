@@ -91,10 +91,13 @@ class WhisperClient:
             # Terminal-Aktivität aktualisieren
             self.terminal_manager.update_activity(self.audio_terminal.id)
         else:
-            # Sende END_OF_AUDIO und starte Wartezeit im Hintergrund
-            self.websocket.stop_processing()
-            # Beende die Aufnahme sofort
+            # Beende zuerst die Aufnahme
+            logger.info("Stoppe Aufnahme...")
             self.audio_manager.stop_recording()
+            
+            # Dann sende END_OF_AUDIO und warte auf letzte Texte
+            logger.info("Warte auf letzte Texte vom Server...")
+            self.websocket.stop_processing()
     
     def on_audio_data(self, audio_data):
         """Callback für Audio-Daten"""
