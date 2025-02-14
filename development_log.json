@@ -1,6 +1,23 @@
 {
   "entries": [
     {
+      "timestamp": "2025-02-14T21:46:51.573719+01:00",
+      "type": "refactor",
+      "component": "timing",
+      "description": "Timing-System hierarchisch organisiert",
+      "details": [],
+      "files_changed": [
+        "tests/run_timing_tests.py",
+        "tests/timing_tests.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
       "timestamp": "2025-02-14T21:45:48.228539+01:00",
       "type": "refactor",
       "component": "timing",
@@ -285,7 +302,7 @@
     }
   ],
   "meta": {
-    "last_updated": "2025-02-14T21:45:48.228539+01:00",
+    "last_updated": "2025-02-14T21:46:51.573719+01:00",
     "format_version": "1.0",
     "notes": [
       "Chronologische Entwicklungshistorie mit Fokus auf Änderungen und deren Auswirkungen",
