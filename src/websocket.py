@@ -268,9 +268,9 @@ class WhisperWebSocket:
             self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
             log_audio(logger, "Sent END_OF_AUDIO signal")
             
-            # Warte auf letzte Segmente (20 Sekunden für vollständige Verarbeitung)
-            log_connection(logger, "Waiting for final segments (20s)...")
-            time.sleep(20.0)  # Gib dem Server genug Zeit zum Verarbeiten
+            # Warte auf letzte Segmente (30 Sekunden für vollständige Verarbeitung)
+            log_connection(logger, "Waiting for final segments (30s)...")
+            time.sleep(30.0)  # Gib dem Server genug Zeit zum Verarbeiten
             
             return True
         except websocket.WebSocketConnectionClosedException:
@@ -285,19 +285,16 @@ class WhisperWebSocket:
         """Stoppt die Verarbeitung von Server-Nachrichten"""
         if self.processing_enabled:
             try:
-                # Warte kurz damit letzte Audio-Puffer gesendet werden können
-                time.sleep(0.5)
-                
                 if self.ws and self.ws.sock and self.ws.sock.connected:
                     # Sende END_OF_AUDIO Signal
                     self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
                     log_audio(logger, "Sent END_OF_AUDIO signal")
                     
                     # Informiere Benutzer über Wartezeit
-                    log_connection(logger, "Warte 20 Sekunden auf mögliche weitere Texte...")
+                    log_connection(logger, "Warte 30 Sekunden auf mögliche weitere Texte...")
                     
                     # Warte auf letzte Segmente
-                    time.sleep(20.0)
+                    time.sleep(30.0)
                     
                     # Deaktiviere Audio-Verarbeitung
                     self.processing_enabled = False

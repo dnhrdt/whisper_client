@@ -119,13 +119,15 @@ pyinstaller --onefile --noconsole whisper_client.py
 
 2. **Aufnahme-Ende**
    - END_OF_AUDIO Signal an Server
-   - 20-Sekunden-Wartezeit für letzte Segmente
+   - 30-Sekunden-Wartezeit für letzte Segmente
    - Verbindung bleibt für Nachzügler-Texte offen
-   - Nur Audio-Verarbeitung wird deaktiviert
+   - Verarbeitung erst nach Empfang aller Texte deaktivieren
+   - Sauberes Beenden der Verbindung
 
 3. **Status-Meldungen**
-   - "Stoppe Aufnahme..." beim Beenden
-   - "Warte auf letzte Texte..." während der 20s
+   - "Aufnahme gestartet (F13)" beim Start
+   - "Aufnahme gestoppt (F13)" beim Stopp
+   - "Warte auf letzte Texte..." während der 30s
    - "Audio-Verarbeitung beendet" nach Wartezeit
 
 ### WhisperLive Server-Logs
