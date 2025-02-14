@@ -286,24 +286,28 @@ class WhisperWebSocket:
         if self.processing_enabled:
             try:
                 if self.ws and self.ws.sock and self.ws.sock.connected:
-                    # Sende END_OF_AUDIO Signal
-                    self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
-                    log_audio(logger, "Sent END_OF_AUDIO signal")
-                    
-                    # Informiere Benutzer über Wartezeit
-                    log_connection(logger, "Warte 30 Sekunden auf mögliche weitere Texte...")
-                    
-                    # Warte auf letzte Segmente
-                    time.sleep(30.0)
-                    
-                    # Deaktiviere Audio-Verarbeitung
-                    self.processing_enabled = False
-                    self.last_segments = []  # Reset gespeicherte Segmente
-                    log_connection(logger, "Audio-Verarbeitung beendet")
-                    
-                    # Schließe Verbindung sauber
-                    log_connection(logger, "Schließe Verbindung...")
-                    self.ws.close(1000, "Client shutdown".encode('utf-8'))
+                    try:
+                        # Sende END_OF_AUDIO Signal
+                        self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
+                        log_audio(logger, "Sent END_OF_AUDIO signal")
+                        
+                        # Informiere Benutzer über Wartezeit
+                        log_connection(logger, "Warte 30 Sekunden auf mögliche weitere Texte...")
+                        
+                        # Warte auf letzte Segmente
+                        time.sleep(30.0)
+                        
+                        # Deaktiviere Audio-Verarbeitung
+                        self.processing_enabled = False
+                        self.last_segments = []  # Reset gespeicherte Segmente
+                        log_connection(logger, "Audio-Verarbeitung beendet")
+                        
+                        # Schließe Verbindung sauber
+                        log_connection(logger, "Schließe Verbindung...")
+                        self.ws.close()  # Keine Parameter, da close() nur self akzeptiert
+                    except Exception as e:
+                        log_error(logger, f"Fehler beim Beenden der Verbindung: {e}")
+                        self.ws = None  # Setze WS auf None um Reconnect zu ermöglichen
                 else:
                     log_connection(logger, "Keine aktive Verbindung für END_OF_AUDIO")
                     self.processing_enabled = False
@@ -349,25 +353,26 @@ class WhisperWebSocket:
         try:
             log_connection(logger, "Starting cleanup...")
             
-            # Stoppe zuerst die Verarbeitung
-            log_connection(logger, "Stopping processing...")
-            self.stop_processing()
-            
-            # Speichere Referenz für Thread-Join
+            # Speichere Referenzen
+            ws = self.ws
             thread = self.ws_thread
             
-            # Schließe WebSocket mit Close-Frame
-            if self.ws and self.ws.sock and self.ws.sock.connected:
-                log_connection(logger, "Closing connection...")
-                try:
-                    self.ws.close(1000, "Client shutdown".encode('utf-8'))
-                except:
-                    pass
-                
             # Setze Status zurück
             self.ws = None
             self.connected = False
             self.server_ready = False
+            
+            # Stoppe die Verarbeitung
+            log_connection(logger, "Stopping processing...")
+            self.processing_enabled = False
+            
+            # Schließe WebSocket mit Close-Frame
+            if ws and ws.sock and ws.sock.connected:
+                log_connection(logger, "Closing connection...")
+                try:
+                    ws.close()  # Keine Parameter, da close() nur self akzeptiert
+                except Exception as e:
+                    log_error(logger, f"Fehler beim Schließen der Verbindung: {e}")
             
             # Warte auf Thread-Ende
             if thread and thread.is_alive():
