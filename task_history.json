@@ -1,6 +1,26 @@
 {
   "tasks": [
     {
+      "timestamp": "2025-02-14T20:31:41.805754",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
       "timestamp": "2025-02-14T20:26:21.255472",
       "description": "Code-Restrukturierung",
       "changes": [

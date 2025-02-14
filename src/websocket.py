@@ -195,8 +195,8 @@ class WhisperWebSocket:
         self.connected = False
         self.server_ready = False
         
-        # Versuche Reconnect wenn nicht explizit beendet
-        if close_status_code != 1000:
+        # Versuche Reconnect nur bei unerwarteter Trennung und wenn Verarbeitung aktiv
+        if close_status_code != 1000 and self.processing_enabled:
             log_connection(logger, "Attempting reconnect in 3 seconds...")
             time.sleep(3)
             try:
@@ -342,23 +342,18 @@ class WhisperWebSocket:
             log_connection(logger, "Stopping processing...")
             self.stop_processing()
             
-            # Sende Stop-Signal an Server
-            self.send_end_of_audio()
-            
-            # Warte auf letzte Verarbeitung (20 Sekunden für vollständige Verarbeitung)
-            log_connection(logger, "Waiting for final server responses (20s)...")
-            time.sleep(20.0)
-            
             # Speichere Referenz für Thread-Join
             thread = self.ws_thread
             
             # Schließe WebSocket mit Close-Frame
-            log_connection(logger, "Closing connection...")
-            try:
-                self.ws.close(1000, "Client shutdown".encode('utf-8'))
-            except:
-                pass
+            if self.ws and self.ws.sock and self.ws.sock.connected:
+                log_connection(logger, "Closing connection...")
+                try:
+                    self.ws.close(1000, "Client shutdown".encode('utf-8'))
+                except:
+                    pass
                 
+            # Setze Status zurück
             self.ws = None
             self.connected = False
             self.server_ready = False
