@@ -1,5 +1,40 @@
 # Entwickler-Dokumentation
 
+## Architektur
+
+Der Whisper Client basiert auf einer WebSocket-Verbindung zum WhisperLive Server und verarbeitet Audio in Echtzeit.
+
+### Hauptkomponenten
+
+1. **WebSocket-Client**
+   - Verbindungsaufbau und -management
+   - Automatische Reconnects
+   - JSON-Konfiguration
+
+2. **Text-Insertion**
+   - Windows API via pywin32
+   - Automatische Fenstererkennung
+   - Tastatureingabe-Simulation
+
+3. **Audio-Aufnahme**
+   - PyAudio für Mikrofonzugriff
+   - Threaded Recording
+   - Float32 Normalisierung (int16 zu float32 Division durch 32768.0)
+   - Korrekte Datentypen für Server-Verarbeitung
+   - Robuste Pufferung und Timing
+
+4. **Logging-System**
+   - Datei- und Konsolenausgabe
+   - Tägliche Logrotation
+   - Strukturierte Fehlerbehandlung
+
+## Status-Codes
+
+### Verbindung
+- ✓ Verbunden
+- ✗ Getrennt
+- 🔄 Reconnecting
+
 ## Neue Erkenntnisse (2025-02-14)
 
 ### Timing-Analyse
