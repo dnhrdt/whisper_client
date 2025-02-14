@@ -13,6 +13,9 @@ WS_READY_TIMEOUT = 10.0    # Timeout für Server-Ready Signal
 WS_RETRY_DELAY = 2.0       # Initiale Wartezeit zwischen Reconnects
 WS_FINAL_WAIT = 30.0       # Wartezeit auf letzte Texte nach Aufnahme-Ende
 WS_THREAD_TIMEOUT = 5.0    # Timeout für Thread-Join
+WS_MAX_RETRY_DELAY = 30.0  # Maximale Wartezeit zwischen Reconnects
+WS_POLL_INTERVAL = 0.1     # Intervall für Verbindungsprüfung
+WS_MESSAGE_WAIT = 1.0      # Wartezeit auf letzte Nachrichten nach Audio-Ende
 
 # Audio-Einstellungen
 AUDIO_CHUNK = 4096

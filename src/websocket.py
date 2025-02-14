@@ -62,7 +62,7 @@ class WhisperWebSocket:
                 while not self.ws.sock or not self.ws.sock.connected:
                     if time.time() - start_time > config.WS_CONNECT_TIMEOUT:
                         raise TimeoutError("Connection timeout")
-                    time.sleep(0.1)
+                    time.sleep(config.WS_POLL_INTERVAL)
                 
                 self.connected = True
                 self.processing_enabled = True
@@ -73,7 +73,7 @@ class WhisperWebSocket:
                 while not self.server_ready:
                     if time.time() - start_time > config.WS_READY_TIMEOUT:
                         raise TimeoutError("Server ready timeout")
-                    time.sleep(0.1)
+                    time.sleep(config.WS_POLL_INTERVAL)
                 
                 return True
                     
@@ -294,10 +294,17 @@ class WhisperWebSocket:
                     # Warte auf letzte Segmente
                     time.sleep(config.WS_FINAL_WAIT)
                     
+                    # Warte kurz auf letzte Nachrichten
+                    log_connection(logger, "Warte auf letzte Nachrichten...")
+                    time.sleep(config.WS_MESSAGE_WAIT)
+                    
                     # Deaktiviere Audio-Verarbeitung
                     self.processing_enabled = False
                     self.last_segments = []  # Reset gespeicherte Segmente
                     log_connection(logger, "Audio-Verarbeitung beendet")
+                    
+                    # Warte nochmal kurz für letzte Verarbeitung
+                    time.sleep(config.WS_MESSAGE_WAIT)
                     
                     # Schließe Verbindung sauber
                     log_connection(logger, "Schließe Verbindung...")
