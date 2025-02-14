@@ -66,7 +66,7 @@ class WhisperClient:
                         self.websocket.connect()
                     except:
                         pass
-                time.sleep(0.1)
+                time.sleep(config.MAIN_POLL_INTERVAL)
         except KeyboardInterrupt:
             self.cleanup()
             
@@ -124,7 +124,7 @@ class WhisperClient:
         self.terminal_manager.cleanup()
         
         # Warte kurz damit die Hauptschleife beendet werden kann
-        time.sleep(0.2)
+        time.sleep(config.MAIN_SHUTDOWN_WAIT)
         sys.exit(0)
 
 def main():

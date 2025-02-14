@@ -66,11 +66,11 @@ class HotkeyManager:
                         else:
                             logger.debug(f"Taste {hotkey} losgelassen")
                 
-                time.sleep(0.05)  # Reduzierte Wartezeit für bessere Reaktion
+                time.sleep(config.HOTKEY_POLL_INTERVAL)  # Polling-Intervall für Hotkey-Prüfung
                 
             except Exception as e:
                 logger.error(f"Fehler bei Hotkey-Prüfung: {e}")
-                time.sleep(0.1)  # Kurze Pause bei Fehlern
+                time.sleep(config.HOTKEY_ERROR_DELAY)  # Wartezeit nach Fehlern
     
     def start(self):
         """Startet die Hotkey-Überwachung"""
@@ -92,13 +92,13 @@ class HotkeyManager:
         self.running = False
         
         # Warte kurz damit der Thread die running=False Änderung mitbekommt
-        time.sleep(0.1)
+        time.sleep(config.HOTKEY_SHUTDOWN_WAIT)
         
         if self.thread and threading.current_thread() != self.thread:
             try:
                 if self.thread.is_alive():
                     logger.debug("Warte auf Hotkey-Thread...")
-                    self.thread.join(timeout=2.0)
+                    self.thread.join(timeout=config.HOTKEY_THREAD_TIMEOUT)
                     if self.thread.is_alive():
                         logger.warning("Hotkey-Thread reagiert nicht - Beende Thread...")
             except RuntimeError as e:

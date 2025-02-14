@@ -231,10 +231,10 @@ class TextManager:
             # Simuliere Strg+V
             win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)  # Strg drücken
             win32api.keybd_event(ord('V'), 0, 0, 0)  # V drücken
-            time.sleep(0.05)  # Kurze Pause
+            time.sleep(config.KEY_PRESS_DELAY)  # Verzögerung zwischen Tastendrücken
             win32api.keybd_event(ord('V'), 0, win32con.KEYEVENTF_KEYUP, 0)  # V loslassen
             win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)  # Strg loslassen
-            time.sleep(0.05)  # Kurze Pause für Verarbeitung
+            time.sleep(config.KEY_PRESS_DELAY)  # Verzögerung für Verarbeitung
         except Exception as e:
             logger.error(f"⚠️ Fehler bei Tastatureingabe: {e}")
             raise
@@ -266,7 +266,7 @@ class TextManager:
             # Strg+V zum Einfügen
             win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)  # Strg drücken
             win32api.keybd_event(ord('V'), 0, 0, 0)  # V drücken
-            time.sleep(0.05)  # Kurze Pause
+            time.sleep(config.KEY_PRESS_DELAY)  # Verzögerung zwischen Tastendrücken
             win32api.keybd_event(ord('V'), 0, win32con.KEYEVENTF_KEYUP, 0)  # V loslassen
             win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)  # Strg loslassen
             

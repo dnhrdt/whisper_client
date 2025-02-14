@@ -128,27 +128,54 @@ pyinstaller --onefile --noconsole whisper_client.py
      "Der Himmel ist blau."
      ```
 
-3. **Timing-Parameter**
-   - Verbindungsaufbau:
-     * CONNECT_TIMEOUT: 5s für Socket-Verbindung
-     * READY_TIMEOUT: 10s für Server-Ready-Signal
-     * RETRY_DELAY: 2s zwischen Verbindungsversuchen (verdoppelt sich bis max. 30s)
-     * POLL_INTERVAL: 0.1s für Verbindungsprüfung
-   - Aufnahme-Ende:
-     * FINAL_WAIT: 30s für letzte Segmente vom Server
-     * MESSAGE_WAIT: 1s für letzte Nachrichten-Verarbeitung
-     * THREAD_TIMEOUT: 5s für Thread-Beendigung
-   - Textverarbeitung:
-     * MIN_OUTPUT_INTERVAL: 0.5s zwischen Ausgaben
-     * MAX_SENTENCE_WAIT: 2.0s für unvollständige Sätze
+### Timing-Parameter
 
-4. **Verbindungsabbau**
-   - END_OF_AUDIO Signal senden
-   - FINAL_WAIT Sekunden auf letzte Segmente warten
-   - MESSAGE_WAIT Sekunden für Nachrichtenverarbeitung
-   - Audio-Verarbeitung deaktivieren
-   - Nochmals MESSAGE_WAIT für letzte Verarbeitung
-   - Verbindung sauber schließen
+Der Client verwendet verschiedene Timing-Parameter für optimale Performance und Zuverlässigkeit:
+
+1. **WebSocket-Timing**
+   - Verbindungsaufbau und Reconnects
+   - Wartezeiten für Server-Antworten
+   - Puffer für letzte Nachrichten
+   - Beispiel: WS_FINAL_WAIT bestimmt wie lange auf letzte Texte gewartet wird
+
+2. **Audio-Timing**
+   - Pufferung der Audio-Daten
+   - Thread-Management
+   - Beispiel: AUDIO_BUFFER_SECONDS bestimmt die Größe des Audio-Puffers
+
+3. **Text-Timing**
+   - Ausgabe-Intervalle
+   - Satzende-Erkennung
+   - Tastatur- und Clipboard-Operationen
+   - Beispiel: MAX_SENTENCE_WAIT bestimmt wann unvollständige Sätze ausgegeben werden
+
+4. **Hotkey-Timing**
+   - Tastenerkennung
+   - Fehlerbehandlung
+   - Thread-Management
+   - Beispiel: HOTKEY_POLL_INTERVAL bestimmt die Reaktionsgeschwindigkeit
+
+5. **Terminal-Timing**
+   - Inaktivitätserkennung
+   - Überwachungsintervalle
+   - Thread-Management
+   - Beispiel: TERMINAL_INACTIVITY_TIMEOUT bestimmt wann Terminals geschlossen werden
+
+Alle Parameter sind in config.py zentral konfigurierbar. Dies ermöglicht:
+- Einfache Anpassung des Timing-Verhaltens
+- Schnelles Debugging von Timing-Problemen
+- Besseres Verständnis der Zusammenhänge
+- Systematische Performance-Optimierung
+
+### Verbindungsabbau
+
+Der Verbindungsabbau erfolgt in mehreren Schritten:
+1. END_OF_AUDIO Signal senden
+2. FINAL_WAIT Sekunden auf letzte Segmente warten
+3. MESSAGE_WAIT Sekunden für Nachrichtenverarbeitung
+4. Audio-Verarbeitung deaktivieren
+5. Nochmals MESSAGE_WAIT für letzte Verarbeitung
+6. Verbindung sauber schließen
 
 4. **Status-Meldungen**
    - "Aufnahme gestartet (F13)" beim Start

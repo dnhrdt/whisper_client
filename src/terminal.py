@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 from enum import Enum
 from src import logger
+import config
 
 class TerminalStatus(Enum):
     """Status eines Terminals"""
@@ -26,9 +27,6 @@ class TerminalInfo:
 
 class TerminalManager:
     """Zentrale Verwaltung aller Terminals"""
-    
-    # Timeout in Sekunden für inaktive Terminals
-    INACTIVITY_TIMEOUT = 300  # 5 Minuten
     
     def __init__(self):
         self.terminals: Dict[str, TerminalInfo] = {}
@@ -144,7 +142,7 @@ class TerminalManager:
                     for id, terminal in self.terminals.items():
                         if terminal.status == TerminalStatus.ACTIVE:
                             inactive_time = current_time - terminal.last_activity
-                            if inactive_time > self.INACTIVITY_TIMEOUT:
+                            if inactive_time > config.TERMINAL_INACTIVITY_TIMEOUT:
                                 terminal.status = TerminalStatus.INACTIVE
                                 logger.debug(f"Terminal inaktiv: {terminal.name}")
                                 to_close.append(id)
@@ -156,7 +154,7 @@ class TerminalManager:
             except Exception as e:
                 logger.error(f"Fehler im Terminal-Monitor: {e}")
             
-            time.sleep(10)  # Alle 10 Sekunden prüfen
+            time.sleep(config.TERMINAL_MONITOR_INTERVAL)  # Intervall für Terminal-Überwachung
     
     def cleanup(self):
         """Ressourcen freigeben"""
@@ -169,6 +167,6 @@ class TerminalManager:
         
         # Auf Monitor-Thread warten
         if self.monitor_thread.is_alive():
-            self.monitor_thread.join(timeout=2.0)
+            self.monitor_thread.join(timeout=config.TERMINAL_THREAD_TIMEOUT)
         
         logger.info("Terminal-Manager beendet")

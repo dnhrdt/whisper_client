@@ -134,7 +134,7 @@ class AudioManager:
             # Warte auf Audio-Thread mit längerem Timeout
             if hasattr(self, 'record_thread') and self.record_thread.is_alive():
                 logger.debug("Warte auf Audio-Thread...")
-                self.record_thread.join(timeout=2.0)
+                self.record_thread.join(timeout=config.AUDIO_THREAD_TIMEOUT)
                 if self.record_thread.is_alive():
                     logger.warning("Audio-Thread reagiert nicht - Beende Thread...")
                     # Thread als Daemon markiert, wird beim Programm-Ende beendet
@@ -157,9 +157,9 @@ class AudioManager:
                     # Füge normalisierte float32 Daten zum Puffer hinzu
                     buffer.append(audio_array)
                     
-                    # Sende gepufferte Daten wenn genug vorhanden
-                    # Sende gepufferte Daten wenn genug vorhanden
-                    if len(buffer) >= 4:  # ca. 1 Sekunde Audio
+                    # Prüfe ob genug Audio für einen Puffer vorhanden
+                    buffer_size = int(config.AUDIO_BUFFER_SECONDS * 4)  # 4 chunks pro Sekunde
+                    if len(buffer) >= buffer_size:
                         combined_data = np.concatenate(buffer)
                         if self.recording:  # Nochmal prüfen vor dem Senden
                             callback(combined_data.tobytes())

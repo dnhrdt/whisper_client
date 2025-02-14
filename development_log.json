@@ -1,6 +1,46 @@
 {
   "entries": [
     {
+      "timestamp": "2025-02-14T21:38:50.967279+01:00",
+      "type": "chore",
+      "component": "git",
+      "description": "PowerShell-Hook entfernt",
+      "details": [],
+      "files_changed": [
+        "config.py",
+        "development_log.json",
+        "docs/development.md",
+        "main.py",
+        "src/audio.py",
+        "src/hotkeys.py",
+        "src/terminal.py",
+        "src/text.py",
+        "src/websocket.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T21:26:05.319998+01:00",
+      "type": "feat",
+      "component": "git",
+      "description": "Python-basierter pre-commit Hook",
+      "details": [],
+      "files_changed": [
+        ""
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
       "timestamp": "2025-02-14T21:25:57.052018+01:00",
       "type": "fix",
       "component": "websocket",
@@ -228,7 +268,7 @@
     }
   ],
   "meta": {
-    "last_updated": "2025-02-14T21:25:57.052018+01:00",
+    "last_updated": "2025-02-14T21:38:50.967279+01:00",
     "format_version": "1.0",
     "notes": [
       "Chronologische Entwicklungshistorie mit Fokus auf Änderungen und deren Auswirkungen",

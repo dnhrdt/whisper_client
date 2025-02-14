@@ -29,7 +29,7 @@ class WhisperWebSocket:
             return True
             
         retry_count = 0
-        retry_delay = 2  # Sekunden zwischen Versuchen
+        retry_delay = config.WS_RETRY_DELAY  # Initiale Wartezeit zwischen Reconnects
         
         while retry_count < max_retries:
             try:
@@ -177,7 +177,7 @@ class WhisperWebSocket:
         log_error(logger, f"Connection error: {str(error)}")
         if isinstance(error, websocket.WebSocketConnectionClosedException):
             log_connection(logger, "Connection lost. Attempting reconnect in 3 seconds...")
-            time.sleep(3)
+            time.sleep(config.WS_RECONNECT_DELAY)
             try:
                 self.connect()
                 log_connection(logger, "Reconnection successful")
@@ -196,7 +196,7 @@ class WhisperWebSocket:
         # Versuche Reconnect nur bei unerwarteter Trennung und wenn Verarbeitung aktiv
         if close_status_code != 1000 and self.processing_enabled:
             log_connection(logger, "Attempting reconnect in 3 seconds...")
-            time.sleep(3)
+            time.sleep(config.WS_RECONNECT_DELAY)
             try:
                 self.connect()
                 log_connection(logger, "Reconnection successful")

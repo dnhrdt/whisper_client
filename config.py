@@ -8,14 +8,40 @@ WS_PORT = 9090
 WS_URL = f"ws://{WS_HOST}:{WS_PORT}"
 
 # WebSocket-Timing
-WS_CONNECT_TIMEOUT = 5.0   # Timeout für Verbindungsaufbau
-WS_READY_TIMEOUT = 10.0    # Timeout für Server-Ready Signal
-WS_RETRY_DELAY = 2.0       # Initiale Wartezeit zwischen Reconnects
-WS_FINAL_WAIT = 30.0       # Wartezeit auf letzte Texte nach Aufnahme-Ende
-WS_THREAD_TIMEOUT = 5.0    # Timeout für Thread-Join
-WS_MAX_RETRY_DELAY = 30.0  # Maximale Wartezeit zwischen Reconnects
-WS_POLL_INTERVAL = 0.1     # Intervall für Verbindungsprüfung
-WS_MESSAGE_WAIT = 1.0      # Wartezeit auf letzte Nachrichten nach Audio-Ende
+WS_CONNECT_TIMEOUT = 5.0      # Timeout für Verbindungsaufbau
+WS_READY_TIMEOUT = 10.0       # Timeout für Server-Ready Signal
+WS_RETRY_DELAY = 2.0          # Initiale Wartezeit zwischen Reconnects
+WS_FINAL_WAIT = 30.0          # Wartezeit auf letzte Texte
+WS_THREAD_TIMEOUT = 5.0       # Timeout für Thread-Join
+WS_MAX_RETRY_DELAY = 30.0     # Maximale Wartezeit zwischen Reconnects
+WS_POLL_INTERVAL = 0.1        # Intervall für Verbindungsprüfung
+WS_MESSAGE_WAIT = 1.0         # Wartezeit auf letzte Nachrichten
+WS_RECONNECT_DELAY = 3.0      # Wartezeit vor Reconnect
+
+# Audio-Timing
+AUDIO_BUFFER_SECONDS = 1.0    # Sekunden Audio pro Puffer
+AUDIO_THREAD_TIMEOUT = 2.0    # Timeout für Thread-Beendigung
+
+# Text-Timing
+MIN_OUTPUT_INTERVAL = 0.5     # Minimaler Abstand zwischen Ausgaben
+MAX_SENTENCE_WAIT = 2.0       # Maximale Wartezeit auf Satzende
+KEY_PRESS_DELAY = 0.05        # Verzögerung zwischen Tastendrücken
+CLIPBOARD_TIMEOUT = 1.0       # Timeout für Clipboard-Operationen
+
+# Hotkey-Timing
+HOTKEY_POLL_INTERVAL = 0.05   # Intervall für Hotkey-Prüfung
+HOTKEY_ERROR_DELAY = 0.1      # Wartezeit nach Fehlern
+HOTKEY_SHUTDOWN_WAIT = 0.1    # Wartezeit für Thread-Shutdown
+HOTKEY_THREAD_TIMEOUT = 2.0   # Timeout für Thread-Beendigung
+
+# Main-Timing
+MAIN_POLL_INTERVAL = 0.1      # Intervall für Hauptschleife
+MAIN_SHUTDOWN_WAIT = 0.2      # Wartezeit beim Beenden
+
+# Terminal-Timing
+TERMINAL_INACTIVITY_TIMEOUT = 300  # Timeout für inaktive Terminals (5 Minuten)
+TERMINAL_MONITOR_INTERVAL = 10      # Intervall für Terminal-Überwachung
+TERMINAL_THREAD_TIMEOUT = 2.0       # Timeout für Monitor-Thread
 
 # Audio-Einstellungen
 AUDIO_CHUNK = 4096
