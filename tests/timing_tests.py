@@ -97,15 +97,30 @@ def test_complete_text_capture():
     test = TimingTest()
     test.ws.set_text_callback(test.on_text_received)
     
+    # F13 Handler für Aufnahmesteuerung
+    recording = False
+    def toggle_recording():
+        nonlocal recording
+        if not recording:
+            test.ws.start_processing()
+            test.audio.start_recording(test.ws.send_audio)
+            recording = True
+        else:
+            test.audio.stop_recording()
+            test.ws.stop_processing()
+            recording = False
+    
     # Verbindung aufbauen
     test.log_event("connection", "Connecting to server")
     assert test.ws.connect(), "Verbindungsaufbau fehlgeschlagen"
     test.log_event("connection", "Connected to server")
     
-    # Audio-Aufnahme starten
-    test.log_event("audio", "Starting recording")
-    test.ws.start_processing()
-    test.audio.start_recording(test.ws.send_audio)
+    print("\nBitte Text aus Speech Test 1.2 vorlesen.")
+    print("F13 drücken zum Starten der Aufnahme")
+    print("Nach dem Vorlesen F13 drücken zum Stoppen")
+    
+    # Warte auf Benutzer-Interaktion
+    input("Drücke Enter wenn der Test abgeschlossen ist...")
     
     print("\nBitte Text aus Speech Test 1.2 vorlesen.")
     print("F13 drücken zum Starten der Aufnahme")
@@ -125,15 +140,30 @@ def test_quick_stop_handling():
     test = TimingTest()
     test.ws.set_text_callback(test.on_text_received)
     
+    # F13 Handler für Aufnahmesteuerung
+    recording = False
+    def toggle_recording():
+        nonlocal recording
+        if not recording:
+            test.ws.start_processing()
+            test.audio.start_recording(test.ws.send_audio)
+            recording = True
+        else:
+            test.audio.stop_recording()
+            test.ws.stop_processing()
+            recording = False
+    
     # Verbindung aufbauen
     test.log_event("connection", "Connecting to server")
     assert test.ws.connect(), "Verbindungsaufbau fehlgeschlagen"
     test.log_event("connection", "Connected to server")
     
-    # Audio-Aufnahme starten
-    test.log_event("audio", "Starting recording")
-    test.ws.start_processing()
-    test.audio.start_recording(test.ws.send_audio)
+    print("\nBitte einen kurzen Satz sagen (2-3 Wörter).")
+    print("F13 drücken zum Starten der Aufnahme")
+    print("SOFORT nach dem Satz F13 drücken zum Stoppen")
+    
+    # Warte auf Benutzer-Interaktion
+    input("Drücke Enter wenn der Test abgeschlossen ist...")
     
     print("\nBitte einen kurzen Satz sagen (2-3 Wörter).")
     print("F13 drücken zum Starten der Aufnahme")

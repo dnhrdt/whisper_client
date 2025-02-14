@@ -6,6 +6,7 @@ import win32api
 import win32gui
 import threading
 import time
+import config
 from src import logger
 
 class HotkeyManager:

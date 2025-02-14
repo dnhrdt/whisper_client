@@ -5,7 +5,7 @@ import time
 import json
 from pathlib import Path
 import config
-from timing_tests import test_complete_text_capture, test_quick_stop_handling
+from tests.timing_tests import TimingTest, test_complete_text_capture, test_quick_stop_handling
 
 # Test-Konfigurationen
 TIMING_CONFIGS = [
@@ -60,7 +60,7 @@ def apply_config(test_config):
     for name, value in test_config.items():
         setattr(config, name, value)
 
-def run_test_suite():
+def run_test_suite(register_recording_handler):
     """Führt alle Tests mit verschiedenen Konfigurationen aus"""
     results_dir = Path("tests/results")
     results_dir.mkdir(exist_ok=True)
@@ -91,6 +91,26 @@ def run_test_suite():
             try:
                 # Vollständigkeitstest
                 print("\n1. Vollständige Texterfassung")
+                test = TimingTest()
+                test.ws.set_text_callback(test.on_text_received)
+                
+                # F13 Handler für Aufnahmesteuerung
+                recording = False
+                def toggle_recording():
+                    nonlocal recording
+                    if not recording:
+                        test.ws.start_processing()
+                        test.audio.start_recording(test.ws.send_audio)
+                        recording = True
+                    else:
+                        test.audio.stop_recording()
+                        test.ws.stop_processing()
+                        recording = False
+                
+                # Handler registrieren
+                register_recording_handler(toggle_recording)
+                
+                # Test durchführen
                 test_complete_text_capture()
                 
                 # Warte zwischen Tests
@@ -98,6 +118,26 @@ def run_test_suite():
                 
                 # Schnellstop-Test
                 print("\n2. Schnellstop-Handling")
+                test = TimingTest()
+                test.ws.set_text_callback(test.on_text_received)
+                
+                # F13 Handler für Aufnahmesteuerung
+                recording = False
+                def toggle_recording():
+                    nonlocal recording
+                    if not recording:
+                        test.ws.start_processing()
+                        test.audio.start_recording(test.ws.send_audio)
+                        recording = True
+                    else:
+                        test.audio.stop_recording()
+                        test.ws.stop_processing()
+                        recording = False
+                
+                # Handler registrieren
+                register_recording_handler(toggle_recording)
+                
+                # Test durchführen
                 test_quick_stop_handling()
                 
             except Exception as e:
@@ -115,4 +155,9 @@ def run_test_suite():
 if __name__ == "__main__":
     print("=== Timing-Test-Runner ===")
     print(f"Starte Tests mit {len(TIMING_CONFIGS)} verschiedenen Konfigurationen")
-    run_test_suite()
+    
+    # Dummy-Handler für direkten Start
+    def register_recording_handler(toggle_recording):
+        pass
+    
+    run_test_suite(register_recording_handler)

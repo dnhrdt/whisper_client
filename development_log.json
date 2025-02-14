@@ -1,6 +1,27 @@
 {
   "entries": [
     {
+      "timestamp": "2025-02-14T22:03:08.525175+01:00",
+      "type": "test",
+      "component": "timing",
+      "description": "Tests für manuelle Steuerung angepasst",
+      "details": [],
+      "files_changed": [
+        "config.py",
+        "run_tests.py",
+        "src/hotkeys.py",
+        "tests/results/config_default_1739566449.json",
+        "tests/run_timing_tests.py",
+        "tests/timing_tests.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
       "timestamp": "2025-02-14T21:51:54.086372+01:00",
       "type": "test",
       "component": "timing",
@@ -321,7 +342,7 @@
     }
   ],
   "meta": {
-    "last_updated": "2025-02-14T21:51:54.086372+01:00",
+    "last_updated": "2025-02-14T22:03:08.525175+01:00",
     "format_version": "1.0",
     "notes": [
       "Chronologische Entwicklungshistorie mit Fokus auf Änderungen und deren Auswirkungen",
