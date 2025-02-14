@@ -1,0 +1,6 @@
+feat(repo): vscode snippets fuer git commits eingerichtet
+
+- Git Commit Snippets implementiert (commit/commitc)
+- Dokumentation in development.md erweitert
+- Beispiele und Best Practices hinzugefuegt
+- Snippet-Nutzung dokumentiert

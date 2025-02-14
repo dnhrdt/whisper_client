@@ -1,124 +1,123 @@
-# WhisperLive Client
+# WhisperClient
 
-Ein Python-Client für die Echtzeit-Spracherkennung mit WhisperLive.
+Ein Python-basierter Client für Echtzeit-Spracherkennung mit WhisperLive.
 
-## Installation
+## 🎯 Features
 
-1. Python 3.8 oder höher installieren
-2. Repository klonen
-3. Virtuelle Umgebung erstellen und aktivieren:
+- Echtzeit-Audioaufnahme und -Streaming
+- WebSocket-basierte Kommunikation mit WhisperLive
+- Automatische Textausgabe in aktive Anwendungen
+- Konfigurierbare Hotkey-Steuerung (F13/F14)
+- Robuste Fehlerbehandlung und Reconnect-Logik
+
+## 🚀 Schnellstart
+
 ```bash
+# Repository klonen
+git clone https://github.com/yourusername/whisper_client.git
+cd whisper_client
+
+# Virtuelle Umgebung erstellen
 python -m venv venv
-.\venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/macOS
-```
-4. Abhängigkeiten installieren:
-```bash
+source venv/bin/activate  # Linux/Mac
+.\venv\Scripts\activate   # Windows
+
+# Abhängigkeiten installieren
 pip install -r requirements.txt
-```
 
-## WhisperLive Server
-
-Der Client benötigt einen laufenden WhisperLive Server. Der Server ist ein separates Projekt:
-- Repository: https://github.com/collabora/WhisperLive
-- Lokale Installation: d:/dev/WhisperLive
-
-### Server starten (Docker)
-```bash
-# GPU Version mit Faster-Whisper Backend
-docker run -it --gpus all -p 9090:9090 ghcr.io/collabora/whisperlive-gpu:latest
-
-# CPU Version
-docker run -it -p 9090:9090 ghcr.io/collabora/whisperlive-cpu:latest
-```
-
-## Verwendung
-
-1. WhisperLive Server starten (siehe oben)
-
-2. Client starten:
-```bash
+# Client starten
 python main.py
 ```
 
-3. Steuerung:
-- F13: Aufnahme starten/stoppen
-- F14: Programm beenden
+## 📋 Voraussetzungen
 
-## Projektstruktur
+- Python 3.12+
+- WhisperLive Server
+- Windows (für Tastatur-Simulation)
+- Mikrofon
 
-```
-whisper_client/
-├── main.py              # Hauptprogramm
-├── config.py            # Zentrale Konfiguration
-├── src/
-│   ├── audio.py        # Audio-Aufnahme
-│   ├── websocket.py    # Server-Kommunikation
-│   ├── text.py         # Textverarbeitung
-│   ├── logging.py      # Logging-System
-│   └── utils.py        # Hilfsfunktionen
-└── tests/
-    └── test_text_processing.py  # Testfälle
-```
+## 🔧 Konfiguration
 
-## Features
+Die Konfiguration erfolgt über `config.py`:
+- Audio-Einstellungen (Format, Rate, Buffer)
+- WebSocket-Parameter (Host, Port, Timeouts)
+- Hotkey-Definitionen
+- Logging-Optionen
 
-- Echtzeit-Spracherkennung via WhisperLive
-- Intelligente Textverarbeitung:
-  - Satzweise Ausgabe
-  - Deduplizierung
-  - Abkürzungserkennung
-  - Automatische Formatierung
-- Robuste Fehlerbehandlung
-- Ausführliches Logging
+## 🎛️ Timing-System
 
-## Debugging
+Das Projekt verwendet ein ausgeklügeltes Timing-System für optimale Performance:
 
-Für detailliertere Ausgaben Debug-Level in config.py aktivieren:
-```python
-LOG_LEVEL_CONSOLE = "DEBUG"
+```mermaid
+flowchart TD
+    A[Audio-Aufnahme] -->|1.0s Buffer| B[WebSocket]
+    B -->|5.0s Timeout| C[Server]
+    C -->|30.0s Final Wait| D[Text-Ausgabe]
 ```
 
-Die Debug-Ausgabe zeigt:
-- 🔍 Server-Ausgabe: Rohe Segmente vom WhisperLive Server
-- 📋 Verarbeitet: Finale, formatierte Texte
-- ✓ Erfolgsmeldungen
-- ⚠️ Warnungen und Fehler
+Detaillierte Diagramme und Dokumentation:
+- [Systemarchitektur](docs/diagrams/architecture/system_modules.md)
+- [Sequenzablauf](docs/diagrams/sequence/audio_processing.md)
+- [Timing-Übersicht](docs/diagrams/timing/system_timings.md)
 
-### Server-Logs
-Die Server-Logs sind wichtig für die Fehleranalyse:
+## 🧪 Tests
+
 ```bash
-# In WSL2
-docker logs -f whisperlive
+# Timing-Tests ausführen
+python run_tests.py
 ```
 
-## Tests
+Die Tests analysieren:
+- Audio-Streaming-Performance
+- WebSocket-Kommunikation
+- Text-Verarbeitungszeiten
+- Fehlerszenarien
 
-Textverarbeitung testen:
-```bash
-python tests/test_text_processing.py
-```
+## 📚 Dokumentation
 
-## Tipps für die Spracherkennung
+- [Entwickler-Dokumentation](docs/development.md)
+- [Roadmap](docs/roadmap.md)
+- [Test-Spezifikationen](tests/speech_test_cases.md)
 
-1. Sprachtest durchführen:
-   - Debug-Modus aktivieren in config.py
-   - Client starten: `python main.py`
-   - Verschiedene Satztypen testen (siehe unten)
-   - Debug-Ausgabe beobachten
+## 🤝 Mitmachen
 
-2. Testszenarios:
-   - Normale Sätze: "Dies ist ein Testatz."
-   - Abkürzungen: "Dr. Müller und Prof. Schmidt."
-   - Pausen: "Dies ist... ein Test... mit Pausen."
-   - Schnelle Sätze: "Erster Satz! Zweiter Satz! Dritter Satz!"
+Wir freuen uns über Beiträge! Aktuelle Fokusgebiete:
 
-3. Probleme identifizieren:
-   - 🔍 Server-Ausgabe zeigt Erkennungsprobleme
-   - 📋 Verarbeitet zeigt Textverarbeitungsprobleme
-   - Timing-Probleme in den Log-Zeitstempeln sichtbar
+1. **Server-Integration**
+   - WhisperLive Server-Parameter verstehen
+   - Timing-Optimierung
+   - Protokoll-Dokumentation
 
-4. Konfiguration anpassen:
-   - MIN_OUTPUT_INTERVAL: Pause zwischen Ausgaben
-   - MAX_SENTENCE_WAIT: Timeout für unvollständige Sätze
-   - SENTENCE_END_MARKERS: Satzende-Erkennung
+2. **Performance**
+   - Audio-Streaming-Optimierung
+   - Latenz-Minimierung
+   - Ressourcen-Effizienz
+
+3. **Benutzerfreundlichkeit**
+   - GUI-Entwicklung
+   - Konfigurationsschnittstelle
+   - Installations-Wizard
+
+### Entwicklungs-Workflow
+
+1. Issue erstellen/auswählen
+2. Branch erstellen: `feature/name` oder `fix/name`
+3. Änderungen committen (siehe [Commit-Konventionen](docs/development.md#commit-konventionen))
+4. Pull Request erstellen
+5. Code Review abwarten
+
+## 📝 Lizenz
+
+[MIT](LICENSE)
+
+## 🙏 Danksagung
+
+- [WhisperLive](https://github.com/whisperlive) für den Server
+- [OpenAI Whisper](https://github.com/openai/whisper) für das Sprachmodell
+- Alle Mitwirkenden und Tester
+
+## 📞 Support
+
+- GitHub Issues für Bugs und Features
+- Discussions für Fragen und Ideen
+- [Regression Investigation Log](docs/investigations/regression_20250214.md) für bekannte Probleme
