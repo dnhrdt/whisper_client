@@ -5,7 +5,6 @@ import time
 import json
 import threading
 from pathlib import Path
-import pytest
 from src.websocket import WhisperWebSocket
 from src.audio import AudioManager
 from src.text import TextManager
@@ -108,13 +107,12 @@ def test_complete_text_capture():
     test.ws.start_processing()
     test.audio.start_recording(test.ws.send_audio)
     
-    # 10 Sekunden aufnehmen
-    time.sleep(10)
+    print("\nBitte Text aus Speech Test 1.2 vorlesen.")
+    print("F13 drücken zum Starten der Aufnahme")
+    print("Nach dem Vorlesen F13 drücken zum Stoppen")
     
-    # Aufnahme stoppen
-    test.log_event("audio", "Stopping recording")
-    test.audio.stop_recording()
-    test.ws.stop_processing()
+    # Warte auf Benutzer-Interaktion
+    input("Drücke Enter wenn fertig...")
     
     # Ergebnisse speichern und analysieren
     test.save_test_results("complete_text_capture")
@@ -137,13 +135,12 @@ def test_quick_stop_handling():
     test.ws.start_processing()
     test.audio.start_recording(test.ws.send_audio)
     
-    # Nur 2 Sekunden aufnehmen
-    time.sleep(2)
+    print("\nBitte einen kurzen Satz sagen (2-3 Wörter).")
+    print("F13 drücken zum Starten der Aufnahme")
+    print("SOFORT nach dem Satz F13 drücken zum Stoppen")
     
-    # Sofort stoppen
-    test.log_event("audio", "Quick stop")
-    test.audio.stop_recording()
-    test.ws.stop_processing()
+    # Warte auf Benutzer-Interaktion
+    input("Drücke Enter wenn fertig...")
     
     # Ergebnisse speichern und analysieren
     test.save_test_results("quick_stop_handling")
