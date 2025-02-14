@@ -1,0 +1,152 @@
+{
+  "tasks": [
+    {
+      "timestamp": "2025-02-13T22:40:40.131617",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-13T13:48:16.040903",
+      "description": "Prompt-Integration implementiert",
+      "changes": [
+        {
+          "type": "feature",
+          "description": "Direkte Prompt-Integration für Texteingabe",
+          "details": [
+            "Konfigurierbare Ausgabemodi (Clipboard/Prompt/Both)",
+            "Automatische Prompt-Fenstererkennung",
+            "Intelligente Texteingabe mit Verzögerungen",
+            "Robuste Fehlerbehandlung und Fallback-Mechanismen"
+          ]
+        }
+      ],
+      "status": "completed",
+      "files": [
+        "src/text.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-13T13:43:18.040903",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "completed",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "src/terminal.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-13T13:21:28.567120",
+      "description": "Terminal-Management implementiert",
+      "changes": [
+        {
+          "type": "feature",
+          "description": "Terminal-Management implementiert",
+          "details": [
+            "Zentrale Verwaltung aller Terminals",
+            "Automatisches Schließen inaktiver Terminals",
+            "Aktivitätsverfolgung für Audio und WebSocket",
+            "Robuste Cleanup-Logik"
+          ]
+        }
+      ],
+      "status": "completed",
+      "files": [
+        "src/terminal.py",
+        "main.py"
+      ]
+    },
+    {
+      "timestamp": "2024-02-12T22:40:55+01:00",
+      "description": "Verbesserung der Audio- und Hotkey-Steuerung",
+      "changes": [
+        {
+          "type": "improvement",
+          "description": "Robustere Hotkey-Erkennung mit Zustandsverfolgung"
+        },
+        {
+          "type": "improvement",
+          "description": "Verbesserte Audio-Thread-Verwaltung und Cleanup"
+        },
+        {
+          "type": "improvement",
+          "description": "Detaillierteres Debug-Logging für Fehleranalyse"
+        }
+      ],
+      "status": "completed",
+      "files": [
+        "src/hotkeys.py",
+        "src/audio.py"
+      ]
+    },
+    {
+      "timestamp": "2024-02-12T22:28:57+01:00",
+      "description": "Verbesserung der Hotkey-Steuerung",
+      "changes": [
+        {
+          "type": "improvement",
+          "description": "Robustere Hotkeys mit F13/F14 statt Alt+Space/ESC"
+        },
+        {
+          "type": "improvement",
+          "description": "Verbesserte Tastendruckerkennung mit Loslass-Prüfung"
+        }
+      ],
+      "status": "completed",
+      "files": [
+        "src/hotkeys.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2024-02-12T22:07:59+01:00",
+      "description": "Verbesserungen an Textverarbeitung und Hotkeys",
+      "changes": [
+        {
+          "type": "improvement",
+          "description": "Verbesserte Satzverarbeitung mit intelligenter Leerzeichenbehandlung"
+        },
+        {
+          "type": "improvement",
+          "description": "Kontextabhängige Großschreibung für Satzteile"
+        },
+        {
+          "type": "test",
+          "description": "Detaillierte Tests für Prompt-Ausgabe implementiert"
+        }
+      ],
+      "status": "completed",
+      "files": [
+        "src/text.py",
+        "tests/test_prompt_output.py"
+      ]
+    }
+  ]
+}

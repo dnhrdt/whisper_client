@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "environment": "development",
+  "audio": {
+    "device": "Poly BT700",
+    "format": "paInt16",
+    "channels": 1,
+    "rate": 16000,
+    "chunk_size": 1024,
+    "silence_threshold": 300
+  },
+  "server": {
+    "url": "ws://localhost:9090",
+    "reconnect": {
+      "attempts": -1,
+      "delay_ms": 3000,
+      "timeout_ms": 5000
+    }
+  },
+  "text": {
+    "output_mode": "prompt",
+    "prompt_settings": {
+      "delay_between_chars_ms": 5,
+      "delay_between_words_ms": 10,
+      "use_win32_api": true
+    },
+    "sentence_processing": {
+      "timeout_ms": 1000,
+      "min_confidence": 0.6,
+      "deduplicate": true
+    }
+  },
+  "hotkeys": {
+    "start_stop": "F13",
+    "exit": "F14"
+  },
+  "logging": {
+    "level": "DEBUG",
+    "file": {
+      "enabled": true,
+      "path": "logs/whisper_client_%Y%m%d.log",
+      "rotation": "daily"
+    },
+    "console": {
+      "enabled": true,
+      "level": "INFO"
+    }
+  },
+  "development": {
+    "docs": {
+      "project": "docs/project.md",
+      "roadmap": "docs/roadmap.md"
+    },
+    "tracking": {
+      "development_log": "development_log.json",
+      "context": "context.json"
+    }
+  },
+  "meta": {
+    "last_updated": "2025-02-14T00:20:00+01:00",
+    "format_version": "1.0"
+  }
+}

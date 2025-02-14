@@ -6,9 +6,8 @@ import win32api
 import win32gui
 import threading
 import time
-from src import logging
-
-logger = logging.get_logger()
+import config
+from src import logger
 
 class HotkeyManager:
     def __init__(self):
@@ -44,7 +43,13 @@ class HotkeyManager:
                     # Taste wurde gerade gedrückt
                     if is_pressed and not key_states[hotkey]:
                         key_states[hotkey] = True
-                        logger.debug(f"Taste {hotkey} gedrückt")
+                        if hotkey == 'f13':
+                            logger.debug("Aufnahme gestartet (F13)")
+                        elif hotkey == 'f14':
+                            logger.debug("Programm wird beendet (F14)")
+                        else:
+                            logger.debug(f"Taste {hotkey} gedrückt")
+                            
                         callback = self.callbacks.get(hotkey)
                         if callback:
                             try:
@@ -55,13 +60,18 @@ class HotkeyManager:
                     # Taste wurde losgelassen
                     elif not is_pressed and key_states[hotkey]:
                         key_states[hotkey] = False
-                        logger.debug(f"Taste {hotkey} losgelassen")
+                        if hotkey == 'f13':
+                            logger.debug("Aufnahme gestoppt (F13)")
+                        elif hotkey == 'f14':
+                            logger.debug("Programm beendet (F14)")
+                        else:
+                            logger.debug(f"Taste {hotkey} losgelassen")
                 
-                time.sleep(0.05)  # Reduzierte Wartezeit für bessere Reaktion
+                time.sleep(config.HOTKEY_POLL_INTERVAL)  # Polling-Intervall für Hotkey-Prüfung
                 
             except Exception as e:
                 logger.error(f"Fehler bei Hotkey-Prüfung: {e}")
-                time.sleep(0.1)  # Kurze Pause bei Fehlern
+                time.sleep(config.HOTKEY_ERROR_DELAY)  # Wartezeit nach Fehlern
     
     def start(self):
         """Startet die Hotkey-Überwachung"""
@@ -76,8 +86,25 @@ class HotkeyManager:
     
     def stop(self):
         """Stoppt die Hotkey-Überwachung"""
+        if not self.running:
+            return
+            
+        logger.debug("Beende Hotkey-System...")
         self.running = False
-        if self.thread:
-            self.thread.join(timeout=1.0)
-            self.thread = None
+        
+        # Warte kurz damit der Thread die running=False Änderung mitbekommt
+        time.sleep(config.HOTKEY_SHUTDOWN_WAIT)
+        
+        if self.thread and threading.current_thread() != self.thread:
+            try:
+                if self.thread.is_alive():
+                    logger.debug("Warte auf Hotkey-Thread...")
+                    self.thread.join(timeout=config.HOTKEY_THREAD_TIMEOUT)
+                    if self.thread.is_alive():
+                        logger.warning("Hotkey-Thread reagiert nicht - Beende Thread...")
+            except RuntimeError as e:
+                logger.debug(f"Thread-Join übersprungen: {e}")
+            finally:
+                self.thread = None
+                
         logger.debug("✓ Hotkey-System gestoppt")

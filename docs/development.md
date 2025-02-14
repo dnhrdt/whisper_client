@@ -19,7 +19,9 @@ Der Whisper Client basiert auf einer WebSocket-Verbindung zum WhisperLive Server
 3. **Audio-Aufnahme**
    - PyAudio für Mikrofonzugriff
    - Threaded Recording
-   - Float32 Normalisierung
+   - Float32 Normalisierung (int16 zu float32 Division durch 32768.0)
+   - Korrekte Datentypen für Server-Verarbeitung
+   - Robuste Pufferung und Timing
 
 4. **Logging-System**
    - Datei- und Konsolenausgabe
@@ -33,179 +35,165 @@ Der Whisper Client basiert auf einer WebSocket-Verbindung zum WhisperLive Server
 - ✗ Getrennt
 - 🔄 Reconnecting
 
-### Aufnahme
-- 🎤 Aktiv
-- ⏹️ Gestoppt
-- ⚠️ Fehler
+## Neue Erkenntnisse (2025-02-14)
 
-## Fehlerbehandlung
+### Timing-Analyse
 
-1. **Verbindungsfehler**
-   - Timeout nach 5 Sekunden
-   - 3 Sekunden Wartezeit vor Reconnect
-   - Maximale Reconnect-Versuche: Unbegrenzt
+Die detaillierte Analyse der Timing-Komponenten hat wichtige Erkenntnisse gebracht:
 
-2. **Audio-Fehler**
-   - Overflow-Ignorierung
-   - Automatischer Stream-Reset
-   - Thread-Safe Aufnahmesteuerung
+1. **Server-Kommunikation Unklarheiten**
+   - Interne Buffer-Größe des Servers unbekannt
+   - Verarbeitungs-Trigger nicht dokumentiert
+   - Batch-Processing-Strategie unklar
 
-## Weiterentwicklung
+2. **Whisper-Konfiguration**
+   - Modell-Parameter und Einstellungen unbekannt
+   - Segmentierungslogik nicht dokumentiert
+   - VAD-Einstellungen unklar
 
-### Geplante Features
+3. **Antwortformat**
+   - JSON-Struktur nicht vollständig dokumentiert
+   - Timestamps und Confidence-Scores?
+   - Satzgrenzen-Markierung?
 
-1. **Windows-Integration**
-   - System Tray Icon (pystray)
-   - Autostart-Funktion
-   - Globale Hotkeys
+4. **Timing-Garantien**
+   - Min/Max Verzögerungen nicht spezifiziert
+   - Update-Frequenz unbekannt
+   - Nachträgliche Korrekturen möglich?
 
-2. **Benutzeroberfläche**
-   - Einstellungsdialog (tkinter/Qt)
-   - Status-Visualisierung
-   - Transkript-Historie
+### Dokumentations-Update
 
-3. **Erweiterungen**
-   - Text-Insertion (pywin32)
-   - Sprachbefehle
-   - Mehrsprachenunterstützung
+Neue Diagramme wurden erstellt:
+- `docs/diagrams/architecture/`: Systemarchitektur
+- `docs/diagrams/sequence/`: Ablaufdiagramme
+- `docs/diagrams/timing/`: Timing-Übersichten
+- `docs/diagrams/state/`: Zustandsdiagramme
 
-### Code-Stil
+### Nächste Schritte
 
-- PEP 8 Konventionen
-- Typisierte Funktionen (Python 3.12+)
-- Ausführliche Docstrings
-- Klare Fehlerbehandlung
+1. **Server-Dokumentation**
+   - WhisperLive Server-Code analysieren
+   - Whisper-Dokumentation prüfen
+   - VAD-Implementierung verstehen
 
-## Deployment
+2. **Test-Strategie**
+   - Minimale Textlänge ermitteln
+   - Update-Frequenz messen
+   - Korrektur-Verhalten testen
 
-### Windows Executable
+3. **Timing-Optimierung**
+   - Server-Parameter dokumentieren
+   - Client-Timing anpassen
+   - Tests entsprechend aktualisieren
 
-```bash
-# PyInstaller Installation
-pip install pyinstaller
+## Commit-Konventionen
 
-# Executable erstellen
-pyinstaller --onefile --noconsole whisper_client.py
+### Format
+```
+type(scope): description
+
+- Detail 1
+- Detail 2
+- ...weitere Details
 ```
 
-### Autostart-Einrichtung
+### Typen
+- `feat`: Neue Features
+- `fix`: Fehlerbehebungen
+- `docs`: Dokumentation
+- `style`: Formatierung
+- `refactor`: Code-Umstrukturierung
+- `test`: Tests
+- `chore`: Wartung
 
-1. Executable in Programme-Ordner kopieren
-2. Verknüpfung erstellen
-3. In Autostart-Ordner platzieren:
-   `shell:startup`
+### Scopes
+- `audio`: Audio-Verarbeitung
+- `ws`: WebSocket
+- `text`: Text-Verarbeitung
+- `config`: Konfiguration
+- `repo`: Repository-Management
+- `test`: Test-Framework
+- `docs`: Dokumentation
 
-## Debugging
+### Beispiele
+```bash
+# Einfacher Commit
+git commit -m "feat(audio): Overflow-Handling implementiert"
 
-### Log-Levels
+# Ausführlicher Commit (Bewährtes Template)
+git commit -m "refactor(timing): Timing-Parameter zentralisiert
 
-- DEBUG: Entwicklungsinformationen
-  - WebSocket-Nachrichten
-  - Audio-Daten-Details
-  - Konfigurationsänderungen
+- Alle Timing-Parameter in config.py ausgelagert
+- Dokumentation in development.md erweitert
+- Module angepasst:
+  - WebSocket-Timing (Verbindung, Reconnects)
+  - Audio-Timing (Puffer, Threads)
+  - Text-Timing (Tastatureingaben, Clipboard)
+  - Hotkey-Timing (Polling, Threads)
+  - Terminal-Timing (Inaktivität, Monitoring)"
+```
 
-- INFO: Standardereignisse
-  - Verbindungsstatus
-  - Aufnahmestatus
-  - Transkriptionen
+### Template für komplexe Änderungen
+```
+type(scope): kurze prägnante beschreibung
 
-- WARNING: Nicht-kritische Probleme
-  - Verbindungsverlust
-  - Audio-Überläufe
-  - Konfigurationsprobleme
+- Hauptänderung 1 beschreiben
+- Hauptänderung 2 beschreiben
+- Betroffene Module:
+  - Modul 1 (spezifische Änderungen)
+  - Modul 2 (spezifische Änderungen)
+  - Modul 3 (spezifische Änderungen)"
+```
 
-- ERROR: Kritische Fehler
-  - Verbindungsfehler
-  - Audio-Gerätefehler
-  - Systemfehler
+Wichtig:
+- Erste Zeile: `type(scope): description` exakt in diesem Format
+- Leerzeile nach der ersten Zeile
+- Details mit Bindestrichen aufzählen
+- Bei vielen Moduländerungen eingerückte Liste verwenden
 
-### Entwicklungsumgebung
+### Automatische Dokumentation
+Der pre-commit Hook und update_dev_log.py:
+1. Prüfen das Commit-Message-Format
+2. Extrahieren Metadaten (Typ, Scope, Beschreibung)
+3. Aktualisieren development_log.json
+4. Fügen Zeitstempel und Impact-Analyse hinzu
 
-1. **VS Code Einstellungen**
-   ```json
-   {
-     "python.linting.enabled": true,
-     "python.linting.pylintEnabled": true,
-     "python.formatting.provider": "black",
-     "editor.formatOnSave": true
-   }
+### VSCode Snippets
+
+Für einfache und korrekte Commit-Messages stehen zwei Snippets zur Verfügung:
+
+1. **Standardformat** (Trigger: `commit⏎`)
+   ```
+   feat(audio): overflow-handling implementiert
+
+   - Buffer-Größe optimiert
+   - Overflow-Erkennung hinzugefügt
+   - Logging verbessert
    ```
 
-2. **Empfohlene Extensions**
-   - Python
-   - Pylance
-   - Black Formatter
-   - Git History
-   - GitLens
+2. **Komplexe Änderungen** (Trigger: `commitc⏎`)
+   ```
+   refactor(timing): timing-parameter zentralisiert
 
-## GitHub Integration
+   - Alle Parameter in config.py ausgelagert
+   - Dokumentation erweitert
+   - Module angepasst:
+     - WebSocket: Verbindungs-Timing
+     - Audio: Buffer-Timing
+     - Text: Ausgabe-Timing
+   ```
 
-### Repository-Struktur
+Nutzung:
+1. Git Staging-Bereich öffnen
+2. Commit-Message eingeben
+3. `commit⏎` oder `commitc⏎` tippen
+4. Tab-Taste für Navigation zwischen Feldern
+5. Platzhalter ausfüllen
 
-```
-.
-├── .git/
-├── .gitignore
-├── .vscode/
-│   └── settings.json
-├── docs/
-├── logs/
-├── README.md
-├── requirements.txt
-└── whisper_client.py
-```
-
-### .gitignore
-
-```
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-ENV/
-
-# Logs
-logs/
-*.log
-
-# VS Code
-.vscode/
-*.code-workspace
-
-# PyInstaller
-dist/
-build/
-*.spec
-
-# Sonstiges
-.DS_Store
-```
-
-### Branches
-
-- `main`: Stabile Version
-- `develop`: Entwicklungsversion
-- `feature/*`: Neue Features
-- `bugfix/*`: Fehlerbehebungen
-
-### Commit-Konventionen
-
-Format: `<typ>(<scope>): <beschreibung>`
-
-Typen:
-- feat: Neues Feature
-- fix: Fehlerbehebung
-- docs: Dokumentation
-- style: Formatierung
-- refactor: Code-Umstrukturierung
-- test: Tests
-- chore: Wartung
-
-Beispiele:
-```
-feat(gui): System Tray Icon hinzugefügt
-fix(audio): Overflow-Behandlung verbessert
-docs(readme): Installation aktualisiert
+### Best Practices
+1. Klare, präzise Beschreibungen
+2. Ein Feature/Fix pro Commit
+3. Details für größere Änderungen
+4. Korrekte Scope-Zuordnung
+5. Aussagekräftige Commit-Messages
+6. Snippets für konsistentes Format nutzen

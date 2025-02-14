@@ -1,48 +1,7 @@
-Toll, Dui ma{
+{
   "tasks": [
     {
-      "timestamp": "2024-02-12T22:44:01+01:00",
-      "description": "Übergabe-Dokumentation erstellt",
-      "changes": [
-        {
-          "type": "docs",
-          "description": "Detaillierte Übergabedatei mit aktuellem Stand und nächsten Schritten"
-        },
-        {
-          "type": "docs",
-          "description": "Testfortschritt und aktuelle Probleme dokumentiert"
-        }
-      ],
-      "status": "completed",
-      "files": [
-        "handover.json"
-      ]
-    },
-    {
-      "timestamp": "2024-02-12T22:40:55+01:00",
-      "description": "Verbesserung der Audio- und Hotkey-Steuerung",
-      "changes": [
-        {
-          "type": "improvement",
-          "description": "Robustere Hotkey-Erkennung mit Zustandsverfolgung"
-        },
-        {
-          "type": "improvement",
-          "description": "Verbesserte Audio-Thread-Verwaltung und Cleanup"
-        },
-        {
-          "type": "improvement",
-          "description": "Detaillierteres Debug-Logging für Fehleranalyse"
-        }
-      ],
-      "status": "completed",
-      "files": [
-        "src/hotkeys.py",
-        "src/audio.py"
-      ]
-    },
-    {
-      "timestamp": "2025-02-12T22:37:13.013036",
+      "timestamp": "2025-02-14T21:07:45.399218",
       "description": "Code-Restrukturierung",
       "changes": [
         {
@@ -62,26 +21,7 @@ Toll, Dui ma{
       ]
     },
     {
-      "timestamp": "2024-02-12T22:28:57+01:00",
-      "description": "Verbesserung der Hotkey-Steuerung",
-      "changes": [
-        {
-          "type": "improvement",
-          "description": "Robustere Hotkeys mit F13/F14 statt Alt+Space/ESC"
-        },
-        {
-          "type": "improvement",
-          "description": "Verbesserte Tastendruckerkennung mit Loslass-Prüfung"
-        }
-      ],
-      "status": "completed",
-      "files": [
-        "src/hotkeys.py",
-        "config.py"
-      ]
-    },
-    {
-      "timestamp": "2025-02-12T22:24:02.079378",
+      "timestamp": "2025-02-14T20:53:14.634515",
       "description": "Code-Restrukturierung",
       "changes": [
         {
@@ -101,7 +41,7 @@ Toll, Dui ma{
       ]
     },
     {
-      "timestamp": "2025-02-12T22:23:12.801179",
+      "timestamp": "2025-02-14T20:52:02.456529",
       "description": "Code-Restrukturierung",
       "changes": [
         {
@@ -121,36 +61,7 @@ Toll, Dui ma{
       ]
     },
     {
-      "timestamp": "2024-02-12T22:07:59+01:00",
-      "description": "Verbesserungen an Textverarbeitung und Hotkeys",
-      "changes": [
-        {
-          "type": "improvement",
-          "description": "Verbesserte Satzverarbeitung mit intelligenter Leerzeichenbehandlung"
-        },
-        {
-          "type": "improvement",
-          "description": "Kontextabhängige Großschreibung für Satzteile"
-        },
-        {
-          "type": "feature",
-          "description": "Neues Hotkey-System mit Win32 API für zuverlässige Tastenerkennung"
-        },
-        {
-          "type": "test",
-          "description": "Detaillierte Tests für Prompt-Ausgabe implementiert"
-        }
-      ],
-      "status": "completed",
-      "files": [
-        "src/text.py",
-        "src/hotkeys.py",
-        "main.py",
-        "tests/test_prompt_output.py"
-      ]
-    },
-    {
-      "timestamp": "2025-02-12T21:57:01.617186",
+      "timestamp": "2025-02-14T20:45:06.081315",
       "description": "Code-Restrukturierung",
       "changes": [
         {
@@ -170,140 +81,143 @@ Toll, Dui ma{
       ]
     },
     {
-      "timestamp": "2024-02-12T21:42:54+01:00",
-      "description": "Code-Aufräumarbeiten und Dokumentation",
+      "timestamp": "2025-02-14T20:35:22.824691",
+      "description": "Code-Restrukturierung",
       "changes": [
         {
-          "type": "cleanup",
-          "description": "Obsolete whisper_client.py entfernt"
-        },
-        {
-          "type": "improvement",
-          "description": "Verbessertes Logging für Server- und Client-Ausgaben"
-        },
-        {
-          "type": "docs",
-          "description": "README.md mit Projektstruktur und Testanleitung erstellt"
-        },
-        {
-          "type": "docs",
-          "description": "Detaillierte Tipps für Spracherkennung dokumentiert"
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
         }
       ],
-      "status": "completed",
+      "status": "in_development",
       "files": [
-        "README.md",
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
         "src/text.py",
-        "src/websocket.py"
-      ]
-    },
-    {
-      "timestamp": "2024-02-12T21:35:23+01:00",
-      "description": "Optimierung der Textverarbeitung",
-      "changes": [
-        {
-          "type": "improvement",
-          "description": "Verbesserte Deduplizierung mit Teilstring-Erkennung"
-        },
-        {
-          "type": "improvement",
-          "description": "Intelligentere Satzende-Erkennung mit Abkürzungsberücksichtigung"
-        },
-        {
-          "type": "feature",
-          "description": "Automatische Ausgabe unvollständiger Sätze nach konfigurierbarem Timeout"
-        },
-        {
-          "type": "improvement",
-          "description": "Optimierte Textformatierung und Interpunktion"
-        },
-        {
-          "type": "test",
-          "description": "Umfangreiche Testfälle für Textverarbeitung implementiert"
-        }
-      ],
-      "status": "completed",
-      "files": [
-        "src/text.py",
-        "config.py",
-        "tests/test_text_processing.py"
-      ]
-    },
-    {
-      "timestamp": "2024-02-12T21:03:34+01:00",
-      "description": "Verbesserung der Textausgabe",
-      "changes": [
-        {
-          "type": "improvement",
-          "description": "Verbesserte Deduplizierung mit Textähnlichkeitsvergleich"
-        },
-        {
-          "type": "improvement",
-          "description": "Intelligentere Satzende-Erkennung mit Abkürzungsberücksichtigung"
-        },
-        {
-          "type": "feature",
-          "description": "Automatische Ausgabe unvollständiger Sätze nach Timeout"
-        },
-        {
-          "type": "improvement",
-          "description": "Verbesserte Textformatierung für Satzzeichen und Großschreibung"
-        }
-      ],
-      "status": "completed",
-      "files": [
-        "src/text.py",
+        "src/utils.py",
+        "main.py",
         "config.py"
       ]
     },
     {
-      "timestamp": "2024-02-12T20:49:52+01:00",
-      "description": "Code-Restrukturierung und Task-Historie",
+      "timestamp": "2025-02-14T20:31:41.805754",
+      "description": "Code-Restrukturierung",
       "changes": [
-        {
-          "type": "feature",
-          "description": "Task-Historie-System implementiert für bessere Kontext-Verwaltung"
-        },
         {
           "type": "refactor",
-          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit",
-          "files": [
-            "src/audio.py",
-            "src/websocket.py",
-            "src/logging.py",
-            "src/text.py",
-            "src/utils.py",
-            "main.py",
-            "config.py"
-          ]
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
         }
       ],
-      "status": "in_progress"
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
     },
     {
-      "timestamp": "2024-02-12T20:26:35+01:00",
-      "description": "Verbesserungen am Whisper-Client",
+      "timestamp": "2025-02-14T20:26:21.255472",
+      "description": "Code-Restrukturierung",
       "changes": [
         {
-          "type": "fix",
-          "description": "Alt+Q durch ESC als Beenden-Hotkey ersetzt"
-        },
-        {
-          "type": "fix",
-          "description": "Umlaut-Korrektur für Windows-Gerätenamen"
-        },
-        {
-          "type": "improvement",
-          "description": "Längere Pause (1s) zwischen Ausgaben"
-        },
-        {
-          "type": "improvement",
-          "description": "Debug-Logs nur in Datei, Konsole zeigt nur wichtige Meldungen"
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
         }
       ],
-      "status": "completed",
+      "status": "in_development",
       "files": [
-        "whisper_client.py"
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-14T20:25:06.838119",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-14T20:24:03.846130",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-14T20:14:25.079155",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ]
+    },
+    {
+      "timestamp": "2025-02-14T20:03:40.068607",
+      "description": "Code-Restrukturierung",
+      "changes": [
+        {
+          "type": "refactor",
+          "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+        }
+      ],
+      "status": "in_development",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
       ]
     }
   ]

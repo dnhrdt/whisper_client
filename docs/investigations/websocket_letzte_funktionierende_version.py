@@ -29,7 +29,7 @@ class WhisperWebSocket:
             return True
             
         retry_count = 0
-        retry_delay = config.WS_RETRY_DELAY  # Initiale Wartezeit zwischen Reconnects
+        retry_delay = 2  # Sekunden zwischen Versuchen
         
         while retry_count < max_retries:
             try:
@@ -58,22 +58,24 @@ class WhisperWebSocket:
                 self.ws_thread.start()
                 
                 # Warte bis Verbindung hergestellt ist
+                timeout = 5
                 start_time = time.time()
                 while not self.ws.sock or not self.ws.sock.connected:
-                    if time.time() - start_time > config.WS_CONNECT_TIMEOUT:
+                    if time.time() - start_time > timeout:
                         raise TimeoutError("Connection timeout")
-                    time.sleep(config.WS_POLL_INTERVAL)
+                    time.sleep(0.1)
                 
                 self.connected = True
                 self.processing_enabled = True
                 
                 # Warte auf Server-Ready Signal
                 log_connection(logger, "Waiting for server ready signal...")
+                timeout = 10
                 start_time = time.time()
                 while not self.server_ready:
-                    if time.time() - start_time > config.WS_READY_TIMEOUT:
+                    if time.time() - start_time > timeout:
                         raise TimeoutError("Server ready timeout")
-                    time.sleep(config.WS_POLL_INTERVAL)
+                    time.sleep(0.1)
                 
                 return True
                     
@@ -92,7 +94,7 @@ class WhisperWebSocket:
                     
                     log_connection(logger, f"Waiting {retry_delay} seconds before retry...")
                     time.sleep(retry_delay)
-                    retry_delay = min(retry_delay * 2, 30.0)  # Exponentielles Backoff mit Maximum
+                    retry_delay *= 2  # Exponentielles Backoff
                 else:
                     log_error(logger, "Maximum retry attempts reached")
                     raise
@@ -177,7 +179,7 @@ class WhisperWebSocket:
         log_error(logger, f"Connection error: {str(error)}")
         if isinstance(error, websocket.WebSocketConnectionClosedException):
             log_connection(logger, "Connection lost. Attempting reconnect in 3 seconds...")
-            time.sleep(config.WS_RECONNECT_DELAY)
+            time.sleep(3)
             try:
                 self.connect()
                 log_connection(logger, "Reconnection successful")
@@ -188,20 +190,14 @@ class WhisperWebSocket:
     def _on_close(self, ws, close_status_code, close_msg):
         """Callback wenn WebSocket-Verbindung geschlossen wird"""
         log_connection(logger, f"Connection closed (Status: {close_status_code}, Message: {close_msg})")
-        
-        # Status zurücksetzen
         self.connected = False
         self.server_ready = False
+        self.processing_enabled = False
         
-        # Versuche Reconnect nur bei unerwarteter Trennung und wenn Verarbeitung aktiv
-        if close_status_code != 1000 and self.processing_enabled:
-            log_connection(logger, "Attempting reconnect in 3 seconds...")
-            time.sleep(config.WS_RECONNECT_DELAY)
-            try:
-                self.connect()
-                log_connection(logger, "Reconnection successful")
-            except:
-                log_error(logger, "Reconnection failed")
+        # Beende die Verbindung bei Status 1000 (normal closure)
+        if close_status_code == 1000:
+            log_connection(logger, "Server closed connection normally")
+            self.ws = None
     
     def is_ready(self):
         """Prüft ob der Server bereit ist"""
@@ -266,9 +262,9 @@ class WhisperWebSocket:
             self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
             log_audio(logger, "Sent END_OF_AUDIO signal")
             
-            # Warte auf letzte Segmente
-            log_connection(logger, f"Waiting for final segments ({config.WS_FINAL_WAIT}s)...")
-            time.sleep(config.WS_FINAL_WAIT)  # Gib dem Server genug Zeit zum Verarbeiten
+            # Warte auf letzte Segmente (20 Sekunden für vollständige Verarbeitung)
+            log_connection(logger, "Waiting for final segments (20s)...")
+            time.sleep(20.0)  # Gib dem Server genug Zeit zum Verarbeiten
             
             return True
         except websocket.WebSocketConnectionClosedException:
@@ -282,39 +278,13 @@ class WhisperWebSocket:
     def stop_processing(self):
         """Stoppt die Verarbeitung von Server-Nachrichten"""
         if self.processing_enabled:
-            try:
-                if self.ws and self.ws.sock and self.ws.sock.connected:
-                    # Sende END_OF_AUDIO Signal
-                    self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
-                    log_audio(logger, "Sent END_OF_AUDIO signal")
-                    
-                    # Informiere Benutzer über Wartezeit
-                    log_connection(logger, f"Warte {config.WS_FINAL_WAIT} Sekunden auf mögliche weitere Texte...")
-                    
-                    # Warte auf letzte Segmente
-                    time.sleep(config.WS_FINAL_WAIT)
-                    
-                    # Warte kurz auf letzte Nachrichten
-                    log_connection(logger, "Warte auf letzte Nachrichten...")
-                    time.sleep(config.WS_MESSAGE_WAIT)
-                    
-                    # Deaktiviere Audio-Verarbeitung
-                    self.processing_enabled = False
-                    self.last_segments = []  # Reset gespeicherte Segmente
-                    log_connection(logger, "Audio-Verarbeitung beendet")
-                    
-                    # Warte nochmal kurz für letzte Verarbeitung
-                    time.sleep(config.WS_MESSAGE_WAIT)
-                    
-                    # Schließe Verbindung sauber
-                    log_connection(logger, "Schließe Verbindung...")
-                    self.ws.close()  # Keine Parameter, da close() nur self akzeptiert
-                else:
-                    log_connection(logger, "Keine aktive Verbindung für END_OF_AUDIO")
-                    self.processing_enabled = False
-            except Exception as e:
-                log_error(logger, f"Fehler beim Stoppen der Verarbeitung: {e}")
-                self.processing_enabled = False
+            # Sende END_OF_AUDIO und warte auf letzte Segmente
+            self.send_end_of_audio()
+            
+            # Deaktiviere Verarbeitung
+            self.processing_enabled = False
+            self.last_segments = []  # Reset gespeicherte Segmente
+            log_connection(logger, "Server message processing disabled")
     
     def start_processing(self):
         """Startet die Verarbeitung von Server-Nachrichten"""
@@ -325,23 +295,14 @@ class WhisperWebSocket:
         self.processing_enabled = True
         self.last_segments = []  # Reset gespeicherte Segmente
         
-        # Leere die Zwischenablage mit Retry
-        max_retries = 3
-        retry_delay = 0.1  # 100ms zwischen Versuchen
-        
-        for attempt in range(max_retries):
-            try:
-                win32clipboard.OpenClipboard()
-                win32clipboard.EmptyClipboard()
-                win32clipboard.CloseClipboard()
-                log_connection(logger, "Clipboard cleared")
-                break
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    time.sleep(retry_delay)
-                    retry_delay *= 2  # Exponentielles Backoff
-                else:
-                    log_error(logger, f"Could not clear clipboard after {max_retries} attempts")
+        # Leere die Zwischenablage
+        try:
+            win32clipboard.OpenClipboard()
+            win32clipboard.EmptyClipboard()
+            win32clipboard.CloseClipboard()
+            log_connection(logger, "Clipboard cleared")
+        except Exception as e:
+            log_error(logger, f"Error clearing clipboard: {str(e)}")
             
         log_connection(logger, "Server message processing enabled")
         return True
@@ -354,30 +315,34 @@ class WhisperWebSocket:
         try:
             log_connection(logger, "Starting cleanup...")
             
-            # Speichere Referenzen
-            ws = self.ws
+            # Stoppe zuerst die Verarbeitung
+            log_connection(logger, "Stopping processing...")
+            self.stop_processing()
+            
+            # Sende Stop-Signal an Server
+            self.send_end_of_audio()
+            
+            # Warte auf letzte Verarbeitung (20 Sekunden für vollständige Verarbeitung)
+            log_connection(logger, "Waiting for final server responses (20s)...")
+            time.sleep(20.0)
+            
+            # Speichere Referenz für Thread-Join
             thread = self.ws_thread
             
-            # Setze Status zurück
+            # Schließe WebSocket mit Close-Frame
+            log_connection(logger, "Closing connection...")
+            try:
+                self.ws.close(1000, "Client shutdown".encode('utf-8'))
+            except:
+                pass
+                
             self.ws = None
             self.connected = False
             self.server_ready = False
             
-            # Stoppe die Verarbeitung
-            log_connection(logger, "Stopping processing...")
-            self.processing_enabled = False
-            
-            # Schließe WebSocket mit Close-Frame
-            if ws and ws.sock and ws.sock.connected:
-                log_connection(logger, "Closing connection...")
-                try:
-                    ws.close()  # Keine Parameter, da close() nur self akzeptiert
-                except Exception as e:
-                    log_error(logger, f"Fehler beim Schließen der Verbindung: {e}")
-            
             # Warte auf Thread-Ende
             if thread and thread.is_alive():
-                thread.join(timeout=config.WS_THREAD_TIMEOUT)
+                thread.join(timeout=5.0)
                 if thread.is_alive():
                     log_error(logger, "Thread could not be terminated")
                 else:

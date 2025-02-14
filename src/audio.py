@@ -5,9 +5,7 @@ import pyaudio
 import numpy as np
 import threading
 import config
-from src import logging
-
-logger = logging.get_logger()
+from src import logger
 
 class AudioManager:
     def __init__(self):
@@ -123,14 +121,7 @@ class AudioManager:
             logger.debug("Stoppe Aufnahme...")
             self.recording = False
             
-            # Warte auf Audio-Thread
-            if hasattr(self, 'record_thread') and self.record_thread.is_alive():
-                logger.debug("Warte auf Audio-Thread...")
-                self.record_thread.join(timeout=1.0)
-                if self.record_thread.is_alive():
-                    logger.warning("Audio-Thread reagiert nicht!")
-            
-            # Stream schließen
+            # Stream sofort schließen um weitere Daten zu verhindern
             if self.stream:
                 try:
                     self.stream.stop_stream()
@@ -140,6 +131,15 @@ class AudioManager:
                 except Exception as e:
                     logger.error(f"Fehler beim Schließen des Streams: {e}")
             
+            # Warte auf Audio-Thread mit längerem Timeout
+            if hasattr(self, 'record_thread') and self.record_thread.is_alive():
+                logger.debug("Warte auf Audio-Thread...")
+                self.record_thread.join(timeout=config.AUDIO_THREAD_TIMEOUT)
+                if self.record_thread.is_alive():
+                    logger.warning("Audio-Thread reagiert nicht - Beende Thread...")
+                    # Thread als Daemon markiert, wird beim Programm-Ende beendet
+                    self.record_thread = None
+            
             logger.info("\n⏹️ Aufnahme gestoppt")
     
     def _record_audio(self, callback):
@@ -148,24 +148,21 @@ class AudioManager:
         logger.debug("Audio-Thread gestartet")
         
         try:
-            while self.recording:
+            while self.recording and self.stream and self.stream.is_active():
                 try:
-                    # Prüfe ob Stream noch aktiv
-                    if not self.stream or not self.stream.is_active():
-                        logger.error("Audio-Stream nicht aktiv!")
-                        break
-                    
                     data = self.stream.read(self.chunk, exception_on_overflow=False)
                     # Konvertiere zu float32 Array
                     audio_array = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
                     
-                    # Füge Daten zum Puffer hinzu
+                    # Füge normalisierte float32 Daten zum Puffer hinzu
                     buffer.append(audio_array)
                     
-                    # Sende gepufferte Daten wenn genug vorhanden
-                    if len(buffer) >= 4:  # ca. 1 Sekunde Audio
-                        combined_array = np.concatenate(buffer)
-                        callback(combined_array.tobytes())
+                    # Prüfe ob genug Audio für einen Puffer vorhanden
+                    buffer_size = int(config.AUDIO_BUFFER_SECONDS * 4)  # 4 chunks pro Sekunde
+                    if len(buffer) >= buffer_size:
+                        combined_data = np.concatenate(buffer)
+                        if self.recording:  # Nochmal prüfen vor dem Senden
+                            callback(combined_data.tobytes())
                         buffer = []  # Puffer leeren
                         
                 except Exception as e:
@@ -173,8 +170,17 @@ class AudioManager:
                     break
                     
         finally:
+            # Sende verbleibende Puffer-Daten
+            if buffer:
+                try:
+                    combined_data = np.concatenate(buffer)
+                    callback(combined_data.tobytes())
+                    logger.debug(f"Letzte {len(buffer)} Puffer-Chunks gesendet")
+                except Exception as e:
+                    logger.error(f"Fehler beim Senden der letzten Puffer-Daten: {e}")
+            
+            buffer = []
             logger.debug("Audio-Thread beendet")
-            # Stelle sicher, dass Aufnahme gestoppt wird
             self.recording = False
     
     def cleanup(self):
