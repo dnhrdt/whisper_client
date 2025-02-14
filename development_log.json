@@ -1,6 +1,27 @@
 {
   "entries": [
     {
+      "timestamp": "2025-02-14T22:57:19.466619+01:00",
+      "type": "refactor",
+      "component": "tests",
+      "description": "Timing-Delays in config.py ausgelagert",
+      "details": [],
+      "files_changed": [
+        "docs/development.md",
+        "docs/diagrams/architecture/system_modules.md",
+        "docs/diagrams/sequence/audio_processing.md",
+        "docs/diagrams/timing/system_timings.md",
+        "docs/roadmap.md",
+        "tests/results/config_default_1739567236.json"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
       "timestamp": "2025-02-14T22:07:02.519422+01:00",
       "type": "feat",
       "component": "tests",
@@ -361,7 +382,7 @@
     }
   ],
   "meta": {
-    "last_updated": "2025-02-14T22:07:02.519422+01:00",
+    "last_updated": "2025-02-14T22:57:19.466619+01:00",
     "format_version": "1.0",
     "notes": [
       "Chronologische Entwicklungshistorie mit Fokus auf Änderungen und deren Auswirkungen",
