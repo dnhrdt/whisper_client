@@ -318,14 +318,23 @@ class WhisperWebSocket:
         self.processing_enabled = True
         self.last_segments = []  # Reset gespeicherte Segmente
         
-        # Leere die Zwischenablage
-        try:
-            win32clipboard.OpenClipboard()
-            win32clipboard.EmptyClipboard()
-            win32clipboard.CloseClipboard()
-            log_connection(logger, "Clipboard cleared")
-        except Exception as e:
-            log_error(logger, f"Error clearing clipboard: {str(e)}")
+        # Leere die Zwischenablage mit Retry
+        max_retries = 3
+        retry_delay = 0.1  # 100ms zwischen Versuchen
+        
+        for attempt in range(max_retries):
+            try:
+                win32clipboard.OpenClipboard()
+                win32clipboard.EmptyClipboard()
+                win32clipboard.CloseClipboard()
+                log_connection(logger, "Clipboard cleared")
+                break
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponentielles Backoff
+                else:
+                    log_error(logger, f"Could not clear clipboard after {max_retries} attempts")
             
         log_connection(logger, "Server message processing enabled")
         return True

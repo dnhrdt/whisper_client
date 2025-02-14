@@ -49,6 +49,14 @@ Der Whisper Client basiert auf einer WebSocket-Verbindung zum WhisperLive Server
    - 20-Sekunden-Wartezeit für letzte Segmente
    - Verbindung bleibt während Wartezeit offen
    - Klare Status-Meldungen für Benutzer
+   - Intelligentes Reconnect nur bei unerwarteter Trennung
+   - Verbindungsabbau nur wenn keine Verarbeitung aktiv
+
+2. **Zwischenablage**
+   - Robustes Leeren mit Retry-Mechanismus
+   - Maximale Retry-Versuche: 3
+   - Exponentielles Backoff zwischen Versuchen
+   - Detaillierte Fehlermeldungen bei Zugriffsproblemen
 
 2. **Audio-Fehler**
    - Overflow-Ignorierung
