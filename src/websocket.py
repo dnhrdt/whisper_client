@@ -296,15 +296,20 @@ class WhisperWebSocket:
                     # Informiere Benutzer über Wartezeit
                     log_connection(logger, "Warte 20 Sekunden auf mögliche weitere Texte...")
                     
-                    # Warte auf letzte Segmente, aber halte Verbindung offen
+                    # Warte auf letzte Segmente
                     time.sleep(20.0)
+                    
+                    # Deaktiviere Audio-Verarbeitung
+                    self.processing_enabled = False
+                    self.last_segments = []  # Reset gespeicherte Segmente
+                    log_connection(logger, "Audio-Verarbeitung beendet")
+                    
+                    # Schließe Verbindung sauber
+                    log_connection(logger, "Schließe Verbindung...")
+                    self.ws.close(1000, "Client shutdown".encode('utf-8'))
                 else:
                     log_connection(logger, "Keine aktive Verbindung für END_OF_AUDIO")
-                
-                # Deaktiviere nur Audio-Verarbeitung
-                self.processing_enabled = False
-                self.last_segments = []  # Reset gespeicherte Segmente
-                log_connection(logger, "Audio-Verarbeitung beendet")
+                    self.processing_enabled = False
             except Exception as e:
                 log_error(logger, f"Fehler beim Stoppen der Verarbeitung: {e}")
                 self.processing_enabled = False

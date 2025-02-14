@@ -55,8 +55,8 @@ def log_error(logger, message):
     logger = logging.getLogger(logger.name)
     logger.error(message, extra={
         'log_type': 'error',
-        'stack': '',
-        'size': 0
+        'stack': getattr(message, 'stack', ''),
+        'size': getattr(message, 'size', 0)
     })
 
 def get_logger():

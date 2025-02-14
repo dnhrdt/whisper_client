@@ -42,7 +42,13 @@ class HotkeyManager:
                     # Taste wurde gerade gedrückt
                     if is_pressed and not key_states[hotkey]:
                         key_states[hotkey] = True
-                        logger.debug(f"Taste {hotkey} gedrückt")
+                        if hotkey == 'f13':
+                            logger.debug("Aufnahme gestartet (F13)")
+                        elif hotkey == 'f14':
+                            logger.debug("Programm wird beendet (F14)")
+                        else:
+                            logger.debug(f"Taste {hotkey} gedrückt")
+                            
                         callback = self.callbacks.get(hotkey)
                         if callback:
                             try:
@@ -53,7 +59,12 @@ class HotkeyManager:
                     # Taste wurde losgelassen
                     elif not is_pressed and key_states[hotkey]:
                         key_states[hotkey] = False
-                        logger.debug(f"Taste {hotkey} losgelassen")
+                        if hotkey == 'f13':
+                            logger.debug("Aufnahme gestoppt (F13)")
+                        elif hotkey == 'f14':
+                            logger.debug("Programm beendet (F14)")
+                        else:
+                            logger.debug(f"Taste {hotkey} losgelassen")
                 
                 time.sleep(0.05)  # Reduzierte Wartezeit für bessere Reaktion
                 
