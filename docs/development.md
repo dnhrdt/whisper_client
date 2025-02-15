@@ -1,5 +1,17 @@
 # Entwickler-Dokumentation
 
+## Entwicklungshistorie
+
+Die Entwicklungshistorie wird in inkrementellen Log-Dateien dokumentiert:
+- `docs/development/logs/development_log_000.json`: Basis-Version
+- `docs/development/logs/development_log_001.json` und folgende: Inkrementelle Updates
+
+Weitere Details und Referenzen:
+- Architektur-Diagramme: `docs/diagrams/architecture/`
+- Sequenz-Diagramme: `docs/diagrams/sequence/`
+- Zustandsdiagramme: `docs/diagrams/state/`
+- Untersuchungen: `docs/investigations/`
+
 ## Architektur
 
 Der Whisper Client basiert auf einer WebSocket-Verbindung zum WhisperLive Server und verarbeitet Audio in Echtzeit.
