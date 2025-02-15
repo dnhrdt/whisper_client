@@ -1,9 +1,12 @@
 # Python
 __pycache__/
+*.pyc
+venv/
 *.py[cod]
 *$py.class
 *.so
 .Python
+env/
 build/
 develop-eggs/
 dist/
@@ -15,40 +18,29 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-venv/
-ENV/
 
-# Logs
-logs/
+# Logs & Backups
 *.log
+logs/
 
-# VS Code
+# Development
+chat protocols/
 .vscode/
-*.code-workspace
-.history
 
-# PyInstaller
-dist/
-build/
-*.spec
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-
-# IDE
-.idea/
+# Temp files
+*.bak
+*.tmp
 *.swp
 *.swo
+*~
+
+# Project specific
+client_debug.log
+practical_files.txt
+t*
+
+# Keep in Git but ignore changes
+Backup/
