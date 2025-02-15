@@ -1,0 +1,119 @@
+{
+  "current_state": {
+    "timestamp": "2025-02-14T16:41:00+01:00",
+    "active_development": {
+      "phase": "Alpha",
+      "focus": "Kritische Regression beheben - keine Server-Outputs",
+      "current_task": "Code-Wiederherstellung basierend auf VS Code Snapshots"
+    },
+    "testing": {
+      "current_stage": 1,
+      "current_test": "1.2",
+      "status": "blocked",
+      "description": "Tests blockiert durch fehlende Server-Kommunikation",
+      "last_working_state": {
+        "test": "1.1",
+        "result": "Bestanden",
+        "notes": "Vor der Regression erfolgreich"
+      }
+    },
+    "components": {
+      "server": {
+        "status": "investigating",
+        "improvements": [
+          "Erweitertes Logging mit Timestamps",
+          "Volume-Mapping für persistente Logs",
+          "Symlink für einfachen Log-Zugriff"
+        ],
+        "current_findings": {
+          "vad": "Filtert alle Audio-Chunks als Stille",
+          "log_path": "/logs/logs via Symlink",
+          "volume_mapping": "/home/michael/appdata/whisperlive/logs:/app/logs"
+        }
+      },
+      "websocket": {
+        "status": "critical",
+        "issue": "Keine Outputs vom Server",
+        "last_working": "Vor der Code-Restrukturierung",
+        "features": [
+          "Verbindungsmanagement",
+          "Automatische Reconnects"
+        ]
+      },
+      "audio": {
+        "status": "unknown",
+        "last_change": "2025-02-12T22:40:55+01:00",
+        "current_config": {
+          "device": "Poly BT700",
+          "format": "paInt16",
+          "channels": 1,
+          "rate": 16000
+        }
+      },
+      "text": {
+        "status": "blocked",
+        "last_change": "2025-02-13T13:48:16.040903",
+        "features": [
+          "Prompt-Integration",
+          "Konfigurierbare Ausgabemodi",
+          "Automatische Fenstererkennung"
+        ]
+      }
+    }
+  },
+  "known_issues": [
+    {
+      "id": "SERVER-001",
+      "component": "websocket",
+      "description": "Keine Outputs vom WhisperLive Server",
+      "details": "Nach Code-Restrukturierung kompletter Ausfall der Server-Kommunikation",
+      "priority": "critical",
+      "regression": true,
+      "impact": "Blockiert gesamte Funktionalität",
+      "identified": "Nach der Code-Restrukturierung",
+      "workaround": "Keine - System nicht funktionsfähig"
+    },
+    {
+      "id": "SPEECH-001",
+      "component": "text",
+      "description": "Satzverarbeitung: Probleme bei schnell aufeinanderfolgenden Sätzen",
+      "details": "Nur 2 von 3 Testsätzen wurden erkannt (vor der Server-Regression)",
+      "priority": "medium",
+      "regression": false,
+      "test_case": "1.2",
+      "workaround": "Langsameres Sprechen mit deutlichen Pausen",
+      "status": "on_hold"
+    }
+  ],
+  "next_actions": [
+    {
+      "priority": 1,
+      "task": "VAD-Verhalten analysieren",
+      "steps": [
+        "Server-Logs auf VAD-Parameter prüfen",
+        "Audio-Format zwischen Client und Server validieren",
+        "VAD-Konfiguration überprüfen"
+      ],
+      "goal": "Verstehen warum VAD alle Audio-Chunks als Stille filtert"
+    },
+    {
+      "priority": 2,
+      "task": "Regression-Test durchführen",
+      "goal": "Verifikation der Server-Kommunikation"
+    },
+    {
+      "priority": 3,
+      "task": "Code-Restrukturierung überprüfen",
+      "goal": "Identifikation problematischer Änderungen"
+    }
+  ],
+  "meta": {
+    "last_updated": "2025-02-14T00:19:00+01:00",
+    "format_version": "1.0",
+    "related_files": {
+      "development_log": "development_log.json",
+      "roadmap": "docs/roadmap.md",
+      "project_docs": "docs/project.md"
+    }
+  }
+}
