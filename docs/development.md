@@ -47,6 +47,32 @@ Der Whisper Client basiert auf einer WebSocket-Verbindung zum WhisperLive Server
 - ✗ Getrennt
 - 🔄 Reconnecting
 
+## Neue Erkenntnisse (2025-02-15)
+
+### Audio-Verarbeitungs-PoCs
+
+Drei Proof-of-Concept Tests für Audio-Optimierungen wurden durchgeführt:
+
+1. **Tumbling Window**
+   - 130ms durchschnittliche Latenz
+   - Stabile Verarbeitung (27 Fenster in 3.5s)
+   - Überlappende Fenster für Audio-Übergänge
+   - Status: Implementierungsbereit
+
+2. **Queue-basierte Chunk-Verwaltung**
+   - Thread- und Async-Implementierungen
+   - AudioChunk Datenmodell mit Metadaten
+   - Verbesserte WebSocket-Integration möglich
+   - Status: Konzeptionell validiert
+
+3. **Audio-Segmentierung**
+   - Erfolgreiche Sprach-Segment-Erkennung
+   - Energie-basierte Klassifizierung
+   - Parameteroptimierung erforderlich
+   - Status: Teilweise validiert
+
+Diese Optimierungen werden für spätere Integration vorgemerkt, während der Fokus zunächst auf den Speech-Tests bleibt.
+
 ## Neue Erkenntnisse (2025-02-14)
 
 ### Timing-Analyse

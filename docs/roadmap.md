@@ -22,7 +22,21 @@
 - [ ] Korrektur-Verhalten testen
 - [ ] Timing-Parameter optimieren
 
-### Phase 2: Client-Optimierung (März 2025)
+### Phase 2: Audio-Optimierungen (März 2025)
+
+#### Audio-Verarbeitung
+- [ ] Tumbling Window implementieren (130ms Latenz erreicht)
+- [ ] Segmentierungs-Parameter optimieren
+- [ ] Queue-basierte Chunk-Verwaltung evaluieren
+- [ ] Async WebSocket-Integration testen
+
+#### Performance-Monitoring
+- [ ] Latenz-Messungen implementieren
+- [ ] Audio-Qualitätsmetriken einführen
+- [ ] Segment-Erkennungsrate messen
+- [ ] Buffer-Auslastung überwachen
+
+### Phase 3: Client-Optimierung (April 2025)
 
 #### Timing-Verbesserungen
 - [ ] Client-Buffer an Server anpassen
