@@ -24,7 +24,7 @@ var/
 
 # Logs & Backups
 *.log
-logs/
+system_logs/
 
 # Development
 chat protocols/
