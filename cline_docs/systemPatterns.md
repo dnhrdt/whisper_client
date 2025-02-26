@@ -1,6 +1,6 @@
 # System Architecture & Patterns
-Version: 1.1
-Timestamp: 2025-02-26 19:57 CET
+Version: 1.2
+Timestamp: 2025-02-26 20:42 CET
 
 ## Document Purpose
 This document outlines how the system is built, key technical decisions, and architectural patterns used throughout the WhisperClient project.
@@ -20,6 +20,13 @@ This document outlines how the system is built, key technical decisions, and arc
    - Documentation parallel to code
    - Changes tracked in logs
    - Development history in incremental logs
+
+3. **Line Ending Standards**
+   - .gitattributes controls line endings
+   - Python files use LF (*.py)
+   - Documentation files use LF (*.md, *.txt, *.json)
+   - Windows scripts use CRLF (*.bat, *.cmd, *.ps1)
+   - Auto-detection for other files
 
 3. **Error Handling Patterns**
    - Connection errors: 5s timeout, 3s reconnect
@@ -195,10 +202,11 @@ refactor(timing): timing parameters centralized
 ## Test Framework Architecture
 
 ### Speech Test Documentation
-- Test cases in `tests/speech_test_cases.md`
+- Test cases in `tests/speech_test_cases.md` (maintained in German)
 - Progress tracking in `tests/speech_test_progress.json`
 - Automatic status updates
 - Standardized test cases
+- Focus on German speech recognition
 
 ### Test Execution Framework
 1. **Pre-Test Setup**

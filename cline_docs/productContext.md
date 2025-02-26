@@ -1,12 +1,16 @@
 # Product Context
-Version: 1.1
-Timestamp: 2025-02-26 19:57 CET
+Version: 1.2
+Timestamp: 2025-02-26 20:42 CET
 
 ## Core Purpose
-- Real-time speech recognition via WhisperLive
+- Real-time German speech recognition via WhisperLive
 - Direct text output to active applications
 - Reliable audio stream processing
 - Task history tracking
+
+Note: While the project documentation is in English for broader accessibility,
+the primary focus is on German speech recognition. Test cases are maintained
+in German to ensure accurate validation of the core functionality.
 
 ## Main Challenges
 
