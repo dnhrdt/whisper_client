@@ -1,123 +1,131 @@
 # WhisperClient
 
-Ein Python-basierter Client für Echtzeit-Spracherkennung mit WhisperLive.
+A Python-based client for real-time speech recognition using WhisperLive.
 
 ## 🎯 Features
 
-- Echtzeit-Audioaufnahme und -Streaming
-- WebSocket-basierte Kommunikation mit WhisperLive
-- Automatische Textausgabe in aktive Anwendungen
-- Konfigurierbare Hotkey-Steuerung (F13/F14)
-- Robuste Fehlerbehandlung und Reconnect-Logik
+- Real-time audio recording and streaming
+- WebSocket-based communication with WhisperLive
+- Automatic text output to active applications
+- Configurable hotkey control (F13/F14)
+- Robust error handling and reconnect logic
 
-## 🚀 Schnellstart
+## 🚀 Quick Start
 
 ```bash
-# Repository klonen
+# Clone repository
 git clone https://github.com/yourusername/whisper_client.git
 cd whisper_client
 
-# Virtuelle Umgebung erstellen
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 .\venv\Scripts\activate   # Windows
 
-# Abhängigkeiten installieren
+# Install dependencies
 pip install -r requirements.txt
 
-# Client starten
+# Start client
 python main.py
 ```
 
-## 📋 Voraussetzungen
+## 📋 Prerequisites
 
 - Python 3.12+
 - WhisperLive Server
-- Windows (für Tastatur-Simulation)
-- Mikrofon
+- Windows (for keyboard simulation)
+- Microphone
 
-## 🔧 Konfiguration
+## 🔧 Configuration
 
-Die Konfiguration erfolgt über `config.py`:
-- Audio-Einstellungen (Format, Rate, Buffer)
-- WebSocket-Parameter (Host, Port, Timeouts)
-- Hotkey-Definitionen
-- Logging-Optionen
+Configuration is managed through `config.json`:
+- Audio settings (format, rate, buffer)
+- WebSocket parameters (host, port, timeouts)
+- Hotkey definitions
+- Logging options
 
-## 🎛️ Timing-System
+## 🎛️ Timing System
 
-Das Projekt verwendet ein ausgeklügeltes Timing-System für optimale Performance:
+The project uses a sophisticated timing system for optimal performance:
 
 ```mermaid
 flowchart TD
-    A[Audio-Aufnahme] -->|1.0s Buffer| B[WebSocket]
+    A[Audio Recording] -->|1.0s Buffer| B[WebSocket]
     B -->|5.0s Timeout| C[Server]
-    C -->|30.0s Final Wait| D[Text-Ausgabe]
+    C -->|30.0s Final Wait| D[Text Output]
 ```
 
-Detaillierte Diagramme und Dokumentation:
-- [Systemarchitektur](docs/diagrams/architecture/system_modules.md)
-- [Sequenzablauf](docs/diagrams/sequence/audio_processing.md)
-- [Timing-Übersicht](docs/diagrams/timing/system_timings.md)
+Detailed diagrams and documentation:
+- [System Architecture](docs/diagrams/architecture/system_modules.md)
+- [Sequence Flow](docs/diagrams/sequence/audio_processing.md)
+- [Timing Overview](docs/diagrams/timing/system_timings.md)
 
 ## 🧪 Tests
 
 ```bash
-# Timing-Tests ausführen
+# Run timing tests
 python run_tests.py
 ```
 
-Die Tests analysieren:
-- Audio-Streaming-Performance
-- WebSocket-Kommunikation
-- Text-Verarbeitungszeiten
-- Fehlerszenarien
+The tests analyze:
+- Audio streaming performance
+- WebSocket communication
+- Text processing times
+- Error scenarios
 
-## 📚 Dokumentation
+## 📚 Documentation
 
-- [Entwickler-Dokumentation](docs/development.md)
+Our documentation follows the Memory Bank structure for comprehensive project understanding:
+
+- **Product Context** - Core purpose and system architecture
+- **System Patterns** - Development standards and architectural patterns
+- **Technical Context** - Core technologies and configuration
+- **Active Context** - Current development focus and recent changes
+- **Progress** - Task tracking and development status
+
+Additional documentation:
 - [Roadmap](docs/roadmap.md)
-- [Test-Spezifikationen](tests/speech_test_cases.md)
+- [Test Specifications](tests/speech_test_cases.md)
 
-## 🤝 Mitmachen
+## 🤝 Contributing
 
-Wir freuen uns über Beiträge! Aktuelle Fokusgebiete:
+We welcome contributions! Current focus areas:
 
-1. **Server-Integration**
-   - WhisperLive Server-Parameter verstehen
-   - Timing-Optimierung
-   - Protokoll-Dokumentation
+1. **Server Integration**
+   - Understanding WhisperLive server parameters
+   - Timing optimization
+   - Protocol documentation
 
 2. **Performance**
-   - Audio-Streaming-Optimierung
-   - Latenz-Minimierung
-   - Ressourcen-Effizienz
+   - Audio streaming optimization
+   - Latency minimization
+   - Resource efficiency
 
-3. **Benutzerfreundlichkeit**
-   - GUI-Entwicklung
-   - Konfigurationsschnittstelle
-   - Installations-Wizard
+3. **User Experience**
+   - GUI development
+   - Configuration interface
+   - Installation wizard
 
-### Entwicklungs-Workflow
+### Development Workflow
 
-1. Issue erstellen/auswählen
-2. Branch erstellen: `feature/name` oder `fix/name`
-3. Änderungen committen (siehe [Commit-Konventionen](docs/development.md#commit-konventionen))
-4. Pull Request erstellen
-5. Code Review abwarten
+1. Create/select an issue
+2. Create branch: `feature/name` or `fix/name`
+3. Make changes following project standards
+4. Create pull request
+5. Await code review
 
-## 📝 Lizenz
+## 📝 License
 
 [MIT](LICENSE)
 
-## 🙏 Danksagung
+## 🙏 Acknowledgments
 
-- [WhisperLive](https://github.com/whisperlive) für den Server
-- [OpenAI Whisper](https://github.com/openai/whisper) für das Sprachmodell
-- Alle Mitwirkenden und Tester
+- [WhisperLive](https://github.com/whisperlive) for the server
+- [OpenAI Whisper](https://github.com/openai/whisper) for the speech model
+- All contributors and testers
 
 ## 📞 Support
 
-- GitHub Issues für Bugs und Features
-- Discussions für Fragen und Ideen
-- [Regression Investigation Log](docs/investigations/regression_20250214.md) für bekannte Probleme
+- GitHub Issues for bugs and features
+- Discussions for questions and ideas
+- [Regression Investigation Log](docs/investigations/regression_20250214.md) for known issues

@@ -1,0 +1,3485 @@
+Directory structure:
+└── savbell-whisper-writer/
+    ├── README.md
+    ├── CHANGELOG.md
+    ├── LICENSE
+    ├── requirements.txt
+    ├── run.py
+    ├── assets/
+    └── src/
+        ├── config_schema.yaml
+        ├── input_simulation.py
+        ├── key_listener.py
+        ├── main.py
+        ├── result_thread.py
+        ├── transcription.py
+        ├── utils.py
+        └── ui/
+            ├── base_window.py
+            ├── main_window.py
+            ├── settings_window.py
+            └── status_window.py
+
+================================================
+File: README.md
+================================================
+# <img src="./assets/ww-logo.png" alt="WhisperWriter icon" width="25" height="25"> WhisperWriter
+
+![version](https://img.shields.io/badge/version-1.0.1-blue)
+
+<p align="center">
+    <img src="./assets/ww-demo-image-02.gif" alt="WhisperWriter demo gif" width="340" height="136">
+</p>
+
+**Update (2024-05-28):** I've just merged in a major rewrite of WhisperWriter! We've migrated from using `tkinter` to using `PyQt5` for the UI, added a new settings window for configuration, a new continuous recording mode, support for a local API, and more! Please be patient as I work out any bugs that may have been introduced in the process. If you encounter any problems, please [open a new issue](https://github.com/savbell/whisper-writer/issues)!
+
+WhisperWriter is a small speech-to-text app that uses [OpenAI's Whisper model](https://openai.com/research/whisper) to auto-transcribe recordings from a user's microphone to the active window.
+
+Once started, the script runs in the background and waits for a keyboard shortcut to be pressed (`ctrl+shift+space` by default). When the shortcut is pressed, the app starts recording from your microphone. There are four recording modes to choose from:
+- `continuous` (default): Recording will stop after a long enough pause in your speech. The app will transcribe the text and then start recording again. To stop listening, press the keyboard shortcut again.
+- `voice_activity_detection`: Recording will stop after a long enough pause in your speech. Recording will not start until the keyboard shortcut is pressed again.
+- `press_to_toggle` Recording will stop when the keyboard shortcut is pressed again. Recording will not start until the keyboard shortcut is pressed again.
+- `hold_to_record` Recording will continue until the keyboard shortcut is released. Recording will not start until the keyboard shortcut is held down again.
+
+You can change the keyboard shortcut (`activation_key`) and recording mode in the [Configuration Options](#configuration-options). While recording and transcribing, a small status window is displayed that shows the current stage of the process (but this can be turned off). Once the transcription is complete, the transcribed text will be automatically written to the active window.
+
+The transcription can either be done locally through the [faster-whisper Python package](https://github.com/SYSTRAN/faster-whisper/) or through a request to [OpenAI's API](https://platform.openai.com/docs/guides/speech-to-text). By default, the app will use a local model, but you can change this in the [Configuration Options](#configuration-options). If you choose to use the API, you will need to either provide your OpenAI API key or change the base URL endpoint.
+
+**Fun fact:** Almost the entirety of the initial release of the project was pair-programmed with [ChatGPT-4](https://openai.com/product/gpt-4) and [GitHub Copilot](https://github.com/features/copilot) using VS Code. Practically every line, including most of this README, was written by AI. After the initial prototype was finished, WhisperWriter was used to write a lot of the prompts as well!
+
+## Getting Started
+
+### Prerequisites
+Before you can run this app, you'll need to have the following software installed:
+
+- Git: [https://git-scm.com/downloads](https://git-scm.com/downloads)
+- Python `3.11`: [https://www.python.org/downloads/](https://www.python.org/downloads/)
+
+If you want to run `faster-whisper` on your GPU, you'll also need to install the following NVIDIA libraries:
+
+- [cuBLAS for CUDA 12](https://developer.nvidia.com/cublas)
+- [cuDNN 8 for CUDA 12](https://developer.nvidia.com/cudnn)
+
+<details>
+<summary>More information on GPU execution</summary>
+
+The below was taken directly from the [`faster-whisper` README](https://github.com/SYSTRAN/faster-whisper?tab=readme-ov-file#gpu):
+
+**Note:** The latest versions of `ctranslate2` support CUDA 12 only. For CUDA 11, the current workaround is downgrading to the `3.24.0` version of `ctranslate2` (This can be done with `pip install --force-reinsall ctranslate2==3.24.0`).
+
+There are multiple ways to install the NVIDIA libraries mentioned above. The recommended way is described in the official NVIDIA documentation, but we also suggest other installation methods below.
+
+#### Use Docker
+
+The libraries (cuBLAS, cuDNN) are installed in these official NVIDIA CUDA Docker images: `nvidia/cuda:12.0.0-runtime-ubuntu20.04` or `nvidia/cuda:12.0.0-runtime-ubuntu22.04`.
+
+#### Install with `pip` (Linux only)
+
+On Linux these libraries can be installed with `pip`. Note that `LD_LIBRARY_PATH` must be set before launching Python.
+
+```bash
+pip install nvidia-cublas-cu12 nvidia-cudnn-cu12
+
+export LD_LIBRARY_PATH=`python3 -c 'import os; import nvidia.cublas.lib; import nvidia.cudnn.lib; print(os.path.dirname(nvidia.cublas.lib.__file__) + ":" + os.path.dirname(nvidia.cudnn.lib.__file__))'`
+```
+
+**Note**: Version 9+ of `nvidia-cudnn-cu12` appears to cause issues due its reliance on cuDNN 9 (Faster-Whisper does not currently support cuDNN 9). Ensure your version of the Python package is for cuDNN 8.
+
+#### Download the libraries from Purfview's repository (Windows & Linux)
+
+Purfview's [whisper-standalone-win](https://github.com/Purfview/whisper-standalone-win) provides the required NVIDIA libraries for Windows & Linux in a [single archive](https://github.com/Purfview/whisper-standalone-win/releases/tag/libs). Decompress the archive and place the libraries in a directory included in the `PATH`.
+
+</details>
+
+### Installation
+To set up and run the project, follow these steps:
+
+#### 1. Clone the repository:
+
+```
+git clone https://github.com/savbell/whisper-writer
+cd whisper-writer
+```
+
+#### 2. Create a virtual environment and activate it:
+
+```
+python -m venv venv
+
+# For Linux and macOS:
+source venv/bin/activate
+
+# For Windows:
+venv\Scripts\activate
+```
+
+#### 3. Install the required packages:
+
+```
+pip install -r requirements.txt
+```
+
+#### 4. Run the Python code:
+
+```
+python run.py
+```
+
+#### 5. Configure and start WhisperWriter:
+On first run, a Settings window should appear. Once configured and saved, another window will open. Press "Start" to activate the keyboard listener. Press the activation key (`ctrl+shift+space` by default) to start recording and transcribing to the active window.
+
+### Configuration Options
+
+WhisperWriter uses a configuration file to customize its behaviour. To set up the configuration, open the Settings window:
+
+<p align="center">
+    <img src="./assets/ww-settings-demo.gif" alt="WhisperWriter Settings window demo gif" width="350" height="350">
+</p>
+
+#### Model Options
+- `use_api`: Toggle to choose whether to use the OpenAI API or a local Whisper model for transcription. (Default: `false`)
+- `common`: Options common to both API and local models.
+  - `language`: The language code for the transcription in [ISO-639-1 format](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes). (Default: `null`)
+  - `temperature`: Controls the randomness of the transcription output. Lower values make the output more focused and deterministic. (Default: `0.0`)
+  - `initial_prompt`: A string used as an initial prompt to condition the transcription. More info: [OpenAI Prompting Guide](https://platform.openai.com/docs/guides/speech-to-text/prompting). (Default: `null`)
+
+- `api`: Configuration options for the OpenAI API. See the [OpenAI API documentation](https://platform.openai.com/docs/api-reference/audio/create?lang=python) for more information.
+  - `model`: The model to use for transcription. Currently, only `whisper-1` is available. (Default: `whisper-1`)
+  - `base_url`: The base URL for the API. Can be changed to use a local API endpoint, such as [LocalAI](https://localai.io/). (Default: `https://api.openai.com/v1`)
+  - `api_key`: Your API key for the OpenAI API. Required for non-local API usage. (Default: `null`)
+
+- `local`: Configuration options for the local Whisper model.
+  - `model`: The model to use for transcription. The larger models provide better accuracy but are slower. See [available models and languages](https://github.com/openai/whisper?tab=readme-ov-file#available-models-and-languages). (Default: `base`)
+  - `device`: The device to run the local Whisper model on. Use `cuda` for NVIDIA GPUs, `cpu` for CPU-only processing, or `auto` to let the system automatically choose the best available device. (Default: `auto`)
+  - `compute_type`: The compute type to use for the local Whisper model. [More information on quantization here](https://opennmt.net/CTranslate2/quantization.html). (Default: `default`)
+  - `condition_on_previous_text`: Set to `true` to use the previously transcribed text as a prompt for the next transcription request. (Default: `true`)
+  - `vad_filter`: Set to `true` to use [a voice activity detection (VAD) filter](https://github.com/snakers4/silero-vad) to remove silence from the recording. (Default: `false`)
+  - `model_path`: The path to the local Whisper model. If not specified, the default model will be downloaded. (Default: `null`)
+
+#### Recording Options
+- `activation_key`: The keyboard shortcut to activate the recording and transcribing process. Separate keys with a `+`. (Default: `ctrl+shift+space`)
+- `input_backend`: The input backend to use for detecting key presses. `auto` will try to use the best available backend. (Default: `auto`)
+- `recording_mode`: The recording mode to use. Options include `continuous` (auto-restart recording after pause in speech until activation key is pressed again), `voice_activity_detection` (stop recording after pause in speech), `press_to_toggle` (stop recording when activation key is pressed again), `hold_to_record` (stop recording when activation key is released). (Default: `continuous`)
+- `sound_device`: The numeric index of the sound device to use for recording. To find device numbers, run `python -m sounddevice`. (Default: `null`)
+- `sample_rate`: The sample rate in Hz to use for recording. (Default: `16000`)
+- `silence_duration`: The duration in milliseconds to wait for silence before stopping the recording. (Default: `900`)
+- `min_duration`: The minimum duration in milliseconds for a recording to be processed. Recordings shorter than this will be discarded. (Default: `100`)
+
+#### Post-processing Options
+- `writing_key_press_delay`: The delay in seconds between each key press when writing the transcribed text. (Default: `0.005`)
+- `remove_trailing_period`: Set to `true` to remove the trailing period from the transcribed text. (Default: `false`)
+- `add_trailing_space`: Set to `true` to add a space to the end of the transcribed text. (Default: `true`)
+- `remove_capitalization`: Set to `true` to convert the transcribed text to lowercase. (Default: `false`)
+- `input_method`: The method to use for simulating keyboard input. (Default: `pynput`)
+
+#### Miscellaneous Options
+- `print_to_terminal`: Set to `true` to print the script status and transcribed text to the terminal. (Default: `true`)
+- `hide_status_window`: Set to `true` to hide the status window during operation. (Default: `false`)
+- `noise_on_completion`: Set to `true` to play a noise after the transcription has been typed out. (Default: `false`)
+
+If any of the configuration options are invalid or not provided, the program will use the default values.
+
+## Known Issues
+
+You can see all reported issues and their current status in our [Issue Tracker](https://github.com/savbell/whisper-writer/issues). If you encounter a problem, please [open a new issue](https://github.com/savbell/whisper-writer/issues/new) with a detailed description and reproduction steps, if possible.
+
+## Roadmap
+Below are features I am planning to add in the near future:
+- [x] Restructuring configuration options to reduce redundancy
+- [x] Update to use the latest version of the OpenAI API
+- [ ] Additional post-processing options:
+  - [ ] Simple word replacement (e.g. "gonna" -> "going to" or "smiley face" -> "😊")
+  - [ ] Using GPT for instructional post-processing
+- [x] Updating GUI
+- [ ] Creating standalone executable file
+
+Below are features not currently planned:
+- [ ] Pipelining audio files
+
+Implemented features can be found in the [CHANGELOG](CHANGELOG.md).
+
+## Contributing
+
+Contributions are welcome! I created this project for my own personal use and didn't expect it to get much attention, so I haven't put much effort into testing or making it easy for others to contribute. If you have ideas or suggestions, feel free to [open a pull request](https://github.com/savbell/whisper-writer/pulls) or [create a new issue](https://github.com/savbell/whisper-writer/issues/new). I'll do my best to review and respond as time allows.
+
+## Credits
+
+- [OpenAI](https://openai.com/) for creating the Whisper model and providing the API. Plus [ChatGPT](https://chat.openai.com/), which was used to write a lot of the initial code for this project.
+- [Guillaume Klein](https://github.com/guillaumekln) for creating the [faster-whisper Python package](https://github.com/SYSTRAN/faster-whisper).
+- All of our [contributors](https://github.com/savbell/whisper-writer/graphs/contributors)!
+
+## License
+
+This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE) file for details.
+
+
+================================================
+File: CHANGELOG.md
+================================================
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [Unreleased]
+### Added
+- New settings window to configure WhisperWriter.
+- New main window to either start the keyboard listener or open the settings window.
+- New continuous recording mode ([Issue #40](https://github.com/savbell/whisper-writer/issues/40)).
+- New option to play a sound when transcription finishes ([Issue #40](https://github.com/savbell/whisper-writer/issues/40)).
+
+### Changed
+- Migrated status window from using `tkinter` to `PyQt5`.
+- Migrated from using JSON to using YAML to store configuration settings.
+- Upgraded to latest versions of `openai` and `faster-whisper`, including support for local API ([Issue #32](https://github.com/savbell/whisper-writer/issues/32)).
+
+### Removed
+- No longer using `keyboard` package to listen for key presses.
+
+## [1.0.1] - 2024-01-28
+### Added
+- New message to identify whether Whisper was being called using the API or running locally.
+- Additional hold-to-talk ([PR #28](https://github.com/savbell/whisper-writer/pull/28)) and press-to-toggle recording methods ([Issue #21](https://github.com/savbell/whisper-writer/issues/21)).
+- New configuration options to:
+  - Choose recording method (defaulting to voice activity detection).
+  - Choose which sound device and sample rate to use.
+  - Hide the status window ([PR #28](https://github.com/savbell/whisper-writer/pull/28)).
+
+### Changed
+- Migrated from `whisper` to `faster-whisper` ([Issue #11](https://github.com/savbell/whisper-writer/issues/11)).
+- Migrated from `pyautogui` to `pynput` ([PR #10](https://github.com/savbell/whisper-writer/pull/10)).
+- Migrated from `webrtcvad` to `webrtcvad-wheels` ([PR #17](https://github.com/savbell/whisper-writer/pull/17)).
+- Changed default activation key combo from `ctrl+alt+space` to `ctrl+shift+space`.
+- Changed to using a local model rather than the API by default.
+- Revamped README.md, including new Roadmap, Contributing, and Credits sections.
+
+### Fixed
+- Local model is now only loaded once at start-up, rather than every time the activation key combo was pressed.
+- Default configuration now auto-chooses compute type for the local model to avoid warnings.
+- Graceful degradation to CPU if CUDA isn't available ([PR #30](https://github.com/savbell/whisper-writer/pull/30)).
+- Removed long prefix of spaces in transcription ([PR #19](https://github.com/savbell/whisper-writer/pull/19)).
+
+## [1.0.0] - 2023-05-29
+### Added
+- Initial release of WhisperWriter.
+- Added CHANGELOG.md.
+- Added Versioning and Known Issues to README.md.
+
+### Changed
+- Updated Whisper Python package; the local model is now compatible with Python 3.11.
+
+[Unreleased]: https://github.com/savbell/whisper-writer/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/savbell/whisper-writer/releases/tag/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/savbell/whisper-writer/releases/tag/v1.0.0
+
+
+================================================
+File: LICENSE
+================================================
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you have
+certain responsibilities if you distribute copies of the software, or if
+you modify it: responsibilities to respect the freedom of others.
+
+  For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+  Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+  For the developers' and authors' protection, the GPL clearly explains
+that there is no warranty for this free software.  For both users' and
+authors' sake, the GPL requires that modified versions be marked as
+changed, so that their problems will not be attributed erroneously to
+authors of previous versions.
+
+  Some devices are designed to deny users access to install or run
+modified versions of the software inside them, although the manufacturer
+can do so.  This is fundamentally incompatible with the aim of
+protecting users' freedom to change the software.  The systematic
+pattern of such abuse occurs in the area of products for individuals to
+use, which is precisely where it is most unacceptable.  Therefore, we
+have designed this version of the GPL to prohibit the practice for those
+products.  If such problems arise substantially in other domains, we
+stand ready to extend this provision to those domains in future versions
+of the GPL, as needed to protect the freedom of users.
+
+  Finally, every program is threatened constantly by software patents.
+States should not allow patents to restrict development and use of
+software on general-purpose computers, but in those that do, we wish to
+avoid the special danger that patents applied to a free program could
+make it effectively proprietary.  To prevent this, the GPL assures that
+patents cannot be used to render the program non-free.
+
+  The precise terms and conditions for copying, distribution and
+modification follow.
+
+                       TERMS AND CONDITIONS
+
+  0. Definitions.
+
+  "This License" refers to version 3 of the GNU General Public License.
+
+  "Copyright" also means copyright-like laws that apply to other kinds of
+works, such as semiconductor masks.
+
+  "The Program" refers to any copyrightable work licensed under this
+License.  Each licensee is addressed as "you".  "Licensees" and
+"recipients" may be individuals or organizations.
+
+  To "modify" a work means to copy from or adapt all or part of the work
+in a fashion requiring copyright permission, other than the making of an
+exact copy.  The resulting work is called a "modified version" of the
+earlier work or a work "based on" the earlier work.
+
+  A "covered work" means either the unmodified Program or a work based
+on the Program.
+
+  To "propagate" a work means to do anything with it that, without
+permission, would make you directly or secondarily liable for
+infringement under applicable copyright law, except executing it on a
+computer or modifying a private copy.  Propagation includes copying,
+distribution (with or without modification), making available to the
+public, and in some countries other activities as well.
+
+  To "convey" a work means any kind of propagation that enables other
+parties to make or receive copies.  Mere interaction with a user through
+a computer network, with no transfer of a copy, is not conveying.
+
+  An interactive user interface displays "Appropriate Legal Notices"
+to the extent that it includes a convenient and prominently visible
+feature that (1) displays an appropriate copyright notice, and (2)
+tells the user that there is no warranty for the work (except to the
+extent that warranties are provided), that licensees may convey the
+work under this License, and how to view a copy of this License.  If
+the interface presents a list of user commands or options, such as a
+menu, a prominent item in the list meets this criterion.
+
+  1. Source Code.
+
+  The "source code" for a work means the preferred form of the work
+for making modifications to it.  "Object code" means any non-source
+form of a work.
+
+  A "Standard Interface" means an interface that either is an official
+standard defined by a recognized standards body, or, in the case of
+interfaces specified for a particular programming language, one that
+is widely used among developers working in that language.
+
+  The "System Libraries" of an executable work include anything, other
+than the work as a whole, that (a) is included in the normal form of
+packaging a Major Component, but which is not part of that Major
+Component, and (b) serves only to enable use of the work with that
+Major Component, or to implement a Standard Interface for which an
+implementation is available to the public in source code form.  A
+"Major Component", in this context, means a major essential component
+(kernel, window system, and so on) of the specific operating system
+(if any) on which the executable work runs, or a compiler used to
+produce the work, or an object code interpreter used to run it.
+
+  The "Corresponding Source" for a work in object code form means all
+the source code needed to generate, install, and (for an executable
+work) run the object code and to modify the work, including scripts to
+control those activities.  However, it does not include the work's
+System Libraries, or general-purpose tools or generally available free
+programs which are used unmodified in performing those activities but
+which are not part of the work.  For example, Corresponding Source
+includes interface definition files associated with source files for
+the work, and the source code for shared libraries and dynamically
+linked subprograms that the work is specifically designed to require,
+such as by intimate data communication or control flow between those
+subprograms and other parts of the work.
+
+  The Corresponding Source need not include anything that users
+can regenerate automatically from other parts of the Corresponding
+Source.
+
+  The Corresponding Source for a work in source code form is that
+same work.
+
+  2. Basic Permissions.
+
+  All rights granted under this License are granted for the term of
+copyright on the Program, and are irrevocable provided the stated
+conditions are met.  This License explicitly affirms your unlimited
+permission to run the unmodified Program.  The output from running a
+covered work is covered by this License only if the output, given its
+content, constitutes a covered work.  This License acknowledges your
+rights of fair use or other equivalent, as provided by copyright law.
+
+  You may make, run and propagate covered works that you do not
+convey, without conditions so long as your license otherwise remains
+in force.  You may convey covered works to others for the sole purpose
+of having them make modifications exclusively for you, or provide you
+with facilities for running those works, provided that you comply with
+the terms of this License in conveying all material for which you do
+not control copyright.  Those thus making or running the covered works
+for you must do so exclusively on your behalf, under your direction
+and control, on terms that prohibit them from making any copies of
+your copyrighted material outside their relationship with you.
+
+  Conveying under any other circumstances is permitted solely under
+the conditions stated below.  Sublicensing is not allowed; section 10
+makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+  No covered work shall be deemed part of an effective technological
+measure under any applicable law fulfilling obligations under article
+11 of the WIPO copyright treaty adopted on 20 December 1996, or
+similar laws prohibiting or restricting circumvention of such
+measures.
+
+  When you convey a covered work, you waive any legal power to forbid
+circumvention of technological measures to the extent such circumvention
+is effected by exercising rights under this License with respect to
+the covered work, and you disclaim any intention to limit operation or
+modification of the work as a means of enforcing, against the work's
+users, your or third parties' legal rights to forbid circumvention of
+technological measures.
+
+  4. Conveying Verbatim Copies.
+
+  You may convey verbatim copies of the Program's source code as you
+receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice;
+keep intact all notices stating that this License and any
+non-permissive terms added in accord with section 7 apply to the code;
+keep intact all notices of the absence of any warranty; and give all
+recipients a copy of this License along with the Program.
+
+  You may charge any price or no price for each copy that you convey,
+and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+  You may convey a work based on the Program, or the modifications to
+produce it from the Program, in the form of source code under the
+terms of section 4, provided that you also meet all of these conditions:
+
+    a) The work must carry prominent notices stating that you modified
+    it, and giving a relevant date.
+
+    b) The work must carry prominent notices stating that it is
+    released under this License and any conditions added under section
+    7.  This requirement modifies the requirement in section 4 to
+    "keep intact all notices".
+
+    c) You must license the entire work, as a whole, under this
+    License to anyone who comes into possession of a copy.  This
+    License will therefore apply, along with any applicable section 7
+    additional terms, to the whole of the work, and all its parts,
+    regardless of how they are packaged.  This License gives no
+    permission to license the work in any other way, but it does not
+    invalidate such permission if you have separately received it.
+
+    d) If the work has interactive user interfaces, each must display
+    Appropriate Legal Notices; however, if the Program has interactive
+    interfaces that do not display Appropriate Legal Notices, your
+    work need not make them do so.
+
+  A compilation of a covered work with other separate and independent
+works, which are not by their nature extensions of the covered work,
+and which are not combined with it such as to form a larger program,
+in or on a volume of a storage or distribution medium, is called an
+"aggregate" if the compilation and its resulting copyright are not
+used to limit the access or legal rights of the compilation's users
+beyond what the individual works permit.  Inclusion of a covered work
+in an aggregate does not cause this License to apply to the other
+parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+  You may convey a covered work in object code form under the terms
+of sections 4 and 5, provided that you also convey the
+machine-readable Corresponding Source under the terms of this License,
+in one of these ways:
+
+    a) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by the
+    Corresponding Source fixed on a durable physical medium
+    customarily used for software interchange.
+
+    b) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by a
+    written offer, valid for at least three years and valid for as
+    long as you offer spare parts or customer support for that product
+    model, to give anyone who possesses the object code either (1) a
+    copy of the Corresponding Source for all the software in the
+    product that is covered by this License, on a durable physical
+    medium customarily used for software interchange, for a price no
+    more than your reasonable cost of physically performing this
+    conveying of source, or (2) access to copy the
+    Corresponding Source from a network server at no charge.
+
+    c) Convey individual copies of the object code with a copy of the
+    written offer to provide the Corresponding Source.  This
+    alternative is allowed only occasionally and noncommercially, and
+    only if you received the object code with such an offer, in accord
+    with subsection 6b.
+
+    d) Convey the object code by offering access from a designated
+    place (gratis or for a charge), and offer equivalent access to the
+    Corresponding Source in the same way through the same place at no
+    further charge.  You need not require recipients to copy the
+    Corresponding Source along with the object code.  If the place to
+    copy the object code is a network server, the Corresponding Source
+    may be on a different server (operated by you or a third party)
+    that supports equivalent copying facilities, provided you maintain
+    clear directions next to the object code saying where to find the
+    Corresponding Source.  Regardless of what server hosts the
+    Corresponding Source, you remain obligated to ensure that it is
+    available for as long as needed to satisfy these requirements.
+
+    e) Convey the object code using peer-to-peer transmission, provided
+    you inform other peers where the object code and Corresponding
+    Source of the work are being offered to the general public at no
+    charge under subsection 6d.
+
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveying the object code work.
+
+  A "User Product" is either (1) a "consumer product", which means any
+tangible personal property which is normally used for personal, family,
+or household purposes, or (2) anything designed or sold for incorporation
+into a dwelling.  In determining whether a product is a consumer product,
+doubtful cases shall be resolved in favor of coverage.  For a particular
+product received by a particular user, "normally used" refers to a
+typical or common use of that class of product, regardless of the status
+of the particular user or of the way in which the particular user
+actually uses, or expects or is expected to use, the product.  A product
+is a consumer product regardless of whether the product has substantial
+commercial, industrial or non-consumer uses, unless such uses represent
+the only significant mode of use of the product.
+
+  "Installation Information" for a User Product means any methods,
+procedures, authorization keys, or other information required to install
+and execute modified versions of a covered work in that User Product from
+a modified version of its Corresponding Source.  The information must
+suffice to ensure that the continued functioning of the modified object
+code is in no case prevented or interfered with solely because
+modification has been made.
+
+  If you convey an object code work under this section in, or with, or
+specifically for use in, a User Product, and the conveying occurs as
+part of a transaction in which the right of possession and use of the
+User Product is transferred to the recipient in perpetuity or for a
+fixed term (regardless of how the transaction is characterized), the
+Corresponding Source conveyed under this section must be accompanied
+by the Installation Information.  But this requirement does not apply
+if neither you nor any third party retains the ability to install
+modified object code on the User Product (for example, the work has
+been installed in ROM).
+
+  The requirement to provide Installation Information does not include a
+requirement to continue to provide support service, warranty, or updates
+for a work that has been modified or installed by the recipient, or for
+the User Product in which it has been modified or installed.  Access to a
+network may be denied when the modification itself materially and
+adversely affects the operation of the network or violates the rules and
+protocols for communication across the network.
+
+  Corresponding Source conveyed, and Installation Information provided,
+in accord with this section must be in a format that is publicly
+documented (and with an implementation available to the public in
+source code form), and must require no special password or key for
+unpacking, reading or copying.
+
+  7. Additional Terms.
+
+  "Additional permissions" are terms that supplement the terms of this
+License by making exceptions from one or more of its conditions.
+Additional permissions that are applicable to the entire Program shall
+be treated as though they were included in this License, to the extent
+that they are valid under applicable law.  If additional permissions
+apply only to part of the Program, that part may be used separately
+under those permissions, but the entire Program remains governed by
+this License without regard to the additional permissions.
+
+  When you convey a copy of a covered work, you may at your option
+remove any additional permissions from that copy, or from any part of
+it.  (Additional permissions may be written to require their own
+removal in certain cases when you modify the work.)  You may place
+additional permissions on material, added by you to a covered work,
+for which you have or can give appropriate copyright permission.
+
+  Notwithstanding any other provision of this License, for material you
+add to a covered work, you may (if authorized by the copyright holders of
+that material) supplement the terms of this License with terms:
+
+    a) Disclaiming warranty or limiting liability differently from the
+    terms of sections 15 and 16 of this License; or
+
+    b) Requiring preservation of specified reasonable legal notices or
+    author attributions in that material or in the Appropriate Legal
+    Notices displayed by works containing it; or
+
+    c) Prohibiting misrepresentation of the origin of that material, or
+    requiring that modified versions of such material be marked in
+    reasonable ways as different from the original version; or
+
+    d) Limiting the use for publicity purposes of names of licensors or
+    authors of the material; or
+
+    e) Declining to grant rights under trademark law for use of some
+    trade names, trademarks, or service marks; or
+
+    f) Requiring indemnification of licensors and authors of that
+    material by anyone who conveys the material (or modified versions of
+    it) with contractual assumptions of liability to the recipient, for
+    any liability that these contractual assumptions directly impose on
+    those licensors and authors.
+
+  All other non-permissive additional terms are considered "further
+restrictions" within the meaning of section 10.  If the Program as you
+received it, or any part of it, contains a notice stating that it is
+governed by this License along with a term that is a further
+restriction, you may remove that term.  If a license document contains
+a further restriction but permits relicensing or conveying under this
+License, you may add to a covered work material governed by the terms
+of that license document, provided that the further restriction does
+not survive such relicensing or conveying.
+
+  If you add terms to a covered work in accord with this section, you
+must place, in the relevant source files, a statement of the
+additional terms that apply to those files, or a notice indicating
+where to find the applicable terms.
+
+  Additional terms, permissive or non-permissive, may be stated in the
+form of a separately written license, or stated as exceptions;
+the above requirements apply either way.
+
+  8. Termination.
+
+  You may not propagate or modify a covered work except as expressly
+provided under this License.  Any attempt otherwise to propagate or
+modify it is void, and will automatically terminate your rights under
+this License (including any patent licenses granted under the third
+paragraph of section 11).
+
+  However, if you cease all violation of this License, then your
+license from a particular copyright holder is reinstated (a)
+provisionally, unless and until the copyright holder explicitly and
+finally terminates your license, and (b) permanently, if the copyright
+holder fails to notify you of the violation by some reasonable means
+prior to 60 days after the cessation.
+
+  Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+  Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, you do not qualify to receive new licenses for the same
+material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+  You are not required to accept this License in order to receive or
+run a copy of the Program.  Ancillary propagation of a covered work
+occurring solely as a consequence of using peer-to-peer transmission
+to receive a copy likewise does not require acceptance.  However,
+nothing other than this License grants you permission to propagate or
+modify any covered work.  These actions infringe copyright if you do
+not accept this License.  Therefore, by modifying or propagating a
+covered work, you indicate your acceptance of this License to do so.
+
+  10. Automatic Licensing of Downstream Recipients.
+
+  Each time you convey a covered work, the recipient automatically
+receives a license from the original licensors, to run, modify and
+propagate that work, subject to this License.  You are not responsible
+for enforcing compliance by third parties with this License.
+
+  An "entity transaction" is a transaction transferring control of an
+organization, or substantially all assets of one, or subdividing an
+organization, or merging organizations.  If propagation of a covered
+work results from an entity transaction, each party to that
+transaction who receives a copy of the work also receives whatever
+licenses to the work the party's predecessor in interest had or could
+give under the previous paragraph, plus a right to possession of the
+Corresponding Source of the work from the predecessor in interest, if
+the predecessor has it or can get it with reasonable efforts.
+
+  You may not impose any further restrictions on the exercise of the
+rights granted or affirmed under this License.  For example, you may
+not impose a license fee, royalty, or other charge for exercise of
+rights granted under this License, and you may not initiate litigation
+(including a cross-claim or counterclaim in a lawsuit) alleging that
+any patent claim is infringed by making, using, selling, offering for
+sale, or importing the Program or any portion of it.
+
+  11. Patents.
+
+  A "contributor" is a copyright holder who authorizes use under this
+License of the Program or a work on which the Program is based.  The
+work thus licensed is called the contributor's "contributor version".
+
+  A contributor's "essential patent claims" are all patent claims
+owned or controlled by the contributor, whether already acquired or
+hereafter acquired, that would be infringed by some manner, permitted
+by this License, of making, using, or selling its contributor version,
+but do not include claims that would be infringed only as a
+consequence of further modification of the contributor version.  For
+purposes of this definition, "control" includes the right to grant
+patent sublicenses in a manner consistent with the requirements of
+this License.
+
+  Each contributor grants you a non-exclusive, worldwide, royalty-free
+patent license under the contributor's essential patent claims, to
+make, use, sell, offer for sale, import and otherwise run, modify and
+propagate the contents of its contributor version.
+
+  In the following three paragraphs, a "patent license" is any express
+agreement or commitment, however denominated, not to enforce a patent
+(such as an express permission to practice a patent or covenant not to
+sue for patent infringement).  To "grant" such a patent license to a
+party means to make such an agreement or commitment not to enforce a
+patent against the party.
+
+  If you convey a covered work, knowingly relying on a patent license,
+and the Corresponding Source of the work is not available for anyone
+to copy, free of charge and under the terms of this License, through a
+publicly available network server or other readily accessible means,
+then you must either (1) cause the Corresponding Source to be so
+available, or (2) arrange to deprive yourself of the benefit of the
+patent license for this particular work, or (3) arrange, in a manner
+consistent with the requirements of this License, to extend the patent
+license to downstream recipients.  "Knowingly relying" means you have
+actual knowledge that, but for the patent license, your conveying the
+covered work in a country, or your recipient's use of the covered work
+in a country, would infringe one or more identifiable patents in that
+country that you have reason to believe are valid.
+
+  If, pursuant to or in connection with a single transaction or
+arrangement, you convey, or propagate by procuring conveyance of, a
+covered work, and grant a patent license to some of the parties
+receiving the covered work authorizing them to use, propagate, modify
+or convey a specific copy of the covered work, then the patent license
+you grant is automatically extended to all recipients of the covered
+work and works based on it.
+
+  A patent license is "discriminatory" if it does not include within
+the scope of its coverage, prohibits the exercise of, or is
+conditioned on the non-exercise of one or more of the rights that are
+specifically granted under this License.  You may not convey a covered
+work if you are a party to an arrangement with a third party that is
+in the business of distributing software, under which you make payment
+to the third party based on the extent of your activity of conveying
+the work, and under which the third party grants, to any of the
+parties who would receive the covered work from you, a discriminatory
+patent license (a) in connection with copies of the covered work
+conveyed by you (or copies made from those copies), or (b) primarily
+for and in connection with specific products or compilations that
+contain the covered work, unless you entered into that arrangement,
+or that patent license was granted, prior to 28 March 2007.
+
+  Nothing in this License shall be construed as excluding or limiting
+any implied license or other defenses to infringement that may
+otherwise be available to you under applicable patent law.
+
+  12. No Surrender of Others' Freedom.
+
+  If conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License.  If you cannot convey a
+covered work so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you may
+not convey it at all.  For example, if you agree to terms that obligate you
+to collect a royalty for further conveying from those to whom you convey
+the Program, the only way you could satisfy both those terms and this
+License would be to refrain entirely from conveying the Program.
+
+  13. Use with the GNU Affero General Public License.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU Affero General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the special requirements of the GNU Affero General Public License,
+section 13, concerning interaction through a network will apply to the
+combination as such.
+
+  14. Revised Versions of this License.
+
+  The Free Software Foundation may publish revised and/or new versions of
+the GNU General Public License from time to time.  Such new versions will
+be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+  Each version is given a distinguishing version number.  If the
+Program specifies that a certain numbered version of the GNU General
+Public License "or any later version" applies to it, you have the
+option of following the terms and conditions either of that numbered
+version or of any later version published by the Free Software
+Foundation.  If the Program does not specify a version number of the
+GNU General Public License, you may choose any version ever published
+by the Free Software Foundation.
+
+  If the Program specifies that a proxy can decide which future
+versions of the GNU General Public License can be used, that proxy's
+public statement of acceptance of a version permanently authorizes you
+to choose that version for the Program.
+
+  Later license versions may give you additional or different
+permissions.  However, no additional obligations are imposed on any
+author or copyright holder as a result of your choosing to follow a
+later version.
+
+  15. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+  16. Limitation of Liability.
+
+  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+  17. Interpretation of Sections 15 and 16.
+
+  If the disclaimer of warranty and limitation of liability provided
+above cannot be given local legal effect according to their terms,
+reviewing courts shall apply local law that most closely approximates
+an absolute waiver of all civil liability in connection with the
+Program, unless a warranty or assumption of liability accompanies a
+copy of the Program in return for a fee.
+
+                     END OF TERMS AND CONDITIONS
+
+            How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+  To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+    <one line to give the program's name and a brief idea of what it does.>
+    Copyright (C) <year>  <name of author>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Also add information on how to contact you by electronic and paper mail.
+
+  If the program does terminal interaction, make it output a short
+notice like this when it starts in an interactive mode:
+
+    <program>  Copyright (C) <year>  <name of author>
+    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+    This is free software, and you are welcome to redistribute it
+    under certain conditions; type `show c' for details.
+
+The hypothetical commands `show w' and `show c' should show the appropriate
+parts of the General Public License.  Of course, your program's commands
+might be different; for a GUI interface, you would use an "about box".
+
+  You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU GPL, see
+<https://www.gnu.org/licenses/>.
+
+  The GNU General Public License does not permit incorporating your program
+into proprietary programs.  If your program is a subroutine library, you
+may consider it more useful to permit linking proprietary applications with
+the library.  If this is what you want to do, use the GNU Lesser General
+Public License instead of this License.  But first, please read
+<https://www.gnu.org/licenses/why-not-lgpl.html>.
+
+
+================================================
+File: run.py
+================================================
+import os
+import sys
+import subprocess
+from dotenv import load_dotenv
+
+print('Starting WhisperWriter...')
+load_dotenv()
+subprocess.run([sys.executable, os.path.join('src', 'main.py')])
+
+
+================================================
+File: src/config_schema.yaml
+================================================
+# Configuration options for the Whisper models
+model_options:
+  use_api:
+    value: false
+    type: bool
+    description: "Toggle to choose whether to use the OpenAI API or a local Whisper model for transcription."
+
+  # Common configuration options for both API and local models
+  common:
+    language:
+      value: null
+      type: str
+      description: "The language code for the transcription in ISO-639-1 format."
+    temperature:
+      value: 0.0
+      type: float
+      description: "Controls the randomness of the transcription output. Lower values make the output more focused and deterministic."
+    initial_prompt:
+      value: null
+      type: str
+      description: "A string used as an initial prompt to condition the transcription. More info: https://platform.openai.com/docs/guides/speech-to-text/prompting"
+
+  # Configuration options for the OpenAI API
+  api:
+    model:
+      value: whisper-1
+      type: str
+      description: "The model to use for transcription. Currently only 'whisper-1' is available."
+    base_url:
+      value: https://api.openai.com/v1
+      type: str
+      description: "The base URL for the API. Can be changed to use a local API endpoint."
+    api_key:
+      value: null
+      type: str
+      description: "Your API key for the OpenAI API. Required for non-local API usage."
+
+  # Configuration options for the faster-whisper model
+  local:
+    model:
+      value: base
+      type: str
+      description: "The model to use for transcription. The larger models provide better accuracy but are slower."
+      options:
+        - base
+        - base.en
+        - tiny
+        - tiny.en
+        - small
+        - small.en
+        - medium
+        - medium.en
+        - large
+        - large-v1
+        - large-v2
+        - large-v3
+    device:
+      value: auto
+      type: str
+      description: "The device to run the local Whisper model on. Use 'cuda' for NVIDIA GPUs, 'cpu' for CPU-only processing, or 'auto' to let the system automatically choose the best available device."
+      options:
+        - auto
+        - cuda
+        - cpu
+    compute_type:
+      value: default
+      type: str
+      description: "The compute type to use for the local Whisper model."
+      options:
+        - default
+        - float32
+        - float16
+        - int8
+    condition_on_previous_text:
+      value: true
+      type: bool
+      description: "Set to true to use the previously transcribed text as a prompt for the next transcription request."
+    vad_filter:
+      value: false
+      type: bool
+      description: "Set to true to use a voice activity detection (VAD) filter to remove silence from the recording."
+    model_path:
+      value: null
+      type: str
+      description: "The path to the local Whisper model. If not specified, the default model will be downloaded."
+
+# Configuration options for activation and recording
+recording_options:
+  activation_key:
+    value: ctrl+shift+space
+    type: str
+    description: "The keyboard shortcut to activate the recording and transcribing process. Separate keys with a '+'."
+  input_backend:
+    value: auto
+    type: str
+    description: "The input backend to use for detecting key presses. 'auto' will try to use the best available backend."
+    options:
+      - auto
+      - evdev
+      - pynput
+  recording_mode:
+    value: continuous
+    type: str
+    description: "The recording mode to use. Options include continuous (auto-restart recording after pause in speech until activation key is pressed again), voice_activity_detection (stop recording after pause in speech), press_to_toggle (stop recording when activation key is pressed again), hold_to_record (stop recording when activation key is released)."
+    options:
+      - continuous
+      - voice_activity_detection
+      - press_to_toggle
+      - hold_to_record
+  sound_device:
+    value: null
+    type: str
+    description: "The numeric index of the sound device to use for recording. To find device numbers, run `python -m sounddevice`"
+  sample_rate:
+    value: 16000
+    type: int
+    description: "The sample rate in Hz to use for recording."
+  silence_duration:
+    value: 900
+    type: int
+    description: "The duration in milliseconds to wait for silence before stopping the recording."
+  min_duration:
+    value: 100
+    type: int
+    description: "The minimum duration in milliseconds for a recording to be processed. Recordings shorter than this will be discarded."
+
+# Post-processing options for the transcribed text
+post_processing:
+  writing_key_press_delay:
+    value: 0.005
+    type: float
+    description: "The delay in seconds between each key press when writing the transcribed text."
+  remove_trailing_period:
+    value: false
+    type: bool
+    description: "Set to true to remove the trailing period from the transcribed text."
+  add_trailing_space:
+    value: true
+    type: bool
+    description: "Set to true to add a space to the end of the transcribed text."
+  remove_capitalization:
+    value: false
+    type: bool
+    description: "Set to true to convert the transcribed text to lowercase."
+  input_method:
+    value: pynput
+    type: str
+    description: "The method to use for simulating keyboard input."
+    options:
+      - pynput
+      - ydotool
+      - dotool
+
+# Miscellaneous settings
+misc:
+  print_to_terminal:
+    value: true
+    type: bool
+    description: "Set to true to print the script status and transcribed text to the terminal."
+  hide_status_window:
+    value: false
+    type: bool
+    description: "Set to true to hide the status window during operation."
+  noise_on_completion:
+    value: false
+    type: bool
+    description: "Set to true to play a noise after the transcription has been typed out."
+
+
+================================================
+File: src/input_simulation.py
+================================================
+import subprocess
+import os
+import signal
+import time
+from pynput.keyboard import Controller as PynputController
+
+from utils import ConfigManager
+
+def run_command_or_exit_on_failure(command):
+    """
+    Run a shell command and exit if it fails.
+
+    Args:
+        command (list): The command to run as a list of strings.
+    """
+    try:
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running command: {e}")
+        exit(1)
+
+class InputSimulator:
+    """
+    A class to simulate keyboard input using various methods.
+    """
+
+    def __init__(self):
+        """
+        Initialize the InputSimulator with the specified configuration.
+        """
+        self.input_method = ConfigManager.get_config_value('post_processing', 'input_method')
+        self.dotool_process = None
+
+        if self.input_method == 'pynput':
+            self.keyboard = PynputController()
+        elif self.input_method == 'dotool':
+            self._initialize_dotool()
+
+    def _initialize_dotool(self):
+        """
+        Initialize the dotool process for input simulation.
+        """
+        self.dotool_process = subprocess.Popen("dotool", stdin=subprocess.PIPE, text=True)
+        assert self.dotool_process.stdin is not None
+
+    def _terminate_dotool(self):
+        """
+        Terminate the dotool process if it's running.
+        """
+        if self.dotool_process:
+            os.kill(self.dotool_process.pid, signal.SIGINT)
+            self.dotool_process = None
+
+    def typewrite(self, text):
+        """
+        Simulate typing the given text with the specified interval between keystrokes.
+
+        Args:
+            text (str): The text to type.
+        """
+        interval = ConfigManager.get_config_value('post_processing', 'writing_key_press_delay')
+        if self.input_method == 'pynput':
+            self._typewrite_pynput(text, interval)
+        elif self.input_method == 'ydotool':
+            self._typewrite_ydotool(text, interval)
+        elif self.input_method == 'dotool':
+            self._typewrite_dotool(text, interval)
+
+    def _typewrite_pynput(self, text, interval):
+        """
+        Simulate typing using pynput.
+
+        Args:
+            text (str): The text to type.
+            interval (float): The interval between keystrokes in seconds.
+        """
+        for char in text:
+            self.keyboard.press(char)
+            self.keyboard.release(char)
+            time.sleep(interval)
+
+    def _typewrite_ydotool(self, text, interval):
+        """
+        Simulate typing using ydotool.
+
+        Args:
+            text (str): The text to type.
+            interval (float): The interval between keystrokes in seconds.
+        """
+        cmd = "ydotool"
+        run_command_or_exit_on_failure([
+            cmd,
+            "type",
+            "--key-delay",
+            str(interval * 1000),
+            "--",
+            text,
+        ])
+
+    def _typewrite_dotool(self, text, interval):
+        """
+        Simulate typing using dotool.
+
+        Args:
+            text (str): The text to type.
+            interval (float): The interval between keystrokes in seconds.
+        """
+        assert self.dotool_process and self.dotool_process.stdin
+        self.dotool_process.stdin.write(f"typedelay {interval * 1000}\n")
+        self.dotool_process.stdin.write(f"type {text}\n")
+        self.dotool_process.stdin.flush()
+
+    def cleanup(self):
+        """
+        Perform cleanup operations, such as terminating the dotool process.
+        """
+        if self.input_method == 'dotool':
+            self._terminate_dotool()
+
+
+================================================
+File: src/key_listener.py
+================================================
+from abc import ABC, abstractmethod
+from enum import Enum, auto
+from typing import Callable, Set
+
+from utils import ConfigManager
+
+
+class InputEvent(Enum):
+    KEY_PRESS = auto()
+    KEY_RELEASE = auto()
+    MOUSE_PRESS = auto()
+    MOUSE_RELEASE = auto()
+
+class KeyCode(Enum):
+    # Modifier keys
+    CTRL_LEFT = auto()
+    CTRL_RIGHT = auto()
+    SHIFT_LEFT = auto()
+    SHIFT_RIGHT = auto()
+    ALT_LEFT = auto()
+    ALT_RIGHT = auto()
+    META_LEFT = auto()
+    META_RIGHT = auto()
+
+    # Function keys
+    F1 = auto()
+    F2 = auto()
+    F3 = auto()
+    F4 = auto()
+    F5 = auto()
+    F6 = auto()
+    F7 = auto()
+    F8 = auto()
+    F9 = auto()
+    F10 = auto()
+    F11 = auto()
+    F12 = auto()
+    F13 = auto()
+    F14 = auto()
+    F15 = auto()
+    F16 = auto()
+    F17 = auto()
+    F18 = auto()
+    F19 = auto()
+    F20 = auto()
+    F21 = auto()
+    F22 = auto()
+    F23 = auto()
+    F24 = auto()
+
+    # Number keys
+    ONE = auto()
+    TWO = auto()
+    THREE = auto()
+    FOUR = auto()
+    FIVE = auto()
+    SIX = auto()
+    SEVEN = auto()
+    EIGHT = auto()
+    NINE = auto()
+    ZERO = auto()
+
+    # Letter keys
+    A = auto()
+    B = auto()
+    C = auto()
+    D = auto()
+    E = auto()
+    F = auto()
+    G = auto()
+    H = auto()
+    I = auto()
+    J = auto()
+    K = auto()
+    L = auto()
+    M = auto()
+    N = auto()
+    O = auto()
+    P = auto()
+    Q = auto()
+    R = auto()
+    S = auto()
+    T = auto()
+    U = auto()
+    V = auto()
+    W = auto()
+    X = auto()
+    Y = auto()
+    Z = auto()
+
+    # Special keys
+    SPACE = auto()
+    ENTER = auto()
+    TAB = auto()
+    BACKSPACE = auto()
+    ESC = auto()
+    INSERT = auto()
+    DELETE = auto()
+    HOME = auto()
+    END = auto()
+    PAGE_UP = auto()
+    PAGE_DOWN = auto()
+    CAPS_LOCK = auto()
+    NUM_LOCK = auto()
+    SCROLL_LOCK = auto()
+    PAUSE = auto()
+    PRINT_SCREEN = auto()
+
+    # Arrow keys
+    UP = auto()
+    DOWN = auto()
+    LEFT = auto()
+    RIGHT = auto()
+
+    # Numpad keys
+    NUMPAD_0 = auto()
+    NUMPAD_1 = auto()
+    NUMPAD_2 = auto()
+    NUMPAD_3 = auto()
+    NUMPAD_4 = auto()
+    NUMPAD_5 = auto()
+    NUMPAD_6 = auto()
+    NUMPAD_7 = auto()
+    NUMPAD_8 = auto()
+    NUMPAD_9 = auto()
+    NUMPAD_ADD = auto()
+    NUMPAD_SUBTRACT = auto()
+    NUMPAD_MULTIPLY = auto()
+    NUMPAD_DIVIDE = auto()
+    NUMPAD_DECIMAL = auto()
+    NUMPAD_ENTER = auto()
+
+    # Additional special characters
+    MINUS = auto()
+    EQUALS = auto()
+    LEFT_BRACKET = auto()
+    RIGHT_BRACKET = auto()
+    SEMICOLON = auto()
+    QUOTE = auto()
+    BACKQUOTE = auto()
+    BACKSLASH = auto()
+    COMMA = auto()
+    PERIOD = auto()
+    SLASH = auto()
+
+    # Media keys
+    MUTE = auto()
+    VOLUME_DOWN = auto()
+    VOLUME_UP = auto()
+    PLAY_PAUSE = auto()
+    NEXT_TRACK = auto()
+    PREV_TRACK = auto()
+
+    # Additional Media and Special Function Keys
+    MEDIA_PLAY = auto()
+    MEDIA_PAUSE = auto()
+    MEDIA_PLAY_PAUSE = auto()
+    MEDIA_STOP = auto()
+    MEDIA_PREVIOUS = auto()
+    MEDIA_NEXT = auto()
+    MEDIA_REWIND = auto()
+    MEDIA_FAST_FORWARD = auto()
+    AUDIO_MUTE = auto()
+    AUDIO_VOLUME_UP = auto()
+    AUDIO_VOLUME_DOWN = auto()
+    MEDIA_SELECT = auto()
+    WWW = auto()
+    MAIL = auto()
+    CALCULATOR = auto()
+    COMPUTER = auto()
+    APP_SEARCH = auto()
+    APP_HOME = auto()
+    APP_BACK = auto()
+    APP_FORWARD = auto()
+    APP_STOP = auto()
+    APP_REFRESH = auto()
+    APP_BOOKMARKS = auto()
+    BRIGHTNESS_DOWN = auto()
+    BRIGHTNESS_UP = auto()
+    DISPLAY_SWITCH = auto()
+    KEYBOARD_ILLUMINATION_TOGGLE = auto()
+    KEYBOARD_ILLUMINATION_DOWN = auto()
+    KEYBOARD_ILLUMINATION_UP = auto()
+    EJECT = auto()
+    SLEEP = auto()
+    WAKE = auto()
+    EMOJI = auto()
+    MENU = auto()
+    CLEAR = auto()
+    LOCK = auto()
+
+    # Mouse Buttons
+    MOUSE_LEFT = auto()
+    MOUSE_RIGHT = auto()
+    MOUSE_MIDDLE = auto()
+    MOUSE_BACK = auto()
+    MOUSE_FORWARD = auto()
+    MOUSE_SIDE1 = auto()
+    MOUSE_SIDE2 = auto()
+    MOUSE_SIDE3 = auto()
+
+class InputBackend(ABC):
+    """
+    Abstract base class for input backends.
+    This class defines the interface that all input backends must implement.
+    """
+
+    @classmethod
+    @abstractmethod
+    def is_available(cls) -> bool:
+        """
+        Check if this input backend is available on the current system.
+
+        Returns:
+            bool: True if the backend is available, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def start(self):
+        """
+        Start the input backend.
+        This method should initialize any necessary resources and begin listening for input events.
+        """
+        pass
+
+    @abstractmethod
+    def stop(self):
+        """
+        Stop the input backend.
+        This method should clean up any resources and stop listening for input events.
+        """
+        pass
+
+    @abstractmethod
+    def on_input_event(self, event: tuple[KeyCode, InputEvent]):
+        """
+        Handle an input event.
+        This method is called when an input event is detected.
+
+        :param event (Tuple[KeyCode, InputEvent]): A tuple containing the key code and the type of event.
+        """
+        pass
+
+class KeyChord:
+    """
+    Represents a combination of keys that need to be pressed simultaneously.
+    """
+
+    def __init__(self, keys: Set[KeyCode | frozenset[KeyCode]]):
+        """Initialize the KeyChord."""
+        self.keys = keys
+        self.pressed_keys: Set[KeyCode] = set()
+
+    def update(self, key: KeyCode, event_type: InputEvent) -> bool:
+        """Update the state of pressed keys and check if the chord is active."""
+        if event_type == InputEvent.KEY_PRESS:
+            self.pressed_keys.add(key)
+        elif event_type == InputEvent.KEY_RELEASE:
+            self.pressed_keys.discard(key)
+
+        return self.is_active()
+
+    def is_active(self) -> bool:
+        """Check if all keys in the chord are currently pressed."""
+        for key in self.keys:
+            if isinstance(key, frozenset):
+                if not any(k in self.pressed_keys for k in key):
+                    return False
+            elif key not in self.pressed_keys:
+                return False
+        return True
+
+class KeyListener:
+    """
+    Manages input backends and listens for specific key combinations.
+    """
+
+    def __init__(self):
+        """Initialize the KeyListener with backends and activation keys."""
+        self.backends = []
+        self.active_backend = None
+        self.key_chord = None
+        self.callbacks = {
+            "on_activate": [],
+            "on_deactivate": []
+        }
+        self.load_activation_keys()
+        self.initialize_backends()
+        self.select_backend_from_config()
+
+    def initialize_backends(self):
+        """Initialize available input backends."""
+        backend_classes = [EvdevBackend, PynputBackend]
+        self.backends = [backend_class() for backend_class in backend_classes if backend_class.is_available()]
+
+    def select_backend_from_config(self):
+        """Select the active backend based on configuration."""
+        preferred_backend = ConfigManager.get_config_value('recording_options', 'input_backend')
+
+        if preferred_backend == 'auto':
+            self.select_active_backend()
+        else:
+            backend_map = {
+                'evdev': EvdevBackend,
+                'pynput': PynputBackend
+            }
+
+            if preferred_backend in backend_map:
+                try:
+                    self.set_active_backend(backend_map[preferred_backend])
+                except ValueError:
+                    print(f"Preferred backend '{preferred_backend}' is not available. Falling back to auto selection.")
+                    self.select_active_backend()
+            else:
+                print(f"Unknown backend '{preferred_backend}'. Falling back to auto selection.")
+                self.select_active_backend()
+
+    def select_active_backend(self):
+        """Select the first available backend as active."""
+        if not self.backends:
+            raise RuntimeError("No supported input backend found")
+        self.active_backend = self.backends[0]
+        self.active_backend.on_input_event = self.on_input_event
+
+    def set_active_backend(self, backend_class):
+        """Set a specific backend as active."""
+        new_backend = next((b for b in self.backends if isinstance(b, backend_class)), None)
+        if new_backend:
+            if self.active_backend:
+                self.stop()
+            self.active_backend = new_backend
+            self.active_backend.on_input_event = self.on_input_event
+            self.start()
+        else:
+            raise ValueError(f"Backend {backend_class.__name__} is not available")
+
+    def update_backend(self):
+        """Update the active backend based on current configuration."""
+        self.select_backend_from_config()
+
+    def start(self):
+        """Start the active backend."""
+        if self.active_backend:
+            self.active_backend.start()
+        else:
+            raise RuntimeError("No active backend selected")
+
+    def stop(self):
+        """Stop the active backend."""
+        if self.active_backend:
+            self.active_backend.stop()
+
+    def load_activation_keys(self):
+        """Load activation keys from configuration."""
+        key_combination = ConfigManager.get_config_value('recording_options', 'activation_key')
+        keys = self.parse_key_combination(key_combination)
+        self.set_activation_keys(keys)
+
+    def parse_key_combination(self, combination_string: str) -> Set[KeyCode | frozenset[KeyCode]]:
+        """Parse a string representation of key combination into a set of KeyCodes."""
+        keys = set()
+        key_map = {
+            'CTRL': frozenset({KeyCode.CTRL_LEFT, KeyCode.CTRL_RIGHT}),
+            'SHIFT': frozenset({KeyCode.SHIFT_LEFT, KeyCode.SHIFT_RIGHT}),
+            'ALT': frozenset({KeyCode.ALT_LEFT, KeyCode.ALT_RIGHT}),
+            'META': frozenset({KeyCode.META_LEFT, KeyCode.META_RIGHT}),
+        }
+
+        for key in combination_string.upper().split('+'):
+            key = key.strip()
+            if key in key_map:
+                keys.add(key_map[key])
+            else:
+                try:
+                    keycode = KeyCode[key]
+                    keys.add(keycode)
+                except KeyError:
+                    print(f"Unknown key: {key}")
+        return keys
+
+    def set_activation_keys(self, keys: Set[KeyCode]):
+        """Set the activation keys for the KeyChord."""
+        self.key_chord = KeyChord(keys)
+
+    def on_input_event(self, event):
+        """Handle input events and trigger callbacks if the key chord becomes active or inactive."""
+        if not self.key_chord or not self.active_backend:
+            return
+
+        key, event_type = event
+
+        was_active = self.key_chord.is_active()
+        is_active = self.key_chord.update(key, event_type)
+
+        if not was_active and is_active:
+            self._trigger_callbacks("on_activate")
+        elif was_active and not is_active:
+            self._trigger_callbacks("on_deactivate")
+
+    def add_callback(self, event: str, callback: Callable):
+        """Add a callback function for a specific event."""
+        if event in self.callbacks:
+            self.callbacks[event].append(callback)
+
+    def _trigger_callbacks(self, event: str):
+        """Trigger all callbacks associated with a specific event."""
+        for callback in self.callbacks.get(event, []):
+            callback()
+
+    def update_activation_keys(self):
+        """Update activation keys from the current configuration."""
+        self.load_activation_keys()
+
+class EvdevBackend(InputBackend):
+    """
+    Backend for handling input events using the evdev library.
+    """
+
+    @classmethod
+    def is_available(cls) -> bool:
+        """Check if the evdev library is available."""
+        try:
+            import evdev
+            return True
+        except ImportError:
+            return False
+
+    def __init__(self):
+        """Initialize the EvdevBackend."""
+        self.devices: List[evdev.InputDevice] = []
+        self.key_map: Optional[dict] = None
+        self.evdev = None
+        self.thread: Optional[threading.Thread] = None
+        self.stop_event: Optional[threading.Event] = None
+
+    def start(self):
+        """Start the evdev backend."""
+        import evdev
+        import threading
+        self.evdev = evdev
+        self.key_map = self._create_key_map()
+
+        # Initialize input devices
+        self.devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+        self.stop_event = threading.Event()
+        self._setup_signal_handler()
+        self._start_listening()
+
+    def _setup_signal_handler(self):
+        """Set up signal handlers for graceful shutdown."""
+        import signal
+
+        def signal_handler(signum, frame):
+            print("Received termination signal. Stopping evdev backend...")
+            self.stop()
+
+        signal.signal(signal.SIGTERM, signal_handler)
+        signal.signal(signal.SIGINT, signal_handler)
+
+    def stop(self):
+        """Stop the evdev backend and clean up resources."""
+        if self.stop_event:
+            self.stop_event.set()
+
+        if self.thread:
+            self.thread.join(timeout=1)  # Wait for up to 1 second
+            if self.thread.is_alive():
+                print("Thread did not terminate in time. Forcing exit.")
+
+        # Close all devices
+        for device in self.devices:
+            try:
+                device.close()
+            except Exception:
+                pass  # Ignore errors when closing devices
+        self.devices = []
+
+    def _start_listening(self):
+        """Start the listening thread."""
+        import threading
+        self.thread = threading.Thread(target=self._listen_loop)
+        self.thread.start()
+
+    def _listen_loop(self):
+        """Main loop for listening to input events."""
+        import select
+        while not self.stop_event.is_set():
+            try:
+                # Wait for input events with a timeout of 0.1 seconds
+                r, _, _ = select.select(self.devices, [], [], 0.1)
+                for device in r:
+                    self._read_device_events(device)
+            except Exception as e:
+                if self.stop_event.is_set():
+                    break
+                print(f"Unexpected error in _listen_loop: {e}")
+
+    def _read_device_events(self, device):
+        """Read and process events from a single device."""
+        try:
+            for event in device.read():
+                if event.type == self.evdev.ecodes.EV_KEY:
+                    self._handle_input_event(event)
+        except Exception as e:
+            self._handle_device_error(device, e)
+
+    def _handle_device_error(self, device, error):
+        """Handle errors that occur when reading from a device."""
+        import errno
+        if isinstance(error, BlockingIOError) and error.errno == errno.EAGAIN:
+            return  # Non-blocking IO is expected, just continue
+        if isinstance(error, OSError) and (error.errno == errno.EBADF or error.errno == errno.ENODEV):
+            print(f"Device {device.path} is no longer available. Removing it.")
+            self.devices.remove(device)
+        else:
+            print(f"Unexpected error reading device: {error}")
+
+    def _handle_input_event(self, event):
+        """Process a single input event."""
+        key_code, event_type = self._translate_key_event(event)
+        if key_code is not None and event_type is not None:
+            self.on_input_event((key_code, event_type))
+
+    def _translate_key_event(self, event) -> tuple[KeyCode | None, InputEvent | None]:
+        """Translate an evdev event to our internal representation."""
+        key_event = self.evdev.categorize(event)
+        if not isinstance(key_event, self.evdev.events.KeyEvent):
+            return None, None
+
+        key_code = self.key_map.get(key_event.scancode)
+        if key_code is None:
+            return None, None
+
+        if key_event.keystate in [key_event.key_down, key_event.key_hold]:
+            event_type = InputEvent.KEY_PRESS
+        elif key_event.keystate == key_event.key_up:
+            event_type = InputEvent.KEY_RELEASE
+        else:
+            return None, None
+
+        return key_code, event_type
+
+    def _create_key_map(self):
+        """Create a mapping from evdev key codes to our internal KeyCode enum."""
+        return {
+            # Modifier keys
+            self.evdev.ecodes.KEY_LEFTCTRL: KeyCode.CTRL_LEFT,
+            self.evdev.ecodes.KEY_RIGHTCTRL: KeyCode.CTRL_RIGHT,
+            self.evdev.ecodes.KEY_LEFTSHIFT: KeyCode.SHIFT_LEFT,
+            self.evdev.ecodes.KEY_RIGHTSHIFT: KeyCode.SHIFT_RIGHT,
+            self.evdev.ecodes.KEY_LEFTALT: KeyCode.ALT_LEFT,
+            self.evdev.ecodes.KEY_RIGHTALT: KeyCode.ALT_RIGHT,
+            self.evdev.ecodes.KEY_LEFTMETA: KeyCode.META_LEFT,
+            self.evdev.ecodes.KEY_RIGHTMETA: KeyCode.META_RIGHT,
+
+            # Function keys
+            self.evdev.ecodes.KEY_F1: KeyCode.F1,
+            self.evdev.ecodes.KEY_F2: KeyCode.F2,
+            self.evdev.ecodes.KEY_F3: KeyCode.F3,
+            self.evdev.ecodes.KEY_F4: KeyCode.F4,
+            self.evdev.ecodes.KEY_F5: KeyCode.F5,
+            self.evdev.ecodes.KEY_F6: KeyCode.F6,
+            self.evdev.ecodes.KEY_F7: KeyCode.F7,
+            self.evdev.ecodes.KEY_F8: KeyCode.F8,
+            self.evdev.ecodes.KEY_F9: KeyCode.F9,
+            self.evdev.ecodes.KEY_F10: KeyCode.F10,
+            self.evdev.ecodes.KEY_F11: KeyCode.F11,
+            self.evdev.ecodes.KEY_F12: KeyCode.F12,
+
+            # Number keys
+            self.evdev.ecodes.KEY_1: KeyCode.ONE,
+            self.evdev.ecodes.KEY_2: KeyCode.TWO,
+            self.evdev.ecodes.KEY_3: KeyCode.THREE,
+            self.evdev.ecodes.KEY_4: KeyCode.FOUR,
+            self.evdev.ecodes.KEY_5: KeyCode.FIVE,
+            self.evdev.ecodes.KEY_6: KeyCode.SIX,
+            self.evdev.ecodes.KEY_7: KeyCode.SEVEN,
+            self.evdev.ecodes.KEY_8: KeyCode.EIGHT,
+            self.evdev.ecodes.KEY_9: KeyCode.NINE,
+            self.evdev.ecodes.KEY_0: KeyCode.ZERO,
+
+            # Letter keys
+            self.evdev.ecodes.KEY_A: KeyCode.A,
+            self.evdev.ecodes.KEY_B: KeyCode.B,
+            self.evdev.ecodes.KEY_C: KeyCode.C,
+            self.evdev.ecodes.KEY_D: KeyCode.D,
+            self.evdev.ecodes.KEY_E: KeyCode.E,
+            self.evdev.ecodes.KEY_F: KeyCode.F,
+            self.evdev.ecodes.KEY_G: KeyCode.G,
+            self.evdev.ecodes.KEY_H: KeyCode.H,
+            self.evdev.ecodes.KEY_I: KeyCode.I,
+            self.evdev.ecodes.KEY_J: KeyCode.J,
+            self.evdev.ecodes.KEY_K: KeyCode.K,
+            self.evdev.ecodes.KEY_L: KeyCode.L,
+            self.evdev.ecodes.KEY_M: KeyCode.M,
+            self.evdev.ecodes.KEY_N: KeyCode.N,
+            self.evdev.ecodes.KEY_O: KeyCode.O,
+            self.evdev.ecodes.KEY_P: KeyCode.P,
+            self.evdev.ecodes.KEY_Q: KeyCode.Q,
+            self.evdev.ecodes.KEY_R: KeyCode.R,
+            self.evdev.ecodes.KEY_S: KeyCode.S,
+            self.evdev.ecodes.KEY_T: KeyCode.T,
+            self.evdev.ecodes.KEY_U: KeyCode.U,
+            self.evdev.ecodes.KEY_V: KeyCode.V,
+            self.evdev.ecodes.KEY_W: KeyCode.W,
+            self.evdev.ecodes.KEY_X: KeyCode.X,
+            self.evdev.ecodes.KEY_Y: KeyCode.Y,
+            self.evdev.ecodes.KEY_Z: KeyCode.Z,
+
+            # Special keys
+            self.evdev.ecodes.KEY_SPACE: KeyCode.SPACE,
+            self.evdev.ecodes.KEY_ENTER: KeyCode.ENTER,
+            self.evdev.ecodes.KEY_TAB: KeyCode.TAB,
+            self.evdev.ecodes.KEY_BACKSPACE: KeyCode.BACKSPACE,
+            self.evdev.ecodes.KEY_ESC: KeyCode.ESC,
+            self.evdev.ecodes.KEY_INSERT: KeyCode.INSERT,
+            self.evdev.ecodes.KEY_DELETE: KeyCode.DELETE,
+            self.evdev.ecodes.KEY_HOME: KeyCode.HOME,
+            self.evdev.ecodes.KEY_END: KeyCode.END,
+            self.evdev.ecodes.KEY_PAGEUP: KeyCode.PAGE_UP,
+            self.evdev.ecodes.KEY_PAGEDOWN: KeyCode.PAGE_DOWN,
+            self.evdev.ecodes.KEY_CAPSLOCK: KeyCode.CAPS_LOCK,
+            self.evdev.ecodes.KEY_NUMLOCK: KeyCode.NUM_LOCK,
+            self.evdev.ecodes.KEY_SCROLLLOCK: KeyCode.SCROLL_LOCK,
+            self.evdev.ecodes.KEY_PAUSE: KeyCode.PAUSE,
+            self.evdev.ecodes.KEY_SYSRQ: KeyCode.PRINT_SCREEN,
+
+            # Arrow keys
+            self.evdev.ecodes.KEY_UP: KeyCode.UP,
+            self.evdev.ecodes.KEY_DOWN: KeyCode.DOWN,
+            self.evdev.ecodes.KEY_LEFT: KeyCode.LEFT,
+            self.evdev.ecodes.KEY_RIGHT: KeyCode.RIGHT,
+
+            # Numpad keys
+            self.evdev.ecodes.KEY_KP0: KeyCode.NUMPAD_0,
+            self.evdev.ecodes.KEY_KP1: KeyCode.NUMPAD_1,
+            self.evdev.ecodes.KEY_KP2: KeyCode.NUMPAD_2,
+            self.evdev.ecodes.KEY_KP3: KeyCode.NUMPAD_3,
+            self.evdev.ecodes.KEY_KP4: KeyCode.NUMPAD_4,
+            self.evdev.ecodes.KEY_KP5: KeyCode.NUMPAD_5,
+            self.evdev.ecodes.KEY_KP6: KeyCode.NUMPAD_6,
+            self.evdev.ecodes.KEY_KP7: KeyCode.NUMPAD_7,
+            self.evdev.ecodes.KEY_KP8: KeyCode.NUMPAD_8,
+            self.evdev.ecodes.KEY_KP9: KeyCode.NUMPAD_9,
+            self.evdev.ecodes.KEY_KPPLUS: KeyCode.NUMPAD_ADD,
+            self.evdev.ecodes.KEY_KPMINUS: KeyCode.NUMPAD_SUBTRACT,
+            self.evdev.ecodes.KEY_KPASTERISK: KeyCode.NUMPAD_MULTIPLY,
+            self.evdev.ecodes.KEY_KPSLASH: KeyCode.NUMPAD_DIVIDE,
+            self.evdev.ecodes.KEY_KPDOT: KeyCode.NUMPAD_DECIMAL,
+            self.evdev.ecodes.KEY_KPENTER: KeyCode.NUMPAD_ENTER,
+
+            # Additional special characters
+            self.evdev.ecodes.KEY_MINUS: KeyCode.MINUS,
+            self.evdev.ecodes.KEY_EQUAL: KeyCode.EQUALS,
+            self.evdev.ecodes.KEY_LEFTBRACE: KeyCode.LEFT_BRACKET,
+            self.evdev.ecodes.KEY_RIGHTBRACE: KeyCode.RIGHT_BRACKET,
+            self.evdev.ecodes.KEY_SEMICOLON: KeyCode.SEMICOLON,
+            self.evdev.ecodes.KEY_APOSTROPHE: KeyCode.QUOTE,
+            self.evdev.ecodes.KEY_GRAVE: KeyCode.BACKQUOTE,
+            self.evdev.ecodes.KEY_BACKSLASH: KeyCode.BACKSLASH,
+            self.evdev.ecodes.KEY_COMMA: KeyCode.COMMA,
+            self.evdev.ecodes.KEY_DOT: KeyCode.PERIOD,
+            self.evdev.ecodes.KEY_SLASH: KeyCode.SLASH,
+
+            # Media keys
+            self.evdev.ecodes.KEY_MUTE: KeyCode.MUTE,
+            self.evdev.ecodes.KEY_VOLUMEDOWN: KeyCode.VOLUME_DOWN,
+            self.evdev.ecodes.KEY_VOLUMEUP: KeyCode.VOLUME_UP,
+            self.evdev.ecodes.KEY_PLAYPAUSE: KeyCode.PLAY_PAUSE,
+            self.evdev.ecodes.KEY_NEXTSONG: KeyCode.NEXT_TRACK,
+            self.evdev.ecodes.KEY_PREVIOUSSONG: KeyCode.PREV_TRACK,
+
+            # Additional function keys (if needed)
+            self.evdev.ecodes.KEY_F13: KeyCode.F13,
+            self.evdev.ecodes.KEY_F14: KeyCode.F14,
+            self.evdev.ecodes.KEY_F15: KeyCode.F15,
+            self.evdev.ecodes.KEY_F16: KeyCode.F16,
+            self.evdev.ecodes.KEY_F17: KeyCode.F17,
+            self.evdev.ecodes.KEY_F18: KeyCode.F18,
+            self.evdev.ecodes.KEY_F19: KeyCode.F19,
+            self.evdev.ecodes.KEY_F20: KeyCode.F20,
+            self.evdev.ecodes.KEY_F21: KeyCode.F21,
+            self.evdev.ecodes.KEY_F22: KeyCode.F22,
+            self.evdev.ecodes.KEY_F23: KeyCode.F23,
+            self.evdev.ecodes.KEY_F24: KeyCode.F24,
+
+            # Additional Media and Special Function Keys
+            self.evdev.ecodes.KEY_PLAYPAUSE: KeyCode.MEDIA_PLAY_PAUSE,
+            self.evdev.ecodes.KEY_STOP: KeyCode.MEDIA_STOP,
+            self.evdev.ecodes.KEY_PREVIOUSSONG: KeyCode.MEDIA_PREVIOUS,
+            self.evdev.ecodes.KEY_NEXTSONG: KeyCode.MEDIA_NEXT,
+            self.evdev.ecodes.KEY_REWIND: KeyCode.MEDIA_REWIND,
+            self.evdev.ecodes.KEY_FASTFORWARD: KeyCode.MEDIA_FAST_FORWARD,
+            self.evdev.ecodes.KEY_MUTE: KeyCode.AUDIO_MUTE,
+            self.evdev.ecodes.KEY_VOLUMEUP: KeyCode.AUDIO_VOLUME_UP,
+            self.evdev.ecodes.KEY_VOLUMEDOWN: KeyCode.AUDIO_VOLUME_DOWN,
+            self.evdev.ecodes.KEY_MEDIA: KeyCode.MEDIA_SELECT,
+            self.evdev.ecodes.KEY_WWW: KeyCode.WWW,
+            self.evdev.ecodes.KEY_MAIL: KeyCode.MAIL,
+            self.evdev.ecodes.KEY_CALC: KeyCode.CALCULATOR,
+            self.evdev.ecodes.KEY_COMPUTER: KeyCode.COMPUTER,
+            self.evdev.ecodes.KEY_SEARCH: KeyCode.APP_SEARCH,
+            self.evdev.ecodes.KEY_HOMEPAGE: KeyCode.APP_HOME,
+            self.evdev.ecodes.KEY_BACK: KeyCode.APP_BACK,
+            self.evdev.ecodes.KEY_FORWARD: KeyCode.APP_FORWARD,
+            self.evdev.ecodes.KEY_STOP: KeyCode.APP_STOP,
+            self.evdev.ecodes.KEY_REFRESH: KeyCode.APP_REFRESH,
+            self.evdev.ecodes.KEY_BOOKMARKS: KeyCode.APP_BOOKMARKS,
+            self.evdev.ecodes.KEY_BRIGHTNESSDOWN: KeyCode.BRIGHTNESS_DOWN,
+            self.evdev.ecodes.KEY_BRIGHTNESSUP: KeyCode.BRIGHTNESS_UP,
+            self.evdev.ecodes.KEY_DISPLAYTOGGLE: KeyCode.DISPLAY_SWITCH,
+            self.evdev.ecodes.KEY_KBDILLUMTOGGLE: KeyCode.KEYBOARD_ILLUMINATION_TOGGLE,
+            self.evdev.ecodes.KEY_KBDILLUMDOWN: KeyCode.KEYBOARD_ILLUMINATION_DOWN,
+            self.evdev.ecodes.KEY_KBDILLUMUP: KeyCode.KEYBOARD_ILLUMINATION_UP,
+            self.evdev.ecodes.KEY_EJECTCD: KeyCode.EJECT,
+            self.evdev.ecodes.KEY_SLEEP: KeyCode.SLEEP,
+            self.evdev.ecodes.KEY_WAKEUP: KeyCode.WAKE,
+            self.evdev.ecodes.KEY_COMPOSE: KeyCode.EMOJI,
+            self.evdev.ecodes.KEY_MENU: KeyCode.MENU,
+            self.evdev.ecodes.KEY_CLEAR: KeyCode.CLEAR,
+            self.evdev.ecodes.KEY_SCREENLOCK: KeyCode.LOCK,
+
+            # Mouse Buttons
+            self.evdev.ecodes.BTN_LEFT: KeyCode.MOUSE_LEFT,
+            self.evdev.ecodes.BTN_RIGHT: KeyCode.MOUSE_RIGHT,
+            self.evdev.ecodes.BTN_MIDDLE: KeyCode.MOUSE_MIDDLE,
+            self.evdev.ecodes.BTN_SIDE: KeyCode.MOUSE_BACK,
+            self.evdev.ecodes.BTN_EXTRA: KeyCode.MOUSE_FORWARD,
+            self.evdev.ecodes.BTN_FORWARD: KeyCode.MOUSE_SIDE1,
+            self.evdev.ecodes.BTN_BACK: KeyCode.MOUSE_SIDE2,
+            self.evdev.ecodes.BTN_TASK: KeyCode.MOUSE_SIDE3,
+        }
+
+    def on_input_event(self, event):
+        """
+        Callback method to be overridden by the KeyListener.
+        This method is called for each processed input event.
+        """
+        pass
+
+class PynputBackend(InputBackend):
+    """
+    Input backend implementation using the pynput library.
+    """
+
+    @classmethod
+    def is_available(cls) -> bool:
+        """Check if pynput library is available."""
+        try:
+            import pynput
+            return True
+        except ImportError:
+            return False
+
+    def __init__(self):
+        """Initialize PynputBackend."""
+        self.keyboard_listener = None
+        self.mouse_listener = None
+        self.keyboard = None
+        self.mouse = None
+        self.key_map = None
+
+    def start(self):
+        """Start listening for keyboard and mouse events."""
+        if self.keyboard is None or self.mouse is None:
+            from pynput import keyboard, mouse
+            self.keyboard = keyboard
+            self.mouse = mouse
+            self.key_map = self._create_key_map()
+
+        self.keyboard_listener = self.keyboard.Listener(
+            on_press=self._on_keyboard_press,
+            on_release=self._on_keyboard_release
+        )
+        self.mouse_listener = self.mouse.Listener(
+            on_click=self._on_mouse_click
+        )
+        self.keyboard_listener.start()
+        self.mouse_listener.start()
+
+    def stop(self):
+        """Stop listening for keyboard and mouse events."""
+        if self.keyboard_listener:
+            self.keyboard_listener.stop()
+            self.keyboard_listener = None
+        if self.mouse_listener:
+            self.mouse_listener.stop()
+            self.mouse_listener = None
+
+    def _translate_key_event(self, native_event) -> tuple[KeyCode, InputEvent]:
+        """Translate a pynput event to our internal event representation."""
+        pynput_key, is_press = native_event
+        key_code = self.key_map.get(pynput_key, KeyCode.SPACE)
+        event_type = InputEvent.KEY_PRESS if is_press else InputEvent.KEY_RELEASE
+        return key_code, event_type
+
+    def _on_keyboard_press(self, key):
+        """Handle keyboard press events."""
+        translated_event = self._translate_key_event((key, True))
+        self.on_input_event(translated_event)
+
+    def _on_keyboard_release(self, key):
+        """Handle keyboard release events."""
+        translated_event = self._translate_key_event((key, False))
+        self.on_input_event(translated_event)
+
+    def _on_mouse_click(self, x, y, button, pressed):
+        """Handle mouse click events."""
+        translated_event = self._translate_key_event((button, pressed))
+        self.on_input_event(translated_event)
+
+    def _create_key_map(self):
+        """Create a mapping from pynput keys to our internal KeyCode enum."""
+        return {
+            # Modifier keys
+            self.keyboard.Key.ctrl_l: KeyCode.CTRL_LEFT,
+            self.keyboard.Key.ctrl_r: KeyCode.CTRL_RIGHT,
+            self.keyboard.Key.shift_l: KeyCode.SHIFT_LEFT,
+            self.keyboard.Key.shift_r: KeyCode.SHIFT_RIGHT,
+            self.keyboard.Key.alt_l: KeyCode.ALT_LEFT,
+            self.keyboard.Key.alt_r: KeyCode.ALT_RIGHT,
+            self.keyboard.Key.cmd_l: KeyCode.META_LEFT,
+            self.keyboard.Key.cmd_r: KeyCode.META_RIGHT,
+
+            # Function keys
+            self.keyboard.Key.f1: KeyCode.F1,
+            self.keyboard.Key.f2: KeyCode.F2,
+            self.keyboard.Key.f3: KeyCode.F3,
+            self.keyboard.Key.f4: KeyCode.F4,
+            self.keyboard.Key.f5: KeyCode.F5,
+            self.keyboard.Key.f6: KeyCode.F6,
+            self.keyboard.Key.f7: KeyCode.F7,
+            self.keyboard.Key.f8: KeyCode.F8,
+            self.keyboard.Key.f9: KeyCode.F9,
+            self.keyboard.Key.f10: KeyCode.F10,
+            self.keyboard.Key.f11: KeyCode.F11,
+            self.keyboard.Key.f12: KeyCode.F12,
+            self.keyboard.Key.f13: KeyCode.F13,
+            self.keyboard.Key.f14: KeyCode.F14,
+            self.keyboard.Key.f15: KeyCode.F15,
+            self.keyboard.Key.f16: KeyCode.F16,
+            self.keyboard.Key.f17: KeyCode.F17,
+            self.keyboard.Key.f18: KeyCode.F18,
+            self.keyboard.Key.f19: KeyCode.F19,
+            self.keyboard.Key.f20: KeyCode.F20,
+
+            # Number keys
+            self.keyboard.KeyCode.from_char('1'): KeyCode.ONE,
+            self.keyboard.KeyCode.from_char('2'): KeyCode.TWO,
+            self.keyboard.KeyCode.from_char('3'): KeyCode.THREE,
+            self.keyboard.KeyCode.from_char('4'): KeyCode.FOUR,
+            self.keyboard.KeyCode.from_char('5'): KeyCode.FIVE,
+            self.keyboard.KeyCode.from_char('6'): KeyCode.SIX,
+            self.keyboard.KeyCode.from_char('7'): KeyCode.SEVEN,
+            self.keyboard.KeyCode.from_char('8'): KeyCode.EIGHT,
+            self.keyboard.KeyCode.from_char('9'): KeyCode.NINE,
+            self.keyboard.KeyCode.from_char('0'): KeyCode.ZERO,
+
+            # Letter keys
+            self.keyboard.KeyCode.from_char('a'): KeyCode.A,
+            self.keyboard.KeyCode.from_char('b'): KeyCode.B,
+            self.keyboard.KeyCode.from_char('c'): KeyCode.C,
+            self.keyboard.KeyCode.from_char('d'): KeyCode.D,
+            self.keyboard.KeyCode.from_char('e'): KeyCode.E,
+            self.keyboard.KeyCode.from_char('f'): KeyCode.F,
+            self.keyboard.KeyCode.from_char('g'): KeyCode.G,
+            self.keyboard.KeyCode.from_char('h'): KeyCode.H,
+            self.keyboard.KeyCode.from_char('i'): KeyCode.I,
+            self.keyboard.KeyCode.from_char('j'): KeyCode.J,
+            self.keyboard.KeyCode.from_char('k'): KeyCode.K,
+            self.keyboard.KeyCode.from_char('l'): KeyCode.L,
+            self.keyboard.KeyCode.from_char('m'): KeyCode.M,
+            self.keyboard.KeyCode.from_char('n'): KeyCode.N,
+            self.keyboard.KeyCode.from_char('o'): KeyCode.O,
+            self.keyboard.KeyCode.from_char('p'): KeyCode.P,
+            self.keyboard.KeyCode.from_char('q'): KeyCode.Q,
+            self.keyboard.KeyCode.from_char('r'): KeyCode.R,
+            self.keyboard.KeyCode.from_char('s'): KeyCode.S,
+            self.keyboard.KeyCode.from_char('t'): KeyCode.T,
+            self.keyboard.KeyCode.from_char('u'): KeyCode.U,
+            self.keyboard.KeyCode.from_char('v'): KeyCode.V,
+            self.keyboard.KeyCode.from_char('w'): KeyCode.W,
+            self.keyboard.KeyCode.from_char('x'): KeyCode.X,
+            self.keyboard.KeyCode.from_char('y'): KeyCode.Y,
+            self.keyboard.KeyCode.from_char('z'): KeyCode.Z,
+
+            # Special keys
+            self.keyboard.Key.space: KeyCode.SPACE,
+            self.keyboard.Key.enter: KeyCode.ENTER,
+            self.keyboard.Key.tab: KeyCode.TAB,
+            self.keyboard.Key.backspace: KeyCode.BACKSPACE,
+            self.keyboard.Key.esc: KeyCode.ESC,
+            self.keyboard.Key.insert: KeyCode.INSERT,
+            self.keyboard.Key.delete: KeyCode.DELETE,
+            self.keyboard.Key.home: KeyCode.HOME,
+            self.keyboard.Key.end: KeyCode.END,
+            self.keyboard.Key.page_up: KeyCode.PAGE_UP,
+            self.keyboard.Key.page_down: KeyCode.PAGE_DOWN,
+            self.keyboard.Key.caps_lock: KeyCode.CAPS_LOCK,
+            self.keyboard.Key.num_lock: KeyCode.NUM_LOCK,
+            self.keyboard.Key.scroll_lock: KeyCode.SCROLL_LOCK,
+            self.keyboard.Key.pause: KeyCode.PAUSE,
+            self.keyboard.Key.print_screen: KeyCode.PRINT_SCREEN,
+
+            # Arrow keys
+            self.keyboard.Key.up: KeyCode.UP,
+            self.keyboard.Key.down: KeyCode.DOWN,
+            self.keyboard.Key.left: KeyCode.LEFT,
+            self.keyboard.Key.right: KeyCode.RIGHT,
+
+            # Numpad keys
+            self.keyboard.Key.num_lock: KeyCode.NUM_LOCK,
+            self.keyboard.KeyCode.from_vk(96): KeyCode.NUMPAD_0,
+            self.keyboard.KeyCode.from_vk(97): KeyCode.NUMPAD_1,
+            self.keyboard.KeyCode.from_vk(98): KeyCode.NUMPAD_2,
+            self.keyboard.KeyCode.from_vk(99): KeyCode.NUMPAD_3,
+            self.keyboard.KeyCode.from_vk(100): KeyCode.NUMPAD_4,
+            self.keyboard.KeyCode.from_vk(101): KeyCode.NUMPAD_5,
+            self.keyboard.KeyCode.from_vk(102): KeyCode.NUMPAD_6,
+            self.keyboard.KeyCode.from_vk(103): KeyCode.NUMPAD_7,
+            self.keyboard.KeyCode.from_vk(104): KeyCode.NUMPAD_8,
+            self.keyboard.KeyCode.from_vk(105): KeyCode.NUMPAD_9,
+            self.keyboard.KeyCode.from_vk(107): KeyCode.NUMPAD_ADD,
+            self.keyboard.KeyCode.from_vk(109): KeyCode.NUMPAD_SUBTRACT,
+            self.keyboard.KeyCode.from_vk(106): KeyCode.NUMPAD_MULTIPLY,
+            self.keyboard.KeyCode.from_vk(111): KeyCode.NUMPAD_DIVIDE,
+            self.keyboard.KeyCode.from_vk(110): KeyCode.NUMPAD_DECIMAL,
+
+            # Additional special characters
+            self.keyboard.KeyCode.from_char('-'): KeyCode.MINUS,
+            self.keyboard.KeyCode.from_char('='): KeyCode.EQUALS,
+            self.keyboard.KeyCode.from_char('['): KeyCode.LEFT_BRACKET,
+            self.keyboard.KeyCode.from_char(']'): KeyCode.RIGHT_BRACKET,
+            self.keyboard.KeyCode.from_char(';'): KeyCode.SEMICOLON,
+            self.keyboard.KeyCode.from_char("'"): KeyCode.QUOTE,
+            self.keyboard.KeyCode.from_char('`'): KeyCode.BACKQUOTE,
+            self.keyboard.KeyCode.from_char('\\'): KeyCode.BACKSLASH,
+            self.keyboard.KeyCode.from_char(','): KeyCode.COMMA,
+            self.keyboard.KeyCode.from_char('.'): KeyCode.PERIOD,
+            self.keyboard.KeyCode.from_char('/'): KeyCode.SLASH,
+
+            # Media keys
+            self.keyboard.Key.media_volume_mute: KeyCode.AUDIO_MUTE,
+            self.keyboard.Key.media_volume_down: KeyCode.AUDIO_VOLUME_DOWN,
+            self.keyboard.Key.media_volume_up: KeyCode.AUDIO_VOLUME_UP,
+            self.keyboard.Key.media_play_pause: KeyCode.MEDIA_PLAY_PAUSE,
+            self.keyboard.Key.media_next: KeyCode.MEDIA_NEXT,
+            self.keyboard.Key.media_previous: KeyCode.MEDIA_PREVIOUS,
+
+            # Mouse buttons
+            self.mouse.Button.left: KeyCode.MOUSE_LEFT,
+            self.mouse.Button.right: KeyCode.MOUSE_RIGHT,
+            self.mouse.Button.middle: KeyCode.MOUSE_MIDDLE,
+        }
+
+    def on_input_event(self, event):
+        """
+        Callback method to be set by the KeyListener.
+        This method is called for each processed input event.
+        """
+        pass
+
+
+================================================
+File: src/main.py
+================================================
+import os
+import sys
+import time
+from audioplayer import AudioPlayer
+from pynput.keyboard import Controller
+from PyQt5.QtCore import QObject, QProcess
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QAction, QMessageBox
+
+from key_listener import KeyListener
+from result_thread import ResultThread
+from ui.main_window import MainWindow
+from ui.settings_window import SettingsWindow
+from ui.status_window import StatusWindow
+from transcription import create_local_model
+from input_simulation import InputSimulator
+from utils import ConfigManager
+
+
+class WhisperWriterApp(QObject):
+    def __init__(self):
+        """
+        Initialize the application, opening settings window if no configuration file is found.
+        """
+        super().__init__()
+        self.app = QApplication(sys.argv)
+        self.app.setWindowIcon(QIcon(os.path.join('assets', 'ww-logo.png')))
+
+        ConfigManager.initialize()
+
+        self.settings_window = SettingsWindow()
+        self.settings_window.settings_closed.connect(self.on_settings_closed)
+        self.settings_window.settings_saved.connect(self.restart_app)
+
+        if ConfigManager.config_file_exists():
+            self.initialize_components()
+        else:
+            print('No valid configuration file found. Opening settings window...')
+            self.settings_window.show()
+
+    def initialize_components(self):
+        """
+        Initialize the components of the application.
+        """
+        self.input_simulator = InputSimulator()
+
+        self.key_listener = KeyListener()
+        self.key_listener.add_callback("on_activate", self.on_activation)
+        self.key_listener.add_callback("on_deactivate", self.on_deactivation)
+
+        model_options = ConfigManager.get_config_section('model_options')
+        model_path = model_options.get('local', {}).get('model_path')
+        self.local_model = create_local_model() if not model_options.get('use_api') else None
+
+        self.result_thread = None
+
+        self.main_window = MainWindow()
+        self.main_window.openSettings.connect(self.settings_window.show)
+        self.main_window.startListening.connect(self.key_listener.start)
+        self.main_window.closeApp.connect(self.exit_app)
+
+        if not ConfigManager.get_config_value('misc', 'hide_status_window'):
+            self.status_window = StatusWindow()
+
+        self.create_tray_icon()
+        self.main_window.show()
+
+    def create_tray_icon(self):
+        """
+        Create the system tray icon and its context menu.
+        """
+        self.tray_icon = QSystemTrayIcon(QIcon(os.path.join('assets', 'ww-logo.png')), self.app)
+
+        tray_menu = QMenu()
+
+        show_action = QAction('WhisperWriter Main Menu', self.app)
+        show_action.triggered.connect(self.main_window.show)
+        tray_menu.addAction(show_action)
+
+        settings_action = QAction('Open Settings', self.app)
+        settings_action.triggered.connect(self.settings_window.show)
+        tray_menu.addAction(settings_action)
+
+        exit_action = QAction('Exit', self.app)
+        exit_action.triggered.connect(self.exit_app)
+        tray_menu.addAction(exit_action)
+
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.show()
+
+    def cleanup(self):
+        if self.key_listener:
+            self.key_listener.stop()
+        if self.input_simulator:
+            self.input_simulator.cleanup()
+
+    def exit_app(self):
+        """
+        Exit the application.
+        """
+        self.cleanup()
+        QApplication.quit()
+
+    def restart_app(self):
+        """Restart the application to apply the new settings."""
+        self.cleanup()
+        QApplication.quit()
+        QProcess.startDetached(sys.executable, sys.argv)
+
+    def on_settings_closed(self):
+        """
+        If settings is closed without saving on first run, initialize the components with default values.
+        """
+        if not os.path.exists(os.path.join('src', 'config.yaml')):
+            QMessageBox.information(
+                self.settings_window,
+                'Using Default Values',
+                'Settings closed without saving. Default values are being used.'
+            )
+            self.initialize_components()
+
+    def on_activation(self):
+        """
+        Called when the activation key combination is pressed.
+        """
+        if self.result_thread and self.result_thread.isRunning():
+            recording_mode = ConfigManager.get_config_value('recording_options', 'recording_mode')
+            if recording_mode == 'press_to_toggle':
+                self.result_thread.stop_recording()
+            elif recording_mode == 'continuous':
+                self.stop_result_thread()
+            return
+
+        self.start_result_thread()
+
+    def on_deactivation(self):
+        """
+        Called when the activation key combination is released.
+        """
+        if ConfigManager.get_config_value('recording_options', 'recording_mode') == 'hold_to_record':
+            if self.result_thread and self.result_thread.isRunning():
+                self.result_thread.stop_recording()
+
+    def start_result_thread(self):
+        """
+        Start the result thread to record audio and transcribe it.
+        """
+        if self.result_thread and self.result_thread.isRunning():
+            return
+
+        self.result_thread = ResultThread(self.local_model)
+        if not ConfigManager.get_config_value('misc', 'hide_status_window'):
+            self.result_thread.statusSignal.connect(self.status_window.updateStatus)
+            self.status_window.closeSignal.connect(self.stop_result_thread)
+        self.result_thread.resultSignal.connect(self.on_transcription_complete)
+        self.result_thread.start()
+
+    def stop_result_thread(self):
+        """
+        Stop the result thread.
+        """
+        if self.result_thread and self.result_thread.isRunning():
+            self.result_thread.stop()
+
+    def on_transcription_complete(self, result):
+        """
+        When the transcription is complete, type the result and start listening for the activation key again.
+        """
+        self.input_simulator.typewrite(result)
+
+        if ConfigManager.get_config_value('misc', 'noise_on_completion'):
+            AudioPlayer(os.path.join('assets', 'beep.wav')).play(block=True)
+
+        if ConfigManager.get_config_value('recording_options', 'recording_mode') == 'continuous':
+            self.start_result_thread()
+        else:
+            self.key_listener.start()
+
+    def run(self):
+        """
+        Start the application.
+        """
+        sys.exit(self.app.exec_())
+
+
+if __name__ == '__main__':
+    app = WhisperWriterApp()
+    app.run()
+
+
+================================================
+File: src/result_thread.py
+================================================
+import time
+import traceback
+import numpy as np
+import sounddevice as sd
+import tempfile
+import wave
+import webrtcvad
+from PyQt5.QtCore import QThread, QMutex, pyqtSignal
+from collections import deque
+from threading import Event
+
+from transcription import transcribe
+from utils import ConfigManager
+
+
+class ResultThread(QThread):
+    """
+    A thread class for handling audio recording, transcription, and result processing.
+
+    This class manages the entire process of:
+    1. Recording audio from the microphone
+    2. Detecting speech and silence
+    3. Saving the recorded audio as numpy array
+    4. Transcribing the audio
+    5. Emitting the transcription result
+
+    Signals:
+        statusSignal: Emits the current status of the thread (e.g., 'recording', 'transcribing', 'idle')
+        resultSignal: Emits the transcription result
+    """
+
+    statusSignal = pyqtSignal(str)
+    resultSignal = pyqtSignal(str)
+
+    def __init__(self, local_model=None):
+        """
+        Initialize the ResultThread.
+
+        :param local_model: Local transcription model (if applicable)
+        """
+        super().__init__()
+        self.local_model = local_model
+        self.is_recording = False
+        self.is_running = True
+        self.sample_rate = None
+        self.mutex = QMutex()
+
+    def stop_recording(self):
+        """Stop the current recording session."""
+        self.mutex.lock()
+        self.is_recording = False
+        self.mutex.unlock()
+
+    def stop(self):
+        """Stop the entire thread execution."""
+        self.mutex.lock()
+        self.is_running = False
+        self.mutex.unlock()
+        self.statusSignal.emit('idle')
+        self.wait()
+
+    def run(self):
+        """Main execution method for the thread."""
+        try:
+            if not self.is_running:
+                return
+
+            self.mutex.lock()
+            self.is_recording = True
+            self.mutex.unlock()
+
+            self.statusSignal.emit('recording')
+            ConfigManager.console_print('Recording...')
+            audio_data = self._record_audio()
+
+            if not self.is_running:
+                return
+
+            if audio_data is None:
+                self.statusSignal.emit('idle')
+                return
+
+            self.statusSignal.emit('transcribing')
+            ConfigManager.console_print('Transcribing...')
+
+            # Time the transcription process
+            start_time = time.time()
+            result = transcribe(audio_data, self.local_model)
+            end_time = time.time()
+
+            transcription_time = end_time - start_time
+            ConfigManager.console_print(f'Transcription completed in {transcription_time:.2f} seconds. Post-processed line: {result}')
+
+            if not self.is_running:
+                return
+
+            self.statusSignal.emit('idle')
+            self.resultSignal.emit(result)
+
+        except Exception as e:
+            traceback.print_exc()
+            self.statusSignal.emit('error')
+            self.resultSignal.emit('')
+        finally:
+            self.stop_recording()
+
+    def _record_audio(self):
+        """
+        Record audio from the microphone and save it to a temporary file.
+
+        :return: numpy array of audio data, or None if the recording is too short
+        """
+        recording_options = ConfigManager.get_config_section('recording_options')
+        self.sample_rate = recording_options.get('sample_rate') or 16000
+        frame_duration_ms = 30  # 30ms frame duration for WebRTC VAD
+        frame_size = int(self.sample_rate * (frame_duration_ms / 1000.0))
+        silence_duration_ms = recording_options.get('silence_duration') or 900
+        silence_frames = int(silence_duration_ms / frame_duration_ms)
+
+        # 150ms delay before starting VAD to avoid mistaking the sound of key pressing for voice
+        initial_frames_to_skip = int(0.15 * self.sample_rate / frame_size)
+
+        # Create VAD only for recording modes that use it
+        recording_mode = recording_options.get('recording_mode') or 'continuous'
+        vad = None
+        if recording_mode in ('voice_activity_detection', 'continuous'):
+            vad = webrtcvad.Vad(2)  # VAD aggressiveness: 0 to 3, 3 being the most aggressive
+            speech_detected = False
+            silent_frame_count = 0
+
+        audio_buffer = deque(maxlen=frame_size)
+        recording = []
+
+        data_ready = Event()
+
+        def audio_callback(indata, frames, time, status):
+            if status:
+                ConfigManager.console_print(f"Audio callback status: {status}")
+            audio_buffer.extend(indata[:, 0])
+            data_ready.set()
+
+        with sd.InputStream(samplerate=self.sample_rate, channels=1, dtype='int16',
+                            blocksize=frame_size, device=recording_options.get('sound_device'),
+                            callback=audio_callback):
+            while self.is_running and self.is_recording:
+                data_ready.wait()
+                data_ready.clear()
+
+                if len(audio_buffer) < frame_size:
+                    continue
+
+                # Save frame
+                frame = np.array(list(audio_buffer), dtype=np.int16)
+                audio_buffer.clear()
+                recording.extend(frame)
+
+                # Avoid trying to detect voice in initial frames
+                if initial_frames_to_skip > 0:
+                    initial_frames_to_skip -= 1
+                    continue
+
+                if vad:
+                    if vad.is_speech(frame.tobytes(), self.sample_rate):
+                        silent_frame_count = 0
+                        if not speech_detected:
+                            ConfigManager.console_print("Speech detected.")
+                            speech_detected = True
+                    else:
+                        silent_frame_count += 1
+
+                    if speech_detected and silent_frame_count > silence_frames:
+                        break
+
+        audio_data = np.array(recording, dtype=np.int16)
+        duration = len(audio_data) / self.sample_rate
+
+        ConfigManager.console_print(f'Recording finished. Size: {audio_data.size} samples, Duration: {duration:.2f} seconds')
+
+        min_duration_ms = recording_options.get('min_duration') or 100
+
+        if (duration * 1000) < min_duration_ms:
+            ConfigManager.console_print(f'Discarded due to being too short.')
+            return None
+
+        return audio_data
+
+
+================================================
+File: src/transcription.py
+================================================
+import io
+import os
+import numpy as np
+import soundfile as sf
+from faster_whisper import WhisperModel
+from openai import OpenAI
+
+from utils import ConfigManager
+
+def create_local_model():
+    """
+    Create a local model using the faster-whisper library.
+    """
+    ConfigManager.console_print('Creating local model...')
+    local_model_options = ConfigManager.get_config_section('model_options')['local']
+    compute_type = local_model_options['compute_type']
+    model_path = local_model_options.get('model_path')
+
+    if compute_type == 'int8':
+        device = 'cpu'
+        ConfigManager.console_print('Using int8 quantization, forcing CPU usage.')
+    else:
+        device = local_model_options['device']
+
+    try:
+        if model_path:
+            ConfigManager.console_print(f'Loading model from: {model_path}')
+            model = WhisperModel(model_path,
+                                 device=device,
+                                 compute_type=compute_type,
+                                 download_root=None)  # Prevent automatic download
+        else:
+            model = WhisperModel(local_model_options['model'],
+                                 device=device,
+                                 compute_type=compute_type)
+    except Exception as e:
+        ConfigManager.console_print(f'Error initializing WhisperModel: {e}')
+        ConfigManager.console_print('Falling back to CPU.')
+        model = WhisperModel(model_path or local_model_options['model'],
+                             device='cpu',
+                             compute_type=compute_type,
+                             download_root=None if model_path else None)
+
+    ConfigManager.console_print('Local model created.')
+    return model
+
+def transcribe_local(audio_data, local_model=None):
+    """
+    Transcribe an audio file using a local model.
+    """
+    if not local_model:
+        local_model = create_local_model()
+    model_options = ConfigManager.get_config_section('model_options')
+
+    # Convert int16 to float32
+    audio_data_float = audio_data.astype(np.float32) / 32768.0
+
+    response = local_model.transcribe(audio=audio_data_float,
+                                      language=model_options['common']['language'],
+                                      initial_prompt=model_options['common']['initial_prompt'],
+                                      condition_on_previous_text=model_options['local']['condition_on_previous_text'],
+                                      temperature=model_options['common']['temperature'],
+                                      vad_filter=model_options['local']['vad_filter'],)
+    return ''.join([segment.text for segment in list(response[0])])
+
+def transcribe_api(audio_data):
+    """
+    Transcribe an audio file using the OpenAI API.
+    """
+    model_options = ConfigManager.get_config_section('model_options')
+    client = OpenAI(
+        api_key=os.getenv('OPENAI_API_KEY') or None,
+        base_url=model_options['api']['base_url'] or 'https://api.openai.com/v1'
+    )
+
+    # Convert numpy array to WAV file
+    byte_io = io.BytesIO()
+    sample_rate = ConfigManager.get_config_section('recording_options').get('sample_rate') or 16000
+    sf.write(byte_io, audio_data, sample_rate, format='wav')
+    byte_io.seek(0)
+
+    response = client.audio.transcriptions.create(
+        model=model_options['api']['model'],
+        file=('audio.wav', byte_io, 'audio/wav'),
+        language=model_options['common']['language'],
+        prompt=model_options['common']['initial_prompt'],
+        temperature=model_options['common']['temperature'],
+    )
+    return response.text
+
+def post_process_transcription(transcription):
+    """
+    Apply post-processing to the transcription.
+    """
+    transcription = transcription.strip()
+    post_processing = ConfigManager.get_config_section('post_processing')
+    if post_processing['remove_trailing_period'] and transcription.endswith('.'):
+        transcription = transcription[:-1]
+    if post_processing['add_trailing_space']:
+        transcription += ' '
+    if post_processing['remove_capitalization']:
+        transcription = transcription.lower()
+
+    return transcription
+
+def transcribe(audio_data, local_model=None):
+    """
+    Transcribe audio date using the OpenAI API or a local model, depending on config.
+    """
+    if audio_data is None:
+        return ''
+
+    if ConfigManager.get_config_value('model_options', 'use_api'):
+        transcription = transcribe_api(audio_data)
+    else:
+        transcription = transcribe_local(audio_data, local_model)
+
+    return post_process_transcription(transcription)
+
+
+
+================================================
+File: src/utils.py
+================================================
+import yaml
+import os
+
+class ConfigManager:
+    _instance = None
+
+    def __init__(self):
+        """Initialize the ConfigManager instance."""
+        self.config = None
+        self.schema = None
+
+    @classmethod
+    def initialize(cls, schema_path=None):
+        """Initialize the ConfigManager with the given schema path."""
+        if cls._instance is None:
+            cls._instance = cls()
+            cls._instance.schema = cls._instance.load_config_schema(schema_path)
+            cls._instance.config = cls._instance.load_default_config()
+            cls._instance.load_user_config()
+
+    @classmethod
+    def get_schema(cls):
+        """Get the configuration schema."""
+        if cls._instance is None:
+            raise RuntimeError("ConfigManager not initialized")
+        return cls._instance.schema
+
+    @classmethod
+    def get_config_section(cls, *keys):
+        """Get a specific section of the configuration."""
+        if cls._instance is None:
+            raise RuntimeError("ConfigManager not initialized")
+
+        section = cls._instance.config
+        for key in keys:
+            if isinstance(section, dict) and key in section:
+                section = section[key]
+            else:
+                return {}
+        return section
+
+    @classmethod
+    def get_config_value(cls, *keys):
+        """Get a specific configuration value using nested keys."""
+        if cls._instance is None:
+            raise RuntimeError("ConfigManager not initialized")
+
+        value = cls._instance.config
+        for key in keys:
+            if isinstance(value, dict) and key in value:
+                value = value[key]
+            else:
+                return None
+        return value
+
+    @classmethod
+    def set_config_value(cls, value, *keys):
+        """Set a specific configuration value using nested keys."""
+        if cls._instance is None:
+            raise RuntimeError("ConfigManager not initialized")
+
+        config = cls._instance.config
+        for key in keys[:-1]:
+            if key not in config:
+                config[key] = {}
+            elif not isinstance(config[key], dict):
+                config[key] = {}
+            config = config[key]
+        config[keys[-1]] = value
+
+    @staticmethod
+    def load_config_schema(schema_path=None):
+        """Load the configuration schema from a YAML file."""
+        if schema_path is None:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            schema_path = os.path.join(base_dir, 'config_schema.yaml')
+
+        with open(schema_path, 'r') as file:
+            schema = yaml.safe_load(file)
+        return schema
+
+    def load_default_config(self):
+        """Load default configuration values from the schema."""
+        def extract_value(item):
+            if isinstance(item, dict):
+                if 'value' in item:
+                    return item['value']
+                else:
+                    return {k: extract_value(v) for k, v in item.items()}
+            return item
+
+        config = {}
+        for category, settings in self.schema.items():
+            config[category] = extract_value(settings)
+        return config
+
+    def load_user_config(self, config_path=os.path.join('src', 'config.yaml')):
+        """Load user configuration and merge with default config."""
+        def deep_update(source, overrides):
+            for key, value in overrides.items():
+                if isinstance(value, dict) and key in source:
+                    deep_update(source[key], value)
+                else:
+                    source[key] = value
+
+        if config_path and os.path.isfile(config_path):
+            try:
+                with open(config_path, 'r') as file:
+                    user_config = yaml.safe_load(file)
+                    deep_update(self.config, user_config)
+            except yaml.YAMLError:
+                print("Error in configuration file. Using default configuration.")
+
+    @classmethod
+    def save_config(cls, config_path=os.path.join('src', 'config.yaml')):
+        """Save the current configuration to a YAML file."""
+        if cls._instance is None:
+            raise RuntimeError("ConfigManager not initialized")
+        with open(config_path, 'w') as file:
+            yaml.dump(cls._instance.config, file, default_flow_style=False)
+
+    @classmethod
+    def reload_config(cls):
+        """
+        Reload the configuration from the file.
+        """
+        if cls._instance is None:
+            raise RuntimeError("ConfigManager not initialized")
+        cls._instance.config = cls._instance.load_default_config()
+        cls._instance.load_user_config()
+
+    @classmethod
+    def config_file_exists(cls):
+        """Check if a valid config file exists."""
+        config_path = os.path.join('src', 'config.yaml')
+        return os.path.isfile(config_path)
+
+    @classmethod
+    def console_print(cls, message):
+        """Print a message to the console if enabled in the configuration."""
+        if cls._instance and cls._instance.config['misc']['print_to_terminal']:
+            print(message)
+
+
+================================================
+File: src/ui/base_window.py
+================================================
+from PyQt5.QtCore import Qt, QRectF
+from PyQt5.QtGui import QPainter, QBrush, QColor, QFont, QPainterPath, QGuiApplication
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QMainWindow
+
+
+class BaseWindow(QMainWindow):
+    def __init__(self, title, width, height):
+        """
+        Initialize the base window.
+        """
+        super().__init__()
+        self.initUI(title, width, height)
+        self.setWindowPosition()
+        self.is_dragging = False
+
+    def initUI(self, title, width, height):
+        """
+        Initialize the user interface.
+        """
+        self.setWindowTitle(title)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setFixedSize(width, height)
+
+        self.main_widget = QWidget(self)
+        self.main_layout = QVBoxLayout(self.main_widget)
+        self.main_layout.setContentsMargins(10, 10, 10, 10)
+
+        # Create a widget for the title bar
+        title_bar = QWidget()
+        title_bar_layout = QHBoxLayout(title_bar)
+        title_bar_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Add the title label
+        title_label = QLabel('WhisperWriter')
+        title_label.setFont(QFont('Segoe UI', 12, QFont.Bold))
+        title_label.setAlignment(Qt.AlignCenter)
+        title_label.setStyleSheet("color: #404040;")
+
+        # Create a widget for the close button
+        close_button_widget = QWidget()
+        close_button_layout = QHBoxLayout(close_button_widget)
+        close_button_layout.setContentsMargins(0, 0, 0, 0)
+
+        close_button = QPushButton('×')
+        close_button.setFixedSize(25, 25)
+        close_button.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                color: #404040;
+            }
+            QPushButton:hover {
+                color: #000000;
+            }
+        """)
+        close_button.clicked.connect(self.handleCloseButton)
+
+        close_button_layout.addWidget(close_button, alignment=Qt.AlignRight)
+
+        # Add widgets to the title bar layout
+        title_bar_layout.addWidget(QWidget(), 1)  # Left spacer
+        title_bar_layout.addWidget(title_label, 3)  # Title (with more width)
+        title_bar_layout.addWidget(close_button_widget, 1)  # Close button
+
+        self.main_layout.addWidget(title_bar)
+        self.setCentralWidget(self.main_widget)
+
+    def setWindowPosition(self):
+        """
+        Set the window position to the center of the screen.
+        """
+        center_point = QGuiApplication.primaryScreen().availableGeometry().center()
+        frame_geometry = self.frameGeometry()
+        frame_geometry.moveCenter(center_point)
+        self.move(frame_geometry.topLeft())
+
+    def handleCloseButton(self):
+        """
+        Close the window.
+        """
+        self.close()
+
+    def mousePressEvent(self, event):
+        """
+        Allow the window to be moved by clicking and dragging anywhere on the window.
+        """
+        if event.button() == Qt.LeftButton:
+            self.is_dragging = True
+            self.start_position = event.globalPos() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        """
+        Move the window when dragging.
+        """
+        if Qt.LeftButton and self.is_dragging:
+            self.move(event.globalPos() - self.start_position)
+            event.accept()
+
+    def mouseReleaseEvent(self, event):
+        """
+        Stop dragging the window.
+        """
+        self.is_dragging = False
+
+    def paintEvent(self, event):
+        """
+        Create a rounded rectangle with a semi-transparent white background.
+        """
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(self.rect()), 20, 20)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(QBrush(QColor(255, 255, 255, 220)))
+        painter.setPen(Qt.NoPen)
+        painter.drawPath(path)
+
+
+================================================
+File: src/ui/main_window.py
+================================================
+import os
+import sys
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QApplication, QPushButton, QHBoxLayout
+from PyQt5.QtCore import pyqtSignal
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from ui.base_window import BaseWindow
+
+class MainWindow(BaseWindow):
+    openSettings = pyqtSignal()
+    startListening = pyqtSignal()
+    closeApp = pyqtSignal()
+
+    def __init__(self):
+        """
+        Initialize the main window.
+        """
+        super().__init__('WhisperWriter', 320, 180)
+        self.initMainUI()
+
+    def initMainUI(self):
+        """
+        Initialize the main user interface.
+        """
+        start_btn = QPushButton('Start')
+        start_btn.setFont(QFont('Segoe UI', 10))
+        start_btn.setFixedSize(120, 60)
+        start_btn.clicked.connect(self.startPressed)
+
+        settings_btn = QPushButton('Settings')
+        settings_btn.setFont(QFont('Segoe UI', 10))
+        settings_btn.setFixedSize(120, 60)
+        settings_btn.clicked.connect(self.openSettings.emit)
+
+        button_layout = QHBoxLayout()
+        button_layout.addStretch(1)
+        button_layout.addWidget(start_btn)
+        button_layout.addWidget(settings_btn)
+        button_layout.addStretch(1)
+
+        self.main_layout.addStretch(1)
+        self.main_layout.addLayout(button_layout)
+        self.main_layout.addStretch(1)
+
+    def closeEvent(self, event):
+        """
+        Close the application when the main window is closed.
+        """
+        self.closeApp.emit()
+
+    def startPressed(self):
+        """
+        Emit the startListening signal when the start button is pressed.
+        """
+        self.startListening.emit()
+        self.hide()
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())
+
+
+================================================
+File: src/ui/settings_window.py
+================================================
+import os
+import sys
+from dotenv import set_key, load_dotenv
+from PyQt5.QtWidgets import (
+    QApplication, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QCheckBox,
+    QMessageBox, QTabWidget, QWidget, QSizePolicy, QSpacerItem, QToolButton, QStyle, QFileDialog
+)
+from PyQt5.QtCore import Qt, QCoreApplication, QProcess, pyqtSignal
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from ui.base_window import BaseWindow
+from utils import ConfigManager
+
+load_dotenv()
+
+class SettingsWindow(BaseWindow):
+    settings_closed = pyqtSignal()
+    settings_saved = pyqtSignal()
+
+    def __init__(self):
+        """Initialize the settings window."""
+        super().__init__('Settings', 700, 700)
+        self.schema = ConfigManager.get_schema()
+        self.init_settings_ui()
+
+    def init_settings_ui(self):
+        """Initialize the settings user interface."""
+        self.tabs = QTabWidget()
+        self.main_layout.addWidget(self.tabs)
+
+        self.create_tabs()
+        self.create_buttons()
+
+        # Connect the use_api checkbox state change
+        self.use_api_checkbox = self.findChild(QCheckBox, 'model_options_use_api_input')
+        if self.use_api_checkbox:
+            self.use_api_checkbox.stateChanged.connect(lambda: self.toggle_api_local_options(self.use_api_checkbox.isChecked()))
+            self.toggle_api_local_options(self.use_api_checkbox.isChecked())
+
+    def create_tabs(self):
+        """Create tabs for each category in the schema."""
+        for category, settings in self.schema.items():
+            tab = QWidget()
+            tab_layout = QVBoxLayout()
+            tab.setLayout(tab_layout)
+            self.tabs.addTab(tab, category.replace('_', ' ').capitalize())
+
+            self.create_settings_widgets(tab_layout, category, settings)
+            tab_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+    def create_settings_widgets(self, layout, category, settings):
+        """Create widgets for each setting in a category."""
+        for sub_category, sub_settings in settings.items():
+            if isinstance(sub_settings, dict) and 'value' in sub_settings:
+                self.add_setting_widget(layout, sub_category, sub_settings, category)
+            else:
+                for key, meta in sub_settings.items():
+                    self.add_setting_widget(layout, key, meta, category, sub_category)
+
+    def create_buttons(self):
+        """Create reset and save buttons."""
+        reset_button = QPushButton('Reset to saved settings')
+        reset_button.clicked.connect(self.reset_settings)
+        self.main_layout.addWidget(reset_button)
+
+        save_button = QPushButton('Save')
+        save_button.clicked.connect(self.save_settings)
+        self.main_layout.addWidget(save_button)
+
+    def add_setting_widget(self, layout, key, meta, category, sub_category=None):
+        """Add a setting widget to the layout."""
+        item_layout = QHBoxLayout()
+        label = QLabel(f"{key.replace('_', ' ').capitalize()}:")
+        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+        widget = self.create_widget_for_type(key, meta, category, sub_category)
+        if not widget:
+            return
+
+        help_button = self.create_help_button(meta.get('description', ''))
+
+        item_layout.addWidget(label)
+        if isinstance(widget, QWidget):
+            item_layout.addWidget(widget)
+        else:
+            item_layout.addLayout(widget)
+        item_layout.addWidget(help_button)
+        layout.addLayout(item_layout)
+
+        # Set object names for the widget, label, and help button
+        widget_name = f"{category}_{sub_category}_{key}_input" if sub_category else f"{category}_{key}_input"
+        label_name = f"{category}_{sub_category}_{key}_label" if sub_category else f"{category}_{key}_label"
+        help_name = f"{category}_{sub_category}_{key}_help" if sub_category else f"{category}_{key}_help"
+        
+        label.setObjectName(label_name)
+        help_button.setObjectName(help_name)
+        
+        if isinstance(widget, QWidget):
+            widget.setObjectName(widget_name)
+        else:
+            # If it's a layout (for model_path), set the object name on the QLineEdit
+            line_edit = widget.itemAt(0).widget()
+            if isinstance(line_edit, QLineEdit):
+                line_edit.setObjectName(widget_name)
+
+    def create_widget_for_type(self, key, meta, category, sub_category):
+        """Create a widget based on the meta type."""
+        meta_type = meta.get('type')
+        current_value = self.get_config_value(category, sub_category, key, meta)
+
+        if meta_type == 'bool':
+            return self.create_checkbox(current_value, key)
+        elif meta_type == 'str' and 'options' in meta:
+            return self.create_combobox(current_value, meta['options'])
+        elif meta_type == 'str':
+            return self.create_line_edit(current_value, key)
+        elif meta_type in ['int', 'float']:
+            return self.create_line_edit(str(current_value))
+        return None
+
+    def create_checkbox(self, value, key):
+        widget = QCheckBox()
+        widget.setChecked(value)
+        if key == 'use_api':
+            widget.setObjectName('model_options_use_api_input')
+        return widget
+
+    def create_combobox(self, value, options):
+        widget = QComboBox()
+        widget.addItems(options)
+        widget.setCurrentText(value)
+        return widget
+
+    def create_line_edit(self, value, key=None):
+        widget = QLineEdit(value)
+        if key == 'api_key':
+            widget.setEchoMode(QLineEdit.Password)
+            widget.setText(os.getenv('OPENAI_API_KEY') or value)
+        elif key == 'model_path':
+            layout = QHBoxLayout()
+            layout.addWidget(widget)
+            browse_button = QPushButton('Browse')
+            browse_button.clicked.connect(lambda: self.browse_model_path(widget))
+            layout.addWidget(browse_button)
+            layout.setContentsMargins(0, 0, 0, 0)
+            container = QWidget()
+            container.setLayout(layout)
+            return container
+        return widget
+
+    def create_help_button(self, description):
+        help_button = QToolButton()
+        help_button.setIcon(self.style().standardIcon(QStyle.SP_MessageBoxQuestion))
+        help_button.setAutoRaise(True)
+        help_button.setToolTip(description)
+        help_button.setCursor(Qt.PointingHandCursor)
+        help_button.setFocusPolicy(Qt.TabFocus)
+        help_button.clicked.connect(lambda: self.show_description(description))
+        return help_button
+
+    def get_config_value(self, category, sub_category, key, meta):
+        if sub_category:
+            return ConfigManager.get_config_value(category, sub_category, key) or meta['value']
+        return ConfigManager.get_config_value(category, key) or meta['value']
+
+    def browse_model_path(self, widget):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select Whisper Model File", "", "Model Files (*.bin);;All Files (*)")
+        if file_path:
+            widget.setText(file_path)
+
+    def show_description(self, description):
+        """Show a description dialog."""
+        QMessageBox.information(self, 'Description', description)
+
+    def save_settings(self):
+        """Save the settings to the config file and .env file."""
+        self.iterate_settings(self.save_setting)
+
+        # Save the API key to the .env file
+        api_key = ConfigManager.get_config_value('model_options', 'api', 'api_key') or ''
+        set_key('.env', 'OPENAI_API_KEY', api_key)
+        os.environ['OPENAI_API_KEY'] = api_key
+
+        # Remove the API key from the config
+        ConfigManager.set_config_value(None, 'model_options', 'api', 'api_key')
+
+        ConfigManager.save_config()
+        QMessageBox.information(self, 'Settings Saved', 'Settings have been saved. The application will now restart.')
+        self.settings_saved.emit()
+        self.close()
+
+    def save_setting(self, widget, category, sub_category, key, meta):
+        value = self.get_widget_value_typed(widget, meta.get('type'))
+        if sub_category:
+            ConfigManager.set_config_value(value, category, sub_category, key)
+        else:
+            ConfigManager.set_config_value(value, category, key)
+
+    def reset_settings(self):
+        """Reset the settings to the saved values."""
+        ConfigManager.reload_config()
+        self.update_widgets_from_config()
+
+    def update_widgets_from_config(self):
+        """Update all widgets with values from the current configuration."""
+        self.iterate_settings(self.update_widget_value)
+
+    def update_widget_value(self, widget, category, sub_category, key, meta):
+        """Update a single widget with the value from the configuration."""
+        if sub_category:
+            config_value = ConfigManager.get_config_value(category, sub_category, key)
+        else:
+            config_value = ConfigManager.get_config_value(category, key)
+
+        self.set_widget_value(widget, config_value, meta.get('type'))
+
+    def set_widget_value(self, widget, value, value_type):
+        """Set the value of the widget."""
+        if isinstance(widget, QCheckBox):
+            widget.setChecked(value)
+        elif isinstance(widget, QComboBox):
+            widget.setCurrentText(value)
+        elif isinstance(widget, QLineEdit):
+            widget.setText(str(value) if value is not None else '')
+        elif isinstance(widget, QWidget) and widget.layout():
+            # This is for the model_path widget
+            line_edit = widget.layout().itemAt(0).widget()
+            if isinstance(line_edit, QLineEdit):
+                line_edit.setText(str(value) if value is not None else '')
+
+    def get_widget_value_typed(self, widget, value_type):
+        """Get the value of the widget with proper typing."""
+        if isinstance(widget, QCheckBox):
+            return widget.isChecked()
+        elif isinstance(widget, QComboBox):
+            return widget.currentText() or None
+        elif isinstance(widget, QLineEdit):
+            text = widget.text()
+            if value_type == 'int':
+                return int(text) if text else None
+            elif value_type == 'float':
+                return float(text) if text else None
+            else:
+                return text or None
+        elif isinstance(widget, QWidget) and widget.layout():
+            # This is for the model_path widget
+            line_edit = widget.layout().itemAt(0).widget()
+            if isinstance(line_edit, QLineEdit):
+                return line_edit.text() or None
+        return None
+
+    def toggle_api_local_options(self, use_api):
+        """Toggle visibility of API and local options."""
+        self.iterate_settings(lambda w, c, s, k, m: self.toggle_widget_visibility(w, c, s, k, use_api))
+
+    def toggle_widget_visibility(self, widget, category, sub_category, key, use_api):
+        if sub_category in ['api', 'local']:
+            widget.setVisible(use_api if sub_category == 'api' else not use_api)
+            
+            # Also toggle visibility of the corresponding label and help button
+            label = self.findChild(QLabel, f"{category}_{sub_category}_{key}_label")
+            help_button = self.findChild(QToolButton, f"{category}_{sub_category}_{key}_help")
+            
+            if label:
+                label.setVisible(use_api if sub_category == 'api' else not use_api)
+            if help_button:
+                help_button.setVisible(use_api if sub_category == 'api' else not use_api)
+
+
+    def iterate_settings(self, func):
+        """Iterate over all settings and apply a function to each."""
+        for category, settings in self.schema.items():
+            for sub_category, sub_settings in settings.items():
+                if isinstance(sub_settings, dict) and 'value' in sub_settings:
+                    widget = self.findChild(QWidget, f"{category}_{sub_category}_input")
+                    if widget:
+                        func(widget, category, None, sub_category, sub_settings)
+                else:
+                    for key, meta in sub_settings.items():
+                        widget = self.findChild(QWidget, f"{category}_{sub_category}_{key}_input")
+                        if widget:
+                            func(widget, category, sub_category, key, meta)
+
+    def closeEvent(self, event):
+        """Confirm before closing the settings window without saving."""
+        reply = QMessageBox.question(
+            self,
+            'Close without saving?',
+            'Are you sure you want to close without saving?',
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+            ConfigManager.reload_config()  # Revert to last saved configuration
+            self.update_widgets_from_config()
+            self.settings_closed.emit()
+            super().closeEvent(event)
+        else:
+            event.ignore()
+
+
+================================================
+File: src/ui/status_window.py
+================================================
+import sys
+import os
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QTimer
+from PyQt5.QtGui import QFont, QPixmap, QIcon
+from PyQt5.QtWidgets import QApplication, QLabel, QHBoxLayout
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from ui.base_window import BaseWindow
+
+class StatusWindow(BaseWindow):
+    statusSignal = pyqtSignal(str)
+    closeSignal = pyqtSignal()
+
+    def __init__(self):
+        """
+        Initialize the status window.
+        """
+        super().__init__('WhisperWriter Status', 320, 120)
+        self.initStatusUI()
+        self.statusSignal.connect(self.updateStatus)
+
+    def initStatusUI(self):
+        """
+        Initialize the status user interface.
+        """
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        
+        status_layout = QHBoxLayout()
+        status_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.icon_label = QLabel()
+        self.icon_label.setFixedSize(32, 32)
+        microphone_path = os.path.join('assets', 'microphone.png')
+        pencil_path = os.path.join('assets', 'pencil.png')
+        self.microphone_pixmap = QPixmap(microphone_path).scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.pencil_pixmap = QPixmap(pencil_path).scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.icon_label.setPixmap(self.microphone_pixmap)
+        self.icon_label.setAlignment(Qt.AlignCenter)
+
+        self.status_label = QLabel('Recording...')
+        self.status_label.setFont(QFont('Segoe UI', 12))
+
+        status_layout.addStretch(1)
+        status_layout.addWidget(self.icon_label)
+        status_layout.addWidget(self.status_label)
+        status_layout.addStretch(1)
+
+        self.main_layout.addLayout(status_layout)
+        
+    def show(self):
+        """
+        Position the window in the bottom center of the screen and show it.
+        """
+        screen = QApplication.primaryScreen()
+        screen_geometry = screen.geometry()
+        screen_width = screen_geometry.width()
+        screen_height = screen_geometry.height()
+        window_width = self.width()
+        window_height = self.height()
+
+        x = (screen_width - window_width) // 2
+        y = screen_height - window_height - 120
+
+        self.move(x, y)
+        super().show()
+        
+    def closeEvent(self, event):
+        """
+        Emit the close signal when the window is closed.
+        """
+        self.closeSignal.emit()
+        super().closeEvent(event)
+
+    @pyqtSlot(str)
+    def updateStatus(self, status):
+        """
+        Update the status window based on the given status.
+        """
+        if status == 'recording':
+            self.icon_label.setPixmap(self.microphone_pixmap)
+            self.status_label.setText('Recording...')
+            self.show()
+        elif status == 'transcribing':
+            self.icon_label.setPixmap(self.pencil_pixmap)
+            self.status_label.setText('Transcribing...')
+
+        if status in ('idle', 'error', 'cancel'):
+            self.close()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    
+    status_window = StatusWindow()
+    status_window.show()
+
+    # Simulate status updates
+    QTimer.singleShot(3000, lambda: status_window.statusSignal.emit('transcribing'))
+    QTimer.singleShot(6000, lambda: status_window.statusSignal.emit('idle'))
+    
+    sys.exit(app.exec_())
+
+

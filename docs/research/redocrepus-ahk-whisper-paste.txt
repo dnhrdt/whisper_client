@@ -1,0 +1,4026 @@
+Directory structure:
+└── redocrepus-ahk-whisper-paste/
+    ├── README.md
+    ├── LICENSE
+    ├── Taskfile.yml
+    ├── config.template.json
+    ├── mywatch.ahk
+    ├── paste.ahk
+    ├── prompt.txt
+    ├── transtriptionPrompt.txt
+    ├── watch.ahk
+    ├── bin/
+    │   ├── autohotkey-1.1.37.01/
+    │   │   ├── ANSI 32-bit.bin
+    │   │   ├── AutoHotkey.chm
+    │   │   ├── LICENSE
+    │   │   ├── Unicode 32-bit.bin
+    │   │   └── Unicode 64-bit.bin
+    │   ├── fmedia-1.31-windows-x64/
+    │   │   └── fmedia/
+    │   │       ├── CHANGES.txt
+    │   │       ├── LICENSE
+    │   │       ├── README.txt
+    │   │       ├── fmedia.conf
+    │   │       ├── fmedia.gui
+    │   │       ├── gui_lang_en.txt
+    │   │       ├── gui_lang_it.txt
+    │   │       ├── help-tui.txt
+    │   │       ├── help.txt
+    │   │       ├── help_de.txt
+    │   │       ├── help_es.txt
+    │   │       ├── help_fr.txt
+    │   │       ├── help_id.txt
+    │   │       ├── help_ru.txt
+    │   │       ├── theme.conf
+    │   │       ├── mod/
+    │   │       └── www/
+    │   │           └── index.html
+    │   └── whisper-autohotkey/
+    ├── whisper-autohotkey/
+    │   ├── go.mod
+    │   ├── go.sum
+    │   ├── script.ahk
+    │   ├── .gitignore
+    │   └── cmd/
+    │       └── whisper-autohotkey/
+    │           ├── ahk.go
+    │           ├── gpt4.go
+    │           ├── main.go
+    │           └── whisper.go
+    └── .github/
+        └── workflows/
+            ├── build.yml
+            └── publish.yml
+
+================================================
+File: README.md
+================================================
+# Wisper Autohotkey Paste
+
+Voice type anywhere in Windows using OpenAI's Whisper Speech Recognition engine!
+This project allows you dictating anywhere in Windows using OpenAI's Whisper speech-to-text engine.
+
+(This is a fork of mxro/autohotkey-chatgpt-voice, I modified it to allow just voice typing instead of carrying out commands.)
+
+## Install
+
+I have to update this section to match the current fork...
+
+- Download and install AutoHotKey V1 from [autohotkey.com](https://www.autohotkey.com/)
+- TBD
+- Copy `config.template.json` to your own `config.json`, and edit it to provide your [Open API Key](https://www.howtogeek.com/885918/how-to-get-an-openai-api-key/) for the property `OpenapiKey`.
+
+```json
+{
+  "OpenapiKey": "",
+  "AutoHotKeyExec": ".\\bin\\autohotkey-1.1.37.01\\AutoHotkeyU64.exe"
+}
+```
+
+## Usage
+
+- Double click on `watch.ahk` from the extracted files
+- Press F8
+- Say whatever you want to type
+- Press F8
+- Wait for Open AI and AutoHotKey to do their magic
+
+### Trigger Hotkey
+
+The hotkey to start/stop a voice command is defined in `watch.ahk`. You can replace the following with a hotkey of your choice:
+
+```
+F8::
+```
+
+## Customise
+
+- Edit transcriptionPrompt.txt to customize the transcription.
+- Add multiple transcription prompt and .ahk files. For example, you can have multiple Trigger Hotkeys for different languages or contexts.
+
+## Prior Art
+
+- [ChatGPT-AutoHotkey-Utility](https://github.com/kdalanon/ChatGPT-AutoHotkey-Utility): Uses AutoHotKey to perform a number of actions, such as translate
+- [ChatGPT Voice Assistant](https://github.com/DonGuillotine/chatGPT_whisper_AI_voice_assistant): Provides a Windows based assistant driven by ChatGPT
+- [How to Make Your Own Windows Transcription App With Whisper and AutoHotkey](https://www.makeuseof.com/make-transcription-app-whisper-autohotkey/): Step by step tutorial to make a transcription app using AutoHotKey (added as per [reddit](https://www.reddit.com/r/AutoHotkey/comments/16ork8y/combining_ahk_with_chatgpt_to_automated_windows/))
+
+
+## Develop
+
+### Build Source Code
+
+`task build`
+
+### Package Executable
+
+`task package`
+
+### Run Locally
+
+```
+go run ./cmd/whisper-autohotkey/.
+```
+
+
+================================================
+File: LICENSE
+================================================
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+
+For compatibility with AutoHotKey
+
+================================================
+File: Taskfile.yml
+================================================
+version: '3'
+
+tasks:
+  build:
+    dir: whisper-autohotkey
+    cmds:
+      - go build ./cmd/whisper-autohotkey/. 
+  package:
+    deps: [build]
+    cmds:
+      - cmd.exe /c copy /Y ".\whisper-autohotkey\whisper-autohotkey.exe" ".\bin\whisper-autohotkey"
+
+
+================================================
+File: config.template.json
+================================================
+{
+  "OpenapiKey": "",
+  "AutoHotKeyExec": ".\\bin\\autohotkey-1.1.37.01\\AutoHotkeyU64.exe",
+  "Coding": false
+}
+
+================================================
+File: mywatch.ahk
+================================================
+#persistent
+
+Capslock::Esc
+
+#s::Send ^s  ; Win + S to Ctrl + S
+#v::Send ^v  ; Win + V to Ctrl + V
+#c::Send ^c  ; Win + C to Ctrl + C
+#z::Send ^z  ; Win + Z to Ctrl + Z
+
+F8::
+  NotRecording := !NotRecording
+  If NotRecording
+  {
+    Run %A_WorkingDir%\bin\fmedia-1.31-windows-x64\fmedia\fmedia.exe --record --overwrite --mpeg-quality=16 --rate=12000 --out=rec.mp3 --globcmd=listen,, Hide
+  }
+  Else
+  {  
+    Run %A_WorkingDir%\bin\fmedia-1.31-windows-x64\fmedia\fmedia.exe --globcmd=stop,, Hide
+    Sleep, 100
+    Run %A_WorkingDir%\bin\whisper-autohotkey\whisper-autohotkey.exe,, Hide
+  }
+  return
+
+
+
+================================================
+File: paste.ahk
+================================================
+Send, ^v ; Ctrl+V for paste
+return
+
+================================================
+File: prompt.txt
+================================================
+You are a Windows automation engineer that is very familiar with AutoHotKey. 
+You create AutoHotKey V1 scripts. I ask you to conduct a certain ACTION. 
+You then write a script to perform this action. 
+
+Unless otherwise specified, assume:
+- the default browser is Firefox
+- the default search engine is DuckDuckGo
+- if looking for pictures, open the pexels website
+- when I ask you to 'tell me X', output a script that shows a GUI window using MsgBox that provides the answer to X.
+- if no specific action is specified, assume a web search for the prompt needs to be conducted
+- Your answer must ALWAYS ONLY be a correct AutoHotKey Script, nothing else
+
+Avoid all logical and syntactical errors. To help you avoid making errors, ALWAYS keep in mind ALL of the following rules:
+1. The action should be executed when the AHK script is run, not define a keyboard shortcut to trigger the action. 
+2. You only respond with the script, don't include any comments, keep it as short as possible but ensure there are no syntax errors in the script and it is a correct AutoHotKey V1 script. 
+3. Tray tips are provided as follows 'TrayTip , Title, Text, Timeout, Options'.
+4. When constructing URLs, ensure to escape the escape sequence for space (%20) as '`%20'. 
+5. Apply all AutoHotKey Escape sequences as required.
+6. Replace all '%' characters in URLs with the correct escape sequence '`%'. E.g. '%20' with '`%20`
+7. NEVER provide any other output than the script. Always complete the action with a 'return'. 
+8. If you are not sure what action needs to be taken or how to create a script to perform the action,
+create a script with the following content:
+> MsgBox, 32,,[Your comment]
+Replace [Your comment] with your comment. Also include the prompt as you have received it in the comment.
+9. If I ask you to Paste something, use the SendInput, {Raw} function.
+
+Now I will provide the ACTION. Please remember, NEVER respond with ANYTHING ELSE but a valid AutoHotKeyScript.
+
+================================================
+File: transtriptionPrompt.txt
+================================================
+This is a transcription in English, mainly about programming, coding and software development.
+
+================================================
+File: watch.ahk
+================================================
+﻿F8::
+  NotRecording := !NotRecording
+  If NotRecording
+  {
+    Run %A_WorkingDir%\bin\fmedia-1.31-windows-x64\fmedia\fmedia.exe --record --overwrite --mpeg-quality=16 --rate=12000 --out=rec.mp3 --globcmd=listen,, Hide
+  }
+  Else
+  {  
+    Run %A_WorkingDir%\bin\fmedia-1.31-windows-x64\fmedia\fmedia.exe --globcmd=stop,, Hide
+    Sleep, 200
+    Run %A_WorkingDir%\bin\whisper-autohotkey\whisper-autohotkey.exe en transtriptionPrompt.txt,, Hide
+  }
+  return
+
+  
+
+
+================================================
+File: bin/autohotkey-1.1.37.01/LICENSE
+================================================
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/LICENSE
+================================================
+BSD 2-Clause License
+
+Copyright (c) 2020, Simon Zolin
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/README.txt
+================================================
+## OVERVIEW
+
+<img align="right" src="res/fmedia.png" width="128" height="128">
+
+fmedia is a fast audio player/recorder/converter for Windows, macOS, Linux, FreeBSD, Android`*`.
+It provides smooth playback and recording even if devices are very slow.
+It's highly customizable and can be easily extended with additional plugins.
+Its low CPU & memory consumption saves energy when running on a notebook's battery.
+
+Play or convert audio files, record new audio tracks from microphone, save songs from Internet radio, and much more!
+fmedia is free and open-source project, and you can use it as a standalone application or as a library for your own software.
+
+**fmedia can read**: .mp3, .ogg (Vorbis/Opus), .opus, .mp4/.m4a/.mov (AAC/ALAC/MPEG), .mka/.mkv/.webm (AAC/ALAC/MPEG/Vorbis/Opus/PCM), .caf (AAC/ALAC/PCM), .avi (AAC/MPEG/PCM), .aac, .mpc, .flac, .ape, .wv, .wav;  .m3u, .pls, .cue.
+
+**fmedia can write**: .mp3, .ogg, .opus, .m4a (AAC), .flac, .wav, .aac (--stream-copy only).
+
+`*` fmedia/Android is currently far behind on features compared to the full-functional desktop-version.
+
+### Contents:
+
+* [Features](#features)
+	* [fmedia/Android features](#fmedia-android-features)
+ * [Install](#install)
+	* [Install On Windows](#install-on-windows)
+	* [Install On Linux](#install-on-linux)
+* [Build](#build)
+* [Config](#config)
+* [Terminal UI](#terminal-ui)
+* [Graphical UI](#graphical-ui)
+* [Extract Tracks From flac.cue](#extract-tracks-from-flac.cue)
+* [Use-Cases](#use-cases)
+	* [Play](#play)
+	* [Convert](#convert)
+	* [Record](#record)
+	* [Edit Tags](#edit-tags)
+	* [Other Functions](#other-functions)
+* [For Developers](#for-developers)
+* [Bug Report](#bug-report)
+
+
+## FEATURES
+
+* Audio I/O:
+	* ALSA (capture/playback)
+	* CoreAudio (capture/playback)
+	* DirectSound (capture/playback)
+	* JACK (capture)
+	* OSS (capture/playback)
+	* PulseAudio (capture/playback)
+	* WASAPI (capture/playback)
+
+* I/O:
+	* File (read/write)
+	* ICY-stream (read)
+	* HLS (read)
+
+* Containers:
+	* .aac (read, write: --stream-copy only)
+	* .ape (read)
+	* .avi (read)
+	* .caf (read)
+	* .flac (read/write)
+	* .mkv/.mka (read)
+	* .mp3 (read/write)
+	* .mp4/.m4a (read/write)
+	* .mpc (read)
+	* .ogg/.opus (read/write)
+	* .wav (read/write)
+	* .wv (read)
+
+* Lossy codecs:
+	* AAC (decode/encode)
+	* MPEG (decode/encode)
+	* Musepack (decode)
+	* Opus (decode/encode)
+	* Vorbis (decode/encode)
+
+* Lossless codecs:
+	* ALAC (decode)
+	* APE (decode)
+	* FLAC (decode/encode)
+	* WavPack (decode)
+
+* Playlists:
+	* .m3u/.m3u8, .pls (read)
+	* .cue (read)
+	* Directory
+
+* Other:
+	* PCM converter
+	* PCM peaks analyzer
+	* Mixer
+	* Dynamic Audio Normalizer
+	* Terminal UI
+	* Graphical UI (Windows, Linux/GTK)
+
+fmedia uses modified versions of these 3rd party libraries: libALAC, libfdk-aac, libFLAC, libMAC, libmp3lame, libmpg123, libmpc, libogg, libopus, libsoxr, libvorbisenc, libvorbis, libwavpack, libDynamicAudioNormalizer, libzstd.  See contents of `alib3/` for more info.
+
+
+### fmedia/Android features
+
+Currently implemented features:
+
+* Playback: .m4a, .mp3, .flac, .ogg, .opus (depends on OS)
+* Recording: .m4a(AAC), .flac
+* Convert (decode): .mp3, .mp4/.m4a(AAC-LC,ALAC), .flac
+* Convert (encode): .m4a(AAC-LC), .flac
+* Convert (stream copy): .mp3, .m4a
+* GUI: list of meta tags
+* GUI: file explorer
+* GUI: 2 playlists
+
+
+## INSTALL
+
+### INSTALL ON WINDOWS
+
+1. Unpack archive to the directory of your choice, e.g. to `"C:\Program Files\fmedia"`
+
+	* Right click on fmedia package file (e.g. `fmedia-1.0-win-x64.zip`) in Explorer
+	* Choose "Extract All..." in the popup menu
+	* Follow the Wizard steps
+
+2. Optionally, run the following command from console (cmd.exe):
+
+		"C:\Program Files\fmedia\fmedia.exe" --install
+
+	This command will:
+	* add fmedia directory into user's environment
+	* create a desktop shortcut to `fmedia-gui.exe`
+
+3. Run `fmedia-gui.exe` to open graphical interface;  or execute commands via `fmedia.exe` from console (cmd.exe).
+
+### INSTALL ON LINUX
+
+1. Unpack archive to the directory of your choice, e.g. to your home directory (`~/bin/fmedia-1`):
+
+		mkdir -p ~/bin
+		tar Jxf ./fmedia-1.0-linux-amd64.tar.xz -C ~/bin
+
+2. Optionally, create a symbolic link:
+
+		ln -s ~/bin/fmedia-1/fmedia ~/bin/fmedia
+
+3. Optionally, add fmedia GUI icon to KDE Applications:
+
+		cp ~/bin/fmedia-1/fmedia.desktop ~/.local/share/applications
+
+	Then edit `Exec=` and `Icon=` rows in `~/.local/share/applications/fmedia.desktop` if necessary.
+
+4. Run `fmedia --gui` to open graphical interface;  or execute commands via `fmedia` from console.
+
+
+## BUILD
+
+Read [fmedia Build Instructions](https://github.com/stsaz/fmedia/blob/master/BUILDING.md).
+
+
+## CONFIG
+
+The global configuration file `fmedia.conf` is located within the fmedia directory itself.  It contains all supported settings and their default values.  You must restart fmedia after you make changes to this file.
+
+Additional settings may be stored in file `fmedia-ext.conf`.  This makes it easier to upgrade fmedia without the need to edit `fmedia.conf`.
+
+Per-user configuration settings are also supported, they must be stored in `fmedia-user.conf` file in home directory:
+
+	Windows: %APPDATA%/fmedia/fmedia-user.conf
+	Linux:   $HOME/.config/fmedia/fmedia-user.conf
+
+Settings for a module must be in format "so.module.key value", e.g. to overwrite the global setting for OGG Vorbis encoding quality you should write:
+
+	vorbis.encode.quality "7.0"
+
+Core configuration settings start with "core.", e.g. set codepage for non-Unicode text:
+
+	core.codepage win1252
+
+
+## TERMINAL UI
+
+By default fmedia runs with a terminal UI, which shows information about the currently playing audio track and the currently playing audio position.  Hot keys are also supported, the most commonly used are:
+
+* `Space` for "Play/Pause"
+* `Right Arrow`/`Alt+Right Arrow`/`Ctrl+Right Arrow` to seek forward
+* `n` to play the next track
+* `s` to stop playback
+* `q` to quit fmedia
+* `h` to show all supported commands
+
+
+## GRAPHICAL UI
+
+To run fmedia in GUI mode (Windows and Linux) you may execute the console binary like this:
+
+	fmedia --gui
+
+Or use this special executable file (Windows only):
+
+	fmedia-gui.exe
+
+You should use this binary file for opening files via Explorer's "Open With..." feature.
+Note: command-line options are not supported.
+
+fmedia GUI is highly customizable, thanks to FF library that is used under the hood.
+FF UI technology allows you to modify properties of every UI control: windows, buttons, menus, tray icons and more.
+You may resize controls, set different styling, change any text, hotkeys, etc.
+All this information is stored within `fmedia.gui` which is a plain text file.
+After you make some changes in `fmedia.gui`, save it and then restart fmedia.
+
+By default fmedia GUI saves its state in file `%APPDATA%\fmedia\fmedia.gui.conf`.
+You can change this by setting `portable_conf` to `true` in `fmedia.conf`.
+After that, `fmedia.gui.conf` will be stored in program directory (e.g. `C:\Program Files\fmedia\fmedia.gui.conf`), thus making fmedia completely portable.
+
+
+## EXTRACT TRACKS FROM flac.cue
+
+While extracting a track from the album in FLAC using CUE sheet, the audio is first decoded to PCM and then re-encoded with FLAC.  This behaviour won't result in any audio quality loss since FLAC is a lossless codec.
+
+
+## USE-CASES
+
+Note the difference between UNIX and Windows terminals when you use special characters and spaces:
+
+* Use single quotes ('') on Linux (sh, bash), e.g.:
+
+		fmedia './my file.ogg'
+		fmedia file.wav -o '$filename.ogg'
+
+* Use double quotes ("") on Windows (cmd.exe), e.g.:
+
+		fmedia "./my file.ogg"
+
+
+### PLAY
+
+Play files, directories, Internet-radio streams
+
+	fmedia ./file.ogg ./*.mp3
+	fmedia ./Music
+	fmedia http://radio-stream:80/
+
+Play (mix) multiple streams simultaneously
+
+	fmedia --mix ./file1.ogg ./file2.ogg
+
+Play wav file with a corrupted header
+
+	fmedia ./file.raw --fseek=44
+
+### CONVERT
+
+Convert with parameters
+
+	fmedia ./file.ogg --out=./file.wav --format=int16
+	fmedia ./file.wav --out=./file.ogg --vorbis-quality=7.0
+	fmedia ./file.wav --out=./file.mp3 --mpeg-quality=0 --rate=48000
+
+Convert all .wav files from the current directory to .ogg
+
+	fmedia ./*.wav --out=.ogg
+
+Convert file and override meta info
+
+	fmedia ./file.flac --out=.ogg --meta='artist=Artist Name;comment=My Comment'
+
+Extract several tracks from .cue file
+
+	fmedia ./album.flac.cue --track=3,7,13 --out='$tracknumber. $artist - $title.flac'
+
+Split audio file
+
+	fmedia ./file.wav --seek=00:35 --until=01:35 --out=./file-1.wav
+	fmedia ./file.wav --split=01:00 -o 'file-$counter.wav'
+
+Cut compressed audio without re-encoding
+
+	fmedia ./file.ogg --out=./out.ogg --seek=1:00 --until=2:00 --stream-copy
+
+Copy left channel's audio from a stereo source
+
+	fmedia ./stereo.ogg -o left.wav --channels=left
+
+Change sound volume in an audio file
+
+	fmedia --gain=5.0 ./file.wav --out=./file-loud.wav
+
+### RECORD
+
+Capture audio from the default audio input device until stopped
+
+	fmedia --record --out=rec.flac
+
+Record with the specific audio format
+
+	fmedia --record -o rec.wav --format=int24 --channels=mono --rate=48000
+
+Record for 60 seconds then stop
+
+	fmedia --record --out=rec.flac --until=60
+
+Record from playback or "record what you hear" (Windows/WASAPI only)
+
+	fmedia --dev-loopback=1 --record --out=./rec.wav
+
+Record from playback AND record from microphone in parallel into 2 different files (Windows/WASAPI only)
+
+	fmedia --dev-loopback=1 --dev-capture=1 --record --out='./rec-$counter.wav'
+
+Record while playing
+
+	fmedia ./file.ogg --record --out=./rec.wav
+
+Live output
+
+	fmedia --record
+
+Record audio from Internet radio (without re-encoding)
+
+	fmedia http://radio-stream:80/ -o ./radio.mp3 --stream-copy
+
+Play AND record audio from Internet radio into separate files (without re-encoding)
+
+	fmedia http://radio-stream:80/ --out-copy -o './$time. $artist - $title.mp3' --stream-copy
+
+### EDIT TAGS
+
+Modify file's meta tags in-place
+
+	fmedia --edit-tags --meta='artist=ARTIST;title=TITLE' ./file.mp3
+
+Set artist, track number and title meta tags from file name
+
+	fmedia --edit-tags --meta-from-filename='$artist - $tracknumber. $title' './Cool Artist - 04. Best Song.mp3'
+
+### OTHER FUNCTIONS
+
+Print audio meta info
+
+	fmedia --info ./file.mp3
+
+Print audio meta info and all tags
+
+	fmedia --info --tags ./file.mp3
+
+Show PCM information
+
+	fmedia input.ogg --pcm-peaks
+
+Create a playlist file from directory:
+
+	fmedia ./Music -o music.m3u8
+
+
+## FOR DEVELOPERS
+
+### YOUR APPLICATION BASED ON FMEDIA
+
+fmedia can be used as a sound library: you can freely use its abilities in your own software.  And you don't have to build fmedia by yourself to use its features.  All you need to do is link your binary file with `core.so` (or `core.dll`) and you'll be able to do everything that fmedia can: playback, record and convert audio from your application.
+
+### SUPPORT NEW FORMAT
+
+You may add support for a new audio format into fmedia.  To do that you have to add your module into "fmedia.conf" and add an appropriate file extension into "input_ext" or "output_ext" section.
+
+For example, after you have built your module (e.g. `xyz.so`), add it into "fmedia.conf":
+
+	mod "xyz.decode"
+
+Then associate it with ".xyz" file extension:
+
+	input_ext {
+		...
+		"xyz.decode" xyz
+	}
+
+fmedia will call module "xyz.decode" each time user orders fmedia to play "*.xyz" files.
+
+See fmedia source code for more details.
+For example, `main.c::main()` will show you how fmedia command line binary initializes core module.
+See `src/format/wav.c` for an example on how to write a simple filter for fmedia.
+
+
+### LOW-LEVEL INTERFACE
+
+If you'd like to use low level interfaces, take a look at the source code of FF libraries.  Together they provide you with an easy interface that you can use to work with a large set of file formats, decode or encode audio and much more.  fmedia itself is built upon FF library - it's completely free and open-source.
+
+
+### PARTICIPATE
+
+You are welcome to participate in fmedia's development.  Send suggestions, improvements, bug reports, patches - anything that can help the project!
+
+Understanding the top-level source code hierarchy can help you to get involved into fmedia quicker.  The source code consists of these separate repositories:
+
+	------------------------
+	    fmedia
+	------------------------
+	 ffos, avpack, ffaudio
+	------------------------
+	    ffbase
+	------------------------
+
+Each of them plays its own part:
+
+* ffbase provides base containers and algorithms
+* ffaudio provides audio I/O
+* ffos provides cross-platform abilities.  Code based on ffos can run on Windows, Linux and FreeBSD.
+* avpack provides API for reading/writing audio-video container formats, e.g. ".mp4".
+* fmedia contains application code, it's largely based on all FF libraries.
+
+
+## BUG REPORT
+
+If you encounter a bug, please report it: the more issues will be reported by users, the more stable fmedia will become.  When filing a bug report try to provide information that can help us to fix the problem.  Try to execute the same command once again, only this time add --debug switch, e.g.:
+
+	fmedia --debug OPTIONS INPUT_FILES...
+
+It will print a lot of information about what fmedia is doing.  This info or a screenshot would be very helpful.
+
+
+## HOMEPAGE
+
+https://stsaz.github.io/fmedia/
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/fmedia.conf
+================================================
+# fmedia v1.30 configuration
+
+
+# Maximum number of worker threads
+# 0: use all CPUs
+# workers 0
+
+# codepage for non-Unicode text: win1251 | win1252
+# codepage win1252
+
+# single instance mode for fmedia-gui:
+# . off: allow multiple instances
+# . add: add files to the currently active queue
+# . play: add files and start playback of the first added track
+# . clear_play: clear the active queue, add files and start playback
+# instance_mode play
+
+# Don't allow the system to put itself to sleep after some time of inactivity
+# prevent_sleep true
+
+# Store user configuration files inside fmedia directory.
+# If this option is "false", user configuration files are stored inside "%APPDATA%\fmedia" (Windows)
+#  or "$HOME/.config/fmedia" (Linux) directory.
+# portable_conf false
+
+# mod_conf "#globcmd.globcmd" {
+	# pipe_name fmedia
+# }
+
+# mod_conf "#file.in" {
+	# buffer_size 64k
+	# buffers 3
+	# align 4k
+
+	# Offload read operations to another thread
+	# use_thread_pool true
+
+	# Read from file using the system's asynchronous I/O
+	# direct_io false
+# }
+
+# mod_conf "#file.out" {
+	# buffer_size 64k
+	# preallocate 1m
+
+	# Offload write operations to another thread
+	# Asynchronous writing may help utilizing more CPU resources
+	# use_thread_pool true
+# }
+
+# mod_conf "#file.stdout" {
+	# buffer_size 64k
+# }
+
+# mod_conf "net.http" {
+	# Buffer size and the number of buffers.  Larger values result in longer audio preload time.
+	# bufsize 16k
+	# buffers 2
+
+	# Minimum number of bytes in buffer before processing it: 1..bufsize
+	# buffer_lowat 4k
+
+	# Connect timeout (msec)
+	# connect_timeout 1500
+
+	# Network I/O timeout (msec)
+	# timeout 5000
+
+	# Maximum number of tries to reconnect on I/O error
+	# max_reconnect 3
+
+	# HTTP header User-Agent: off | name_only | full
+	# user_agent off
+
+	# Maximum number of HTTP redirects
+	# max_redirect 10
+
+	# Connect via a proxy server
+	# proxy "127.0.0.1:8080"
+# }
+
+# mod_conf "net.icy" {
+	# Support dynamic titles
+	# meta true
+# }
+
+# mod_conf "afilter.mixer-out" {
+	# format int16
+	# channels 2
+	# rate 44100
+
+	# buffer size (in msec)
+	# buffer 1000
+# }
+
+# mod_conf "#queue.track" {
+	# Start the next track in list after an error has occurred with the current track
+	# next_if_error true
+
+	# Auto-remove playlist item if source doesn't exist
+	# remove_if_no_source false
+
+	# Auto-remove playlist item if the file format is not supported
+	# remove_if_unknown_format true
+# }
+
+# Dynamic Audio Normalizer
+# mod_conf "dynanorm.filter" {
+	# frame_len_msec 500
+	# filter_size 31
+	# peak_value 0.95
+	# max_amplification 10.0
+	# target_rms 0.0
+	# compress_factor 0.0
+	# channels_coupled true
+	# enable_dc_correction false
+	# alt_boundary_mode false
+# }
+
+# mod_conf "plist.dir" {
+	# Expand sub-directories
+	# expand true
+# }
+
+
+# UI:
+
+mod_conf "tui.tui" {
+	# Disable terminal input echo on Linux.
+	# Set to "false" if you experience problems when terminal echo isn't restored after fmedia process was killed.
+	# echo_off true
+
+	# "Delete From Disk" job:
+	# . default: move to trash
+	# . rename: rename a file to ".deleted"
+	# file_delete_method default
+}
+
+mod_conf "gui.gui" {
+
+	# Always minimize to tray, not taskbar
+	# minimize_to_tray false
+
+	# Show tray icon while recording
+	# status_tray true
+
+	# Seeking deltas (in sec)
+	# seek_step 5
+	# seek_leap 60
+
+	# Save/load playlists on exit/start
+	# autosave_playlists true
+
+	# Set theme index on startup (see theme.conf)
+	# theme 0
+
+	# "Delete From Disk" job:
+	# . default: move to trash
+	# . rename: rename a file to ".deleted"
+	# file_delete_method default
+
+	# Executable for showing/editing a text file (Linux-GTK only)
+	# editor_path "/usr/bin/kwrite"
+
+	# File explorer tab (Linux-GTK only)
+	# explorer {
+	# 	disable false
+	# 	path ""
+	# }
+
+	# record {
+		# output "%APPDATA%\\fmedia\\rec-$date-$time.flac"
+	# }
+
+	# convert {
+		# output "$filepath/$tracknumber. $artist - $title.ogg" "$filepath/$filename.m4a"
+	# }
+
+	# Register global hotkeys.
+	# Note: these hotkeys may still be blocked or overwritten by other applications.
+	# global_hotkeys {
+		# Usage: CMD "hotkey"
+		# See available commands in fmedia.gui
+
+		# NEXT "Ctrl+Shift+Alt+N"
+		# STOP "Ctrl+Shift+Alt+S"
+		# REC "Ctrl+Shift+Alt+R"
+	# }
+}
+
+
+# CONTAINERS:
+
+# mod_conf "fmt.mp3-write" {
+	# min_meta_size 1000
+# }
+
+# mod_conf "fmt.ogg" {
+	# seekable true
+# }
+
+# mod_conf "fmt.ogg-write" {
+	# Maximum page duration (in msec)
+	# max_page_duration 1000
+# }
+
+# mod_conf "fmt.flac-write" {
+	# audio interval (in seconds) for seek table (0=disable)
+	# seektable_interval 1
+
+	# minimum size of meta data (add padding block if needed)
+	# min_meta_size 1000
+# }
+
+
+# AUDIO CODECS:
+
+# mod_conf "mpeg.encode" {
+	# VBR quality: 9..0 or CBR bitrate: 64..320
+	# quality 2
+# }
+
+# mod_conf "vorbis.encode" {
+	# minimum size of Vorbis comments (add padding if necessary)
+	# min_tag_size 1000
+
+	# -1.0 .. 10.0
+	# quality "5.0"
+# }
+
+# mod_conf "opus.encode" {
+	# Minimum size of Vorbis comments (add padding if necessary)
+	# min_tag_size 1000
+
+	# bitrate 192
+
+	# (in msec)
+	# frame_size 40
+
+	# 0..10
+	# complexity 10
+
+	# (in kHz)
+	# bandwidth 20
+# }
+
+# mod_conf "flac.encode" {
+	# compression level: 0..8
+	# compression 6
+
+	# generate MD5 checksum of uncompressed data
+	# md5 true
+# }
+
+# mod_conf "aac.encode" {
+	# LC | HE | HEv2
+	# profile LC
+
+	# AAC encoding quality: 1..5 (VBR) or 8..800 (CBR, kbit/s)
+	# quality 256
+
+	# Better quality at the cost of additional encoding time
+	# afterburner 1
+
+	# Frequency cut-off (max. 20000Hz);  0: default setting.
+	# bandwidth 0
+# }
+
+
+# AUDIO I/O:
+
+# mod_conf "wasapi.out" {
+	# device_index 0
+
+	# 0: disabled, 1: allowed, 2: always
+	# exclusive_mode 0
+
+	# buffer_length 500
+# }
+
+# mod_conf "wasapi.in" {
+	# device_index 0
+
+	# 0: disabled, 1: allowed, 2: always
+	# exclusive_mode 0
+
+	# in msec
+	# buffer_length 100
+
+	# latency_autocorrect false
+# }
+
+# mod_conf "direct-sound.in" {
+	# device_index 0
+	# buffer_length 500
+# }
+
+# mod_conf "direct-sound.out" {
+	# device_index 0
+	# buffer_length 500
+# }
+
+
+# mod_conf "alsa.out" {
+	# device_index 0
+	# buffer_length 500
+	# notify_rate 0
+# }
+
+# mod_conf "alsa.in" {
+	# device_index 0
+	# buffer_length 500
+# }
+
+
+# mod_conf "pulse.out" {
+	# device_index 0
+	# buffer_length 250
+	# notify_rate 0
+# }
+
+
+# mod_conf "coreaudio.out" {
+	# device_index 0
+# }
+
+# mod_conf "coreaudio.in" {
+	# device_index 0
+	# buffer_length 1000
+# }
+
+
+# mod_conf "oss.out" {
+	# device_index 0
+	# buffer_length 500
+# }
+
+
+# Module for audio playback (use the first one found)
+output "wasapi.out"
+output "direct-sound.out"
+output "pulse.out"
+output "alsa.out"
+output "oss.out"
+output "coreaudio.out"
+
+# Module for audio recording (use the first one found)
+input "wasapi.in"
+input "direct-sound.in"
+input "alsa.in"
+input "pulse.in"
+input "jack.in"
+input "oss.in"
+input "coreaudio.in"
+
+# Default audio format for recording
+# record_format {
+	# Audio format: int8 | int16 | int24 | int32 | float32
+	# format int16
+
+	# Channels number: 2 (stereo) | 1 (mono) | left | right
+	# channels 2
+
+	# rate 44100
+# }
+
+
+# The table we use for finding an input module by file extension
+#  (either from file name or by first few bytes of file data)
+input_ext {
+	# mod ext...
+	"fmt.wav" wav
+	"fmt.raw" raw
+	"fmt.mp3" mp3
+	"fmt.mpc" mpc
+	"fmt.aac" aac
+	"fmt.flac" flac
+	"fmt.caf" caf
+	"fmt.wv" wv
+	"fmt.ape" ape
+
+	"fmt.avi" avi
+	"fmt.mkv" mkv
+	"fmt.mp4" mp4
+	"fmt.ogg" ogg
+
+	"plist.m3u" m3u m3u8 m3uz
+	"plist.pls" pls
+	"plist.cue" cue
+}
+
+output_ext {
+	# mod ext...
+	"fmt.wav-write" wav
+	"fmt.ogg-write" ogg opus
+	"fmt.mp4-write" m4a
+	"fmt.mp3-write" mp3
+	"fmt.aac-write" aac
+	"fmt.flac-write" flac
+
+	"plist.m3u-out" m3u m3u8
+}
+
+
+# Additional configuration files:
+include "fmedia-ext.conf"
+
+# Per-user configuration:
+#  Portable mode: "./fmedia-user.conf"
+#  Windows: %APPDATA%/fmedia/fmedia-user.conf
+#  Linux:   $HOME/.config/fmedia/fmedia-user.conf
+include_user "fmedia-user.conf"
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/fmedia.gui
+================================================
+# fmedia v1.28 GUI/winapi
+
+include_language {
+	# <LANG> "gui_lang_<LANG>.txt"
+	default "gui_lang_en.txt"
+	it "gui_lang_it.txt"
+}
+
+menu mfile {
+	item $MFOpen {
+		action OPEN
+		hotkey "Ctrl+O"
+	}
+	item $MFAdd {
+		action ADD
+		hotkey "Insert"
+	}
+	item $MFAddURL {
+		action ADDURL
+		hotkey "Ctrl+U"
+	}
+	item "-" {
+	}
+	item $MFShowMetaData {
+		action A_FILE_SHOWINFO
+		hotkey "I"
+	}
+	item $MFAnalyzeShowPCMInfo {
+		action A_FILE_SHOWPCM
+	}
+	item $MFCopytoClipboard {
+		action A_FILE_COPYFILE
+		hotkey "Ctrl+C"
+	}
+	item $MFCopyFilenametoClipboard {
+		action A_FILE_COPYFN
+	}
+	item $MFShowFileinExplorer {
+		action A_FILE_SHOWDIR
+	}
+	item $MFDeleteFromDisk {
+		action A_FILE_DELFILE
+		hotkey "Shift+Delete"
+	}
+	item "-" {
+	}
+	item "Theme: Default" {
+		action SETTHEME
+	}
+	item "-" {
+	}
+	item $MFMinimizetoTray {
+		action HIDE
+		hotkey "Ctrl+M"
+	}
+	item $MFExit {
+		action QUIT
+	}
+}
+
+menu mlist {
+	item $MLNewTab {
+		action A_LIST_NEW
+		hotkey "Ctrl+N"
+	}
+	item $MLCloseTab {
+		action A_LIST_CLOSE
+		hotkey "Ctrl+W"
+	}
+	item $MLSavePlaylist {
+		action A_LIST_SAVELIST
+		hotkey "Ctrl+S"
+	}
+	item $MLReadMetaTags {
+		action A_LIST_READMETA
+	}
+	item "-" {
+	}
+	item $MLSelectAll {
+		action A_LIST_SELALL
+		hotkey "Ctrl+A"
+	}
+	item $MLInvertSelection {
+		action A_LIST_SELINVERT
+	}
+	item $MLSelectionFollowsCursor {
+		action A_LIST_SEL_AFTER_CUR
+	}
+	item "-" {
+	}
+	item $MLRemove {
+		action A_LIST_REMOVE
+		hotkey "Delete"
+	}
+	item $MLRemoveDeadItems {
+		action A_LIST_RMDEAD
+		hotkey "Alt+Delete"
+	}
+	item $MLClear {
+		action A_LIST_CLEAR
+	}
+	item "-" {
+	}
+	item $MLFilter {
+		action FILTER_SHOW
+		hotkey "Ctrl+F"
+	}
+	item $MLRandom {
+		action A_LIST_RANDOM
+	}
+	item $MLSortRandom {
+		action A_LIST_SORTRANDOM
+	}
+	item "-" {
+	}
+	item $MLShowFavorites {
+		action FAV_SHOW
+	}
+	item $MLAddtoFavorites {
+		action FAV_ADD
+	}
+}
+
+menu mplay {
+	item $MPPlayPause {
+		action A_PLAY_PAUSE
+		hotkey "Space"
+	}
+	item $MPStop {
+		action A_PLAY_STOP
+		hotkey "S"
+	}
+	item $MPStopAfterCurrent {
+		action A_PLAY_STOP_AFTER
+		hotkey "Shift+S"
+	}
+	item $MPNext {
+		action A_PLAY_NEXT
+		hotkey "N"
+	}
+	item $MPPrevious {
+		action A_PLAY_PREV
+		hotkey "P"
+	}
+	item $MPRepeatNoneTrackAll {
+		action A_PLAY_REPEAT
+	}
+	item "-" {
+	}
+	item $MPSeekForward {
+		action A_PLAY_FFWD
+		hotkey "Right"
+	}
+	item $MPSeekBack {
+		action A_PLAY_RWND
+		hotkey "Left"
+	}
+	item $MPLeapForward {
+		action A_PLAY_LEAP_FWD
+		hotkey "Ctrl+Right"
+	}
+	item $MPLeapBack {
+		action A_PLAY_LEAP_BACK
+		hotkey "Ctrl+Left"
+	}
+	item $MPGoTo {
+		action GOTO_SHOW
+		hotkey "Ctrl+G"
+	}
+	item $MPSetMarker {
+		action A_PLAY_SETGOPOS
+		hotkey "Shift+G"
+	}
+	item $MPJumpToMarker {
+		action A_PLAY_GOPOS
+		hotkey "G"
+	}
+	item "-" {
+	}
+	item $MPVolumeUp {
+		action A_PLAY_VOLUP
+		hotkey "Up"
+	}
+	item $MPVolumeDown {
+		action A_PLAY_VOLDOWN
+		hotkey "Down"
+	}
+	item $MPResetVolume {
+		action A_PLAY_VOLRESET
+	}
+	item "-" {
+	}
+	item $MPSelectAudioDevice {
+		action DEVLIST_SHOW
+	}
+	item $MPProperties {
+		action A_SHOW_PROPS
+	}
+}
+
+menu mrec {
+	item $MRRecord {
+		action REC_SETS
+		hotkey "Ctrl+Shift+R"
+	}
+	item $MRQuickStartStop {
+		action REC
+		hotkey "Ctrl+R"
+	}
+	item $MRPlayandRecord {
+		action PLAYREC
+	}
+	item $MROpenRecordingsFolder {
+		action SHOWRECS
+	}
+	item $MRSelectAudioDevice {
+		action DEVLIST_SHOWREC
+	}
+}
+
+menu mconvert {
+	item $MCConvert {
+		action SHOWCONVERT
+		hotkey "Ctrl+T"
+	}
+	item $MCSetSeekPosition {
+		action SETCONVPOS_SEEK
+		hotkey "["
+	}
+	item $MCSetUntilPosition {
+		action SETCONVPOS_UNTIL
+		hotkey "]"
+	}
+}
+
+menu mhelp {
+	item $MHEditDefaultSettings {
+		action CONF_EDIT
+	}
+	item $MHEditUserSettings {
+		action USRCONF_EDIT
+	}
+	item $MHEditGUI {
+		action FMEDGUI_EDIT
+	}
+	item $MHEditGUIThemes {
+		action THEMES_EDIT
+	}
+	item "-" {
+	}
+	item $MHShowReadmeFile {
+		action README_SHOW
+	}
+	item $MHShowChangelog {
+		action CHANGES_SHOW
+	}
+	item $MHAbout {
+		action ABOUT
+	}
+}
+
+menu mlist_popup {
+	item $MUPlay {
+		style default
+		action PLAY
+	}
+	item $MLRemove {
+		action A_LIST_REMOVE
+	}
+	item $MFShowMetaData {
+		action A_FILE_SHOWINFO
+	}
+	item $MUToNextPlaylist {
+		action TO_NXTLIST
+	}
+	item $MFCopytoClipboard {
+		action A_FILE_COPYFILE
+	}
+	item $MFCopyFilenametoClipboard {
+		action A_FILE_COPYFN
+	}
+	item $MFShowFileinExplorer {
+		action A_FILE_SHOWDIR
+	}
+	item $MFDeleteFromDisk {
+		action A_FILE_DELFILE
+	}
+}
+
+menu mtray {
+	item "fmedia" {
+		style default
+		action SHOW
+	}
+	item $MTPlayback {
+		submenu mplay
+	}
+	item $MTExit {
+		action QUIT
+	}
+}
+
+dialog dlg {
+	filter "Input (*.mp3;*.ogg;*.opus;*.mpc;*.flac;*.m4a;*.mp4;*.mka;*.mkv;*.aac;*.caf;*.avi;*.wv;*.ape;*.wav;*.m3u;*.m3u8;*.pls;*.cue)\x00*.mp3;*.ogg;*.opus;*.mpc;*.flac;*.m4a;*.mp4;*.mka;*.mkv;*.aac;*.caf;*.avi;*.wv;*.ape;*.wav;*.m3u;*.m3u8;*.pls;*.cue\x00Output (*.ogg;*.opus;*.mp3;*.flac;*.m4a;*.wav)\x00*.ogg;*.opus;*.mp3;*.flac;*.m4a;*.wav\x00Playlists (*.m3u8;*.m3u)\x00*.m3u8;*.m3u\x00All (*.*)\x00*.*\x00\x00"
+}
+
+window wmain {
+	title "fmedia"
+	position 100 100 380 300
+	borderstick 7
+	icon {
+		resource 2
+	}
+	font {
+		name Arial
+		height 10
+	}
+
+	mainmenu mm {
+		item $MMFile {
+			submenu mfile
+		}
+		item $MMList {
+			submenu mlist
+		}
+		item $MMPlayback {
+			submenu mplay
+		}
+		item $MMRecord {
+			submenu mrec
+		}
+		item $MMConvert {
+			submenu mconvert
+		}
+		item $MMHelp {
+			submenu mhelp
+		}
+	}
+
+	button bpause {
+		position 5 5 30 30
+		tooltip "Play/Pause"
+		action A_PLAY_PAUSE
+		icon {
+			resource 3
+			size 30 30
+		}
+	}
+
+	button bstop {
+		size 30 30
+		style horizontal
+		tooltip "Stop"
+		action A_PLAY_STOP
+		icon {
+			resource 4
+			size 30 30
+		}
+	}
+
+	button bprev {
+		size 30 30
+		style horizontal
+		tooltip "Previous"
+		action A_PLAY_PREV
+		icon {
+			resource 5
+			size 30 30
+		}
+	}
+
+	button bnext {
+		size 30 30
+		style horizontal
+		tooltip "Next"
+		action A_PLAY_NEXT
+		icon {
+			resource 6
+			size 30 30
+		}
+	}
+
+	label lpos {
+		position 135 10 150 30
+		font {
+			name Arial
+			height 12
+			style bold
+		}
+	}
+
+	trackbar tvol {
+		position 305 10 120 20
+		style no_ticks both
+		range 125
+		value 100
+		page_size 5
+		onscrolling A_PLAY_VOL
+	}
+
+	trackbar tpos {
+		size 300 20
+		resize cx
+		style no_ticks both
+		range 0
+		page_size 15
+		onscrolling SEEKING
+		onscroll A_PLAY_SEEK
+	}
+
+	tab tabs {
+		size 300 20
+		resize cx
+		onchange A_LIST_SEL
+	}
+
+	listview vlist {
+		size 360 175
+		resize cx cy
+		style explorer_theme grid_lines multi_select
+		dblclick PLAY
+		popupmenu mlist_popup
+
+		column "#" {
+			width 35
+			align right
+		}
+		column $LCArtist {
+		}
+		column $LCTitle {
+			width 200
+		}
+		column $LCDuration {
+			width 50
+			align right
+		}
+		column $LCInfo {
+		}
+		column $LCDate {
+		}
+		column $LCAlbum {
+		}
+		column $LCFilename {
+		}
+	}
+
+	paned pntop {
+		child tvol {
+			move x
+		}
+	}
+
+	statusbar stbar {
+		parts 100 -1
+	}
+
+	trayicon tray_icon {
+		popupmenu mtray
+		lclick SHOW
+	}
+}
+
+window wconvert {
+	parent wmain
+	position 300 100 300 200
+	style popup
+	title $WTConvert
+
+	font {
+		name Arial
+		height 10
+	}
+
+	mainmenu mmconv {
+		item $CMMConvert {
+			action CONVERT
+		}
+	}
+
+	label lfn {
+		size 200 15
+		text "Convert files to:"
+	}
+
+	combobox eout {
+		size 200 25
+	}
+
+	button boutbrowse {
+		size 35 25
+		style horizontal
+		text "..."
+		action OUTBROWSE
+		tooltip "Select output directory"
+	}
+
+	label lsets {
+		size 300 15
+		text "Settings (click on the middle column to modify):"
+	}
+
+	listview vsets {
+		size 250 100
+		resize cx cy
+		style edit_labels explorer_theme grid_lines
+
+		lclick CVT_SETS_EDIT
+
+		column Setting {
+		}
+		column Value {
+		}
+		column Description {
+		}
+	}
+
+	paned pnout {
+		child eout {
+			resize cx
+		}
+		child boutbrowse {
+			move x
+		}
+	}
+}
+
+window wrec {
+	parent wmain
+	position 300 100 300 200
+	style popup
+	title $WTRecord
+
+	font {
+		name Arial
+		height 10
+	}
+
+	mainmenu mmrec {
+		item $RMMStartStop {
+			action REC
+		}
+	}
+
+	label lfn {
+		size 200 15
+		text "Output filename template:"
+	}
+
+	editbox eout {
+		size 200 25
+	}
+
+	button boutbrowse {
+		size 35 25
+		style horizontal
+		text "..."
+		action OUTBROWSE
+	}
+
+	label lsets {
+		size 300 15
+		text "Settings (click on the middle column to modify):"
+	}
+
+	listview vsets {
+		size 250 100
+		resize cx cy
+		style edit_labels explorer_theme grid_lines
+
+		lclick REC_SETT_EDIT
+
+		column Setting {
+		}
+		column Value {
+		}
+		column Description {
+		}
+	}
+
+	paned pnout {
+		child eout {
+			resize cx
+		}
+		child boutbrowse {
+			move x
+		}
+	}
+}
+
+window wdev {
+	parent wmain
+	title $WTChooseanAudioDevice
+	position 300 300 400 200
+	style popup
+	opacity 90
+	font {
+		name Arial
+		height 10
+	}
+
+	listview vdev {
+		size 250 100
+		resize cx
+		style explorer_theme grid_lines
+		column "#" {
+			width 20
+		}
+		column "Name" {
+			width 300
+		}
+	}
+
+	button bok {
+		size 50 25
+		text "OK"
+		action DEVLIST_SELOK
+	}
+}
+
+window winfo {
+	parent wmain
+	position 300 100 300 500
+	style popup
+
+	listview vinfo {
+		size 100 100
+		resize cx cy
+		style edit_labels explorer_theme grid_lines multi_select
+
+		lclick INFOEDIT
+
+		column Name {
+		}
+		column Value {
+			width 200
+		}
+	}
+}
+
+window wgoto {
+	parent wmain
+	title $WTGoTo
+	position 300 300 100 120
+	style popup
+	opacity 90
+	font {
+		name Arial
+		height 10
+	}
+
+	editbox etime {
+		size 100 25
+	}
+
+	button bgo {
+		size 50 25
+		text "Go!"
+		action A_PLAY_GOTO
+	}
+}
+
+window wabout {
+	parent wmain
+	title $WTAboutfmedia
+	position 300 300 425 175
+	style popup
+	opacity 90
+
+	image ico {
+		position 0 5 85 85
+		icon {
+			resource 2
+			size 128 128
+		}
+	}
+
+	label labout {
+		position 130 15 300 80
+		font {
+			name Arial
+			height 12
+		}
+	}
+
+	label lurl {
+		position 130 100 215 25
+		font {
+			name Arial
+			height 12
+			style underline
+		}
+		cursor hand
+		color blue
+		onclick OPEN_HOMEPAGE
+	}
+}
+
+window wlog {
+	parent wmain
+	title $WTLog
+	position 300 300 400 200
+	style popup
+
+	text tlog {
+		size 100 100
+		resize cx cy
+		font {
+			name "Courier New"
+			height 8
+		}
+	}
+}
+
+window wuri {
+	parent wmain
+	title $WTAddURL
+	position 300 300 400 100
+	style popup
+	opacity 90
+	font {
+		name Arial
+		height 10
+	}
+
+	editbox turi {
+		size 100 25
+		resize cx
+	}
+
+	button bok {
+		size 50 25
+		text "OK"
+		action URL_ADD
+	}
+
+	button bcancel {
+		size 50 25
+		style horizontal
+		text "Cancel"
+		action URL_CLOSE
+	}
+}
+
+window wfilter {
+	parent wmain
+	title $WTFilterTracks
+	position 300 300 300 100
+	style popup
+	opacity 90
+	font {
+		name Arial
+		height 10
+	}
+
+	editbox ttext {
+		size 150 25
+		onchange FILTER_APPLY
+	}
+
+	button breset {
+		size 50 25
+		style horizontal
+		text "Reset"
+		action FILTER_RESET
+	}
+
+	checkbox cbfilename {
+		size 150 25
+		style checked
+		text "Search in file names"
+	}
+
+	paned pntext {
+		child ttext {
+			resize cx
+		}
+		child breset {
+			move x
+		}
+	}
+}
+
+window wplayprops {
+	title $WTPlaybackProperties
+	position 300 100 300 500
+
+	# editbox tfilter {
+	# }
+
+	listview vconfig {
+		size 90 90
+		resize cx cy
+		column Name {
+			width 200
+		}
+		column Value {
+			width 200
+		}
+	}
+}
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/gui_lang_en.txt
+================================================
+# fmedia v1.28 GUI/winapi
+
+MMFile					"&File"
+	MFOpen					"&Open..."
+	MFAdd					"&Add..."
+	MFAddURL				"Add &URL..."
+	MFShowMetaData			"Show Meta Data"
+	MFAnalyzeShowPCMInfo	"Analyze && Show PCM Info"
+	MFCopytoClipboard		"C&opy to Clipboard"
+	MFCopyFilenametoClipboard	"Copy File&name to Clipboard"
+	MFShowFileinExplorer	"Show Fi&le in Explorer"
+	MFDeleteFromDisk		"&Delete From Disk"
+	MFMinimizetoTray		"&Minimize to Tray"
+		MTPlayback				"Playback"
+		MTExit					"Exit"
+	MFExit					"E&xit"
+MMList					"&List"
+	MLNewTab				"&New Tab"
+	MLCloseTab				"Close Tab"
+	MLSavePlaylist			"&Save Playlist..."
+	MLReadMetaTags			"Read &Meta Tags"
+	MLSelectAll				"Select &All"
+	MLInvertSelection		"In&vert Selection"
+	MLSelectionFollowsCursor	"Selection Follows Cursor"
+	MLRemove				"&Remove"
+	MLRemoveDeadItems		"Remove &Dead Items"
+	MLClear					"&Clear"
+	MLFilter				"&Filter..."
+	MLRandom				"Random"
+	MLSortRandom			"Sort: Random"
+	MLShowFavorites			"Show Favorites"
+	MLAddtoFavorites		"Add to Favorites"
+MMPlayback				"&Playback"
+	MPPlayPause				"&Play/Pause"
+	MPStop					"&Stop"
+	MPStopAfterCurrent		"Stop After Current"
+	MPNext					"&Next"
+	MPPrevious				"P&revious"
+	MPRepeatNoneTrackAll	"Repeat: None/Track/All"
+	MPSeekForward			"Seek &Forward"
+	MPSeekBack				"Seek &Back"
+	MPLeapForward			"Leap Forward"
+	MPLeapBack				"Leap Back"
+	MPGoTo					"Go To..."
+	MPSetMarker				"Set Marker"
+	MPJumpToMarker			"Jump To Marker"
+	MPVolumeUp				"Volume &Up"
+	MPVolumeDown			"Volume &Down"
+	MPResetVolume			"Reset Volume"
+	MPSelectAudioDevice		"Select Audio Device..."
+	MPProperties			"Properties..."
+MMRecord				"&Record"
+	MRRecord				"&Record..."
+		WTRecord				"Record"
+		RMMStartStop			"&Start/Stop"
+	MRQuickStartStop		"&Quick Start/Stop"
+	MRPlayandRecord			"&Play and Record"
+	MROpenRecordingsFolder	"Open Recordings Fo&lder"
+	MRSelectAudioDevice		"Select Audio Device..."
+MMConvert				"&Convert"
+	MCConvert				"&Convert..."
+		WTConvert				"Convert"
+		CMMConvert				"&Convert!"
+	MCSetSeekPosition		"Set Seek Position"
+	MCSetUntilPosition		"Set Until Position"
+MMHelp					"&Help"
+	MHEditDefaultSettings	"Edit Default Settings..."
+	MHEditUserSettings		"Edit User Settings..."
+	MHEditGUI				"Edit GUI..."
+	MHEditGUIThemes			"Edit GUI Themes..."
+	MHShowReadmeFile		"Show Readme File..."
+	MHShowChangelog			"Show Changelog..."
+	MHAbout					"&About"
+
+MUPlay					"Play"
+MUToNextPlaylist		"To Ne&xt Playlist"
+
+LCArtist				"Artist"
+LCTitle					"Title"
+LCDuration				"Duration"
+LCInfo					"Info"
+LCDate					"Date"
+LCAlbum					"Album"
+LCFilename				"Filename"
+
+WTChooseanAudioDevice	"Choose an Audio Device"
+WTGoTo					"Go To"
+WTAboutfmedia			"About fmedia"
+WTLog					"Log"
+WTAddURL				"Add URL"
+WTFilterTracks			"Filter Tracks"
+WTPlaybackProperties	"Playback Properties"
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/gui_lang_it.txt
+================================================
+# fmedia v1.28 GUI/winapi
+
+MMFile                         "&File"
+MFOpen                         "&Apri..."
+MFAdd                          "A&ggiungi..."
+MFAddURL                       "Aggiungi&URL..."
+MFShowMetaData                 "Visualizza metadati"
+MFAnalyzeShowPCMInfo           "Analizza e visualizza info PCM"
+MFCopytoClipboard              "C&opia negli Appunti"
+MFCopyFilenametoClipboard      "Copia &nome file y negli Appunti"
+MFShowFileinExplorer           "Visualizza fi&le in Explorer"
+MFDeleteFromDisk               "&Elimina dal disco"
+MFMinimizetoTray               "&Minimizza nella barra di sistema"
+MTPlayback                     "Riproduci"
+MTExit                         "Esci"
+MFExit                         "E&sci"
+MMList                         "&Elenco"
+MLNewTab                       "&Nuova scheda"
+MLCloseTab                     "Chiudi scheda"
+MLSavePlaylist                 "&Salva Playlist..."
+MLReadMetaTags                 "Leggi tag &meta"
+MLSelectAll                    "Seleziona &tutto"
+MLInvertSelection              "In&verti selezione"
+MLSelectionFollowsCursor       "Selezione segue il cursore"
+MLRemove                       "&Rimuovi"
+MLRemoveDeadItems              "Rimuovi elementi &morti"
+MLClear                        "A&zzera"
+MLFilter                       "&Filtri..."
+MLRandom                       "Casuale"
+MLSortRandom                   "Ordinamento: casuale"
+MLShowFavorites                "Visualizza preferiti"
+MLAddtoFavorites               "Aggiungi ai preferiti"
+MMPlayback                     "Ri&produzione"
+MPPlayPause                    "Ri&produci/pausa"
+MPStop                         "&Stop"
+MPStopAfterCurrent             "Stop dopo attuale"
+MPNext                         "&Successivo"
+MPPrevious                     "P&recedente"
+MPRepeatNoneTrackAll           "Ripetizione: nessuna/traccia/tutto"
+MPSeekForward                  "Vai &avanti"
+MPSeekBack                     "Vai &indietro"
+MPLeapForward                  "Vai a successivo"
+MPLeapBack                     "Vai a precedente"
+MPGoTo                         "Vai a..."
+MPSetMarker                    "Imposta marcatore"
+MPJumpToMarker                 "Vai a marcatore"
+MPVolumeUp                     "Volume &+"
+MPVolumeDown                   "Volume &-"
+MPResetVolume                  "Ripristina volume"
+MPSelectAudioDevice            "Seleziona dispositivo audio..."
+MPProperties                   "Proprietà..."
+MMRecord                       "&Registra"
+MRRecord                       "&Registra..."
+WTRecord                       "Registra"
+RMMStartStop                   "&Avvia/stop"
+MRQuickStartStop               "Avvio/stop &rapido"
+MRPlayandRecord                "Ri&produci e registra"
+MROpenRecordingsFolder         "Apri carte&lla registrazioni"
+MRSelectAudioDevice            "Seleziona dispositivo audio..."
+MMConvert                      "&Converti"
+MCConvert                      "&Converti..."
+WTConvert                      "Converti"
+CMMConvert                     "&Converti!"
+MCSetSeekPosition              "Imposta posizione ricerca"
+MCSetUntilPosition             "Imposta fino alla posizione"
+MMHelp                         "&Aiuto"
+MHEditDefaultSettings          "Modifica impostazioni predefinite..."
+MHEditUserSettings             "Modifica impostazioni utente..."
+MHEditGUI                      "Modifica GUI..."
+MHEditGUIThemes                "Modifica temi GUI..."
+MHShowReadmeFile               "Visualizza file Readme..."
+MHShowChangelog                "Visualizza elenco modifiche..."
+MHAbout                        "&Info programma"
+
+MUPlay                         "Riproduci"
+MUToNextPlaylist               "&Vai alla prossima playlist"
+
+LCArtist                       "Artista"
+LCTitle                        "Titolo"
+LCDuration                     "Durata"
+LCInfo                         "Info"
+LCDate                         "Data"
+LCAlbum                        "Album"
+LCFilename                     "Nome file"
+
+WTChooseanAudioDevice          "Scegli un dispositivo audio"
+WTGoTo                         "Vai a"
+WTAboutfmedia                  "Info su fmedia"
+WTLog                          "Registro"
+WTAddURL                       "Aggiungi URL"
+WTFilterTracks                 "Filtra tracce"
+WTPlaybackProperties           "Proprietà riproduzione"
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/help-tui.txt
+================================================
+fmedia Terminal UI commands:
+
+Key    Command
+--------------
+Space  Play/Pause
+s      Stop
+n      Next track
+p      Previous track
+q      Quit
+h      Show help
+T      a) Save this track from radio.
+       b) Start writing the recording to disk (with --prebuffer).
+
+Right  Seek forward
+Left   Seek backward
+Supported key modifiers:
+  +Alt   medium step
+  +Ctrl  large step
+
+Up     Volume up
+Down   Volume down
+m      Mute
+
+i      Show tags
+D      Delete file from disk
+
+d      Remove the track from playlist
+x      Remove the track from playlist and play next track
+E      Remove "dead" items from playlist
+L      Save current playlist to the system's temporary directory
+r      "Choose random track" setting: on/off
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/help.txt
+================================================
+Usage:
+    fmedia [OPTIONS] [INPUT...]
+
+INPUT              Input file, directory, URL or a wildcard
+                   @stdin.EXT: read from standard input.
+
+OPTIONS
+
+Typical track chain: QUEUE -> INPUT -> FILTERS -> ENCODERS -> OUTPUT
+
+AUDIO DEVICES:
+
+--list-dev          List available sound devices and exit
+--dev=DEVNO         Use playback device
+--dev-capture=DEVNO Use capture device
+--dev-loopback=DEVNO
+                    Use playback device in a loopback mode (record from playback) (WASAPI only).
+                    If used together with --dev-capture,
+                     2 recording streams from both devices will run in parallel.
+--playback-buffer=INT
+                    Length (in msec) of the playback buffer (See also fmedia.conf::*.out.buffer_length)
+
+AUDIO FORMAT:
+
+--format=STR       Set audio format (int8 | int16 | int24 | int32 | float32)
+--rate=INT         Set sample rate
+                   Note: some settings may not work together with sample rate conversion.
+--channels=STR     Set channels number
+                   Can convert stereo to mono:
+                    --channels=mono: mix all channels together
+                    --channels=left: use left channel only
+                    --channels=right: use right channel only
+
+QUEUE:
+
+--track=N1[,N2...] Select specific track numbers in playlist
+--repeat-all       Repeat all
+--random           Choose the next track randomly
+
+INPUT (RECORDING):
+
+--record           Capture audio.  Set default audio format in fmedia.conf::record_format.
+--capture-buffer=INT
+                   Length (in msec) of the capture buffer (See also fmedia.conf::*.in.buffer_length)
+
+INPUT (FILES):
+
+--flist=FILE       Read filenames from FILE
+--include='WILDCARD[;WILDCARD]'
+                   Only include files matching a wildcard (case-insensitive)
+--exclude='WILDCARD[;WILDCARD]'
+                   Exclude files & directories matching a wildcard (case-insensitive)
+-i, --info         Don't play but show media information
+--tags             Print all meta tags
+--fseek=BYTE       Set input file offset
+-s, --seek=TIME    Seek to time: [[HH:]MM:]SS[.MSC]
+-u, --until=TIME   Stop at time
+                   Special values:
+                     'playback-end': stop recording when the last playback track is finished
+
+INPUT (.cue):
+
+--cue-gaps=INT     control track pregaps
+                   0: skip pregaps:
+                     track01.index01 .. track02.index00
+                   1: (default), gap is added to the previous track:
+                     track01.index01 .. track02.index01
+                   2: gap is added to the previous track (but track01's pregap is preserved):
+                     track01.index00 .. track02.index01
+                     track02.index01 .. track03.index01
+                   3: gap is added to the beginning of the current track:
+                     track01.index00 .. track02.index00
+
+FILTERS (VOLUME):
+
+--volume=INT       Set volume (0% .. 125%)
+--gain=FLOAT       Set gain/attenuation in dB
+--dynanorm         Use Dynamic Audio Normalizer filter.
+                   Set parameters in section `mod_conf dynanorm.filter` in fmedia.conf.
+--auto-attenuate=FLOAT
+                   Set ceiling audio level in dB (always negative value) for loud tracks
+
+FILTERS (LEVEL):
+
+--start-dblevel=DB Skip initial audio until input signal level goes above DB (-100dB..0dB)
+--stop-dblevel=DB[;TIME][;MINTIME]
+                   Stop processing if input signal level goes below DB for TIME time (default: 5 sec).
+                   If MINTIME is specified, stop only after MINTIME time has passed.
+
+-P, --pcm-peaks    Analyze PCM and print some details
+--pcm-crc          Print CRC of PCM data (must be used with --pcm-peaks)
+                   Useful for checking the results of lossless audio conversion.
+
+FILTERS (LENGTH):
+
+--prebuffer=TIME   Start writing the recorded audio to a file by user's command,
+                    saving some previously recorded data (before the command is issued)
+--split=TIME       Split audio by equal time intervals
+
+FILTERS:
+
+--mix              Play input files simultaneously.
+                   Set audio format in fmedia.conf::mod_conf "mixer.out".
+                   Note: all inputs must have channels number and sample rate equal to the output.
+
+ENCODERS:
+
+--vorbis-quality=FLOAT
+                   Vorbis encoding quality: -1.0 .. 10.0
+                    VBR-quality guide (44.1k/2ch):
+                     5: ~150kbit/s
+                     7: ~200kbit/s
+--opus-bitrate=INT Opus encoding bitrate: 6..510 (VBR)
+--mpeg-quality=INT MPEG encoding quality: 9..0 (VBR) or 64..320 (CBR)
+                    VBR-quality guide (44.1k/2ch):
+                     0: ~190kbit/s
+--aac-quality=INT  AAC encoding quality: 1..5 (VBR) or 8..800 (CBR, kbit/s)
+                    VBR-quality guide (44.1k/2ch, LC):
+                     4: ~120kbit/s
+                     5: ~210kbit/s
+--aac-profile=STR  Set AAC profile: LC | HE | HEv2
+--flac-compression=INT
+                   FLAC compression level: 0..8
+--stream-copy      Copy audio data without re-encoding.  Supported formats: .ogg, .mp3.
+
+OUTPUT:
+
+-o, --out=[NAME].EXT
+                   Don't play but write output to a file (i.e. convert audio)
+                   If NAME is "@stdout", write to standard output.
+                   Output format is chosen by "EXT" (see fmedia.conf::output_ext).
+                   Supported variables:
+                     $filepath: path to input file
+                     $filename: name (without extension) of the input file
+                     $date: current date
+                     $time: current time
+                     $timems: current time with milliseconds
+                     $counter: sequentially incrementing counter (starts from 1)
+                   --out=.ogg is a short for --out='./$filename.ogg'
+                   Filename may be generated automatically using meta info,
+                     e.g.: --out '$tracknumber. $artist - $title.flac'
+-y, --overwrite    Overwrite output file
+--preserve-date    Set output file date/time equal to input file.
+--out-copy         Play AND copy data to output file specified by "--out" switch
+                     (for ICY streams only)
+--out-copy-cmd     Play AND copy data to output file specified by "--out" switch,
+                     but save each track only by user's command
+
+OUTPUT (TAGS):
+
+--meta='[clear;]NAME=STR;...'
+                    Set meta data
+                    If "clear;" is specified, skip all meta from input file.
+                    .mp3 supports: album, albumartist, artist, comment, date, genre, picture, publisher, title, tracknumber, tracktotal.
+                    .mp4 supports: album, albumartist, artist, comment, composer, copyright, date, discnumber, genre, lyrics, title, tracknumber.
+                    .flac, .ogg support tags of any name.
+                    Value may be read from file (e.g. album cover picture):
+                     "--meta=picture=@file:FILENAME"
+--edit-tags         Don't play files but just modify their meta tags.
+                    Set tags with '--meta'.
+                    Supported formats: .mp3(ID3v2+ID3v1)
+--meta-from-filename=TEMPLATE
+                    Specify template for auto-tagging from input file name.
+                    Use together with --edit-tags.
+                    .mp3 supports: $album, $albumartist, $artist, $comment, $date, $genre, $publisher, $title, $tracknumber, $tracktotal.
+
+OTHER OPTIONS:
+
+--parallel         Process input files in parallel (fmedia.conf::workers).
+                   Must be used with '--out'.
+--background       Create a new process that will run in background
+--globcmd=STR      Send commands to another running fmedia process.
+                   Supported commands:
+                     listen: Start listening for incoming commands
+                     play INPUT... : Add items to queue and start playing the first added
+                     add INPUT... : Add items to queue
+                     clear: Clear the current queue
+                     next: Play next track in the current queue
+                     stop: Stop all active tracks
+                     pause: Pause all active tracks
+                     unpause: Unpause all paused tracks
+                     quit: Close fmedia process
+--globcmd.pipe-name=STR
+                   Set name of the pipe for communication between fmedia instances
+
+--http-ctl="[Option,...]"
+                    Enable HTTP server (http://<IP>:7314/) for handling remote commands.
+                    Supported commands:
+                      "POST /api/next": Play next track
+                      "POST /api/pause": Pause
+                      "POST /api/unpause": Unpause
+
+--playlist-heal="[Option,...]"
+                    Auto-correct the paths to files inside a .m3u playlist.
+                    Replace absolute file paths to relative paths, e.g.:
+                      for /path/list.m3u:
+                      /path/dir/file.mp3 -> dir/file.mp3
+                    Correct the file extension, e.g.:
+                      dir/file.mp3 -> dir/file.m4a
+                    Correct the file directory, e.g.:
+                      olddir/file.mp3 -> newdir/file.mp3
+                    Correct the file directory & extension, e.g.:
+                      olddir/file.mp3 -> newdir/file.m4a
+                    Note: can't detect file renamings.
+
+--conf=FN          Set configuration file (default: "fmedia.conf" from the program directory)
+--gui              Run in graphical UI mode (Windows,Linux only)
+--notui            Don't use terminal UI
+--print-time       Show the time spent for processing each track
+-D, --debug        Print debug info to stdout
+-h, --help         Print help info and exit
+
+INSTALL:
+
+--install          Windows: add fmedia directory into user's environment and create a desktop shortcut
+--uninstall        Undo changes made by '--install'
+
+SOME EXAMPLES:
+
+Play:
+    fmedia play.mp3
+Record:
+    fmedia --record -o rec.flac
+Convert:
+    fmedia input.wav -o output.ogg
+Edit tags:
+    fmedia --edit-tags --meta='artist=ARTIST;title=TITLE' file.mp3
+Heal playlists:
+	fmedia --playlist-heal="" ./*.m3u8
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/help_de.txt
+================================================
+Anwendung:
+    fmedia [OPTIONEN] [EINGABE...]
+
+EINGABE            Datei, Verzeichnis, URL oder ein Platzhalter (WILDCARD)
+                   @stdin.EXT: Lese von der Standard Eingabe
+
+OPTIONEN:
+
+Typische Aufnahmekette: WARTESCHLANGE -> EINGABE -> FILTER -> KODIERUNG -> AUSGABE
+
+AUDIO GERÄTE:
+
+--list-dev          Liste alle verfügbaren Audio Geräte auf und beende
+--dev=DEVNO         Benutze Gerät zum abspielen
+--dev-capture=DEVNO Benutze Gerät zum aufnehmen
+--dev-loopback=DEVNO
+                    Benutze Gerät zum abspielen im loopback Modus (Aufnahme erfolgt über playback) (nur WASAPI)
+--playback-buffer=INT
+                    Length (in msec) of the playback buffer (See also fmedia.conf::*.out.buffer_length)
+
+AUDIO FORMAT:
+
+--format=STR       Setzt das Audio Format (int8 | int16 | int24 | int32 | float32)
+--rate=INT         Setzt die Abtastrate (sample rate)
+                   Hinweis: Manche Einstellungen könnten zusammen mit der Anpassung der Abtastrate nicht funktionieren
+--channels=STR     Setzt Kanal Nummer
+                   Konvertierung zu Stereo oder Mono möglich:
+                    --channels=mono: Mische alle Kanäle zusammen
+                    --channels=left: Benutze nur den linken Kanal
+                    --channels=right: Benutze nur den rechten Kanal
+
+WARTESCHLANGE:
+
+--track=N1[,N2...] Wähle ein spezifisches Stück aus der Wiedergabeliste
+--repeat-all       Wiederhole alles
+--random           Wähle das nächste Stück zufällig
+
+EINGABE:
+
+--record           Audio aufnehmen. Das Standard Audio Format ist in fmedia.conf::record_format hinterlegt.
+--capture-buffer=INT
+                   Length (in msec) of the capture buffer (See also fmedia.conf::*.in.buffer_length)
+
+--flist=FILE       Lese alle Dateinamen von FILE
+--include='WILDCARD[;WILDCARD]'
+                   Binde nur die Dateien ein, die dem Platzhalter (WILDCARD) entsprechen. Es wird nicht zwischen Groß- und Kleinschreibung unterschieden (case-insensitive)
+--exclude='WILDCARD[;WILDCARD]'
+                   Schließe die Dateien und Ordner aus, die dem Platzhalter (WILDCARD) entsprechen. Es wird nicht zwischen Groß- und Kleinschreibung unterschieden (case-insensitive)
+-i, --info         Zeige Informationen zum Medium
+--tags             Zeige alle Meta Schlagwörter (meta tags)
+--fseek=BYTE       Setzt ein Offset für die Eingabedatei
+-s, --seek=TIME    Suche den angegebenen Zeitpunkt: [[HH:]MM:]SS[.MSC]
+-u, --until=TIME   Stoppe zum angegebenen Zeitpunkt
+                   Besondere Werte:
+                     'playback-end': Beende die Aufnahme sobald das letzte Stück beendet wurde
+
+--cue-gaps=INT     Fügt Vorlücken (pregaps) zur Aufnahme hinzu
+                   0: überspringe Vorlücke:
+                     track01.index01 .. track02.index00
+                   1: (Standard), Lücke wird zum vorherigen Stück addiert:
+                     track01.index01 .. track02.index01
+                   2: Lücke wird zum vorherigen Stück addiert (aber die Vorlücke von track01 bleibt erhalten):
+                     track01.index00 .. track02.index01
+                     track02.index01 .. track03.index01
+                   3: Lücke wird zum Anfang des aktuellen Stücks hinzugefügt:
+                     track01.index00 .. track02.index00
+
+FILTER:
+
+--volume=INT       Setzt Lautstärke (0% .. 125%)
+--gain=FLOAT       Setzt Verstärkung (gain) bzw. Abschwächung in dB
+--dynanorm         Benutze den Filter Dynamic Audio Normalizer.
+                   Parameter hierfür können in Abschnitt `mod_conf dynanorm.filter` in der Datei fmedia.conf gesetzt werden.
+--auto-attenuate=FLOAT
+                   Set ceiling audio level in dB (always negative value) for loud tracks
+
+--start-dblevel=DB Überspringe das initiale Audio solange bis das Eingabesignal über das Level DB geht (-100dB..0dB)
+--stop-dblevel=DB[;TIME][;MINTIME]
+                   Stoppe den Prozess wenn das Eingangssignal unter das Level DB für TIME Zeiteinheiten geht (Standard: 5 sek).
+                   Wenn MINTIME spezifiziert ist, stoppe erst wenn MINTIME Zeiteinheiten vorbei sind.
+
+-P, --pcm-peaks    Analysiere PCM and gebe Details dazu aus
+--pcm-crc          Gibt CRC der PCM Daten aus (muss mit --pcm-peaks genutzt werden)
+                   Nützlich um die Ergebnisse einer verlustfreien Audio Konvertierung zu überprüfen
+
+--prebuffer=TIME   Start recording by a command from user, saving the previously bufferred seconds of audio
+--split=TIME       Split audio by equal time intervals
+
+--mix              Spiele alle eingegebenen Dateien gleichzeitig.
+                   Das Audio Format kann in fmedia.conf::mod_conf "mixer.out" angepasst werden.
+                   Hinweis: alle Eingaben müssen die gleiche Anzahl an Kanälen und Abtastrate wie die Ausgabe haben.
+
+KODIERUNG:
+
+--vorbis-quality=FLOAT
+                   Vorbis Kodierungsqualität: -1.0 .. 10.0
+--opus-bitrate=INT Opus Kodierungs Bitrate: 6..510 (VBR)
+--mpeg-quality=INT MPEG Kodierungsqualität: 9..0 (VBR) or 64..320 (CBR)
+--aac-quality=INT  AAC Kodierungsqualität: 1..5 (VBR) or 8..800 (CBR, kbit/s)
+--aac-profile=STR  Setzt AAC Profil: LC | HE | HEv2
+--flac-compression=INT
+                   FLAC Kompressionslevel: 0..8
+--stream-copy      Kopiert Audiodaten ohne diese erneut zu kodieren. Unterstützte Formate: .ogg, .mp3.
+
+AUSGABE:
+
+-o, --out=[NAME].EXT
+                   Keine Wiedergabe, sondern Ausgabe in eine Datei schreiben (d.h. konvertiere Audio)
+                   Wenn der NAME "@stdout" ist, schreibe auf die Standardausgabe.
+                   Ausgabeformat wird über "EXT" festgelegt (siehe fmedia.conf::output_ext).
+                   Unterstützte Variablen:
+                     $filepath: Pfad zur Eingabedatei
+                     $filename: Name der Eingabedatei (ohne Dateikürzel)
+                     $date: aktuelles Datum
+                     $time: aktuelle Zeit
+                     $timems: aktuelle Zeit in Millisekunden
+                     $counter: sequentially incrementing counter (starts from 1)
+                   --out=.ogg ist eine Abkürzung für --out='./$filename.ogg'
+                   Der Dateiname kann automatisch aus den Metainformationen generiert werden,
+                     z. B..: --out '$tracknumber. $artist - $title.flac'
+-y, --overwrite    Überschreibe Ausgabedatei
+--preserve-date    Setzt Datum/Zeit der Ausgabedatei auf die Werte der Eingabedatei.
+--out-copy         Spiele Daten ab UND kopiere sie in die Ausgabedatei welche mit "--out" festgelegt wurde
+--out-copy-cmd     Spiele Daten ab UND kopiere sie in die Ausgabedatei welche mit "--out" festgelegt wurde,
+                     speichere jedes Stück nur auf Befehl des Anwenders/der Anwenderin
+
+--meta='[clear;]NAME=STR;...'
+                   Setzt Metadaten
+                   Wenn "clear;" spezifiziert ist, überspringe all Metadaten der Eingabedatei.
+                   .mp3 unterstützt: album, albumartist, artist, comment, date, genre, picture, publisher, title, tracknumber, tracktotal.
+                   .mp4 unterstützt: album, albumartist, artist, comment, composer, copyright, date, discnumber, genre, lyrics, title, tracknumber.
+                   .flac, .ogg unterstützen jegliche Schlagwörter.
+                   Die Werte dazu können aus einer Datei gelesen werden (z. B. album cover picture):
+                     "--meta=picture=@file:FILENAME"
+--edit-tags        Don't play files but just modify their meta tags.
+                   Set tags with '--meta'.
+                   Supported formats: .mp3(ID3v2+ID3v1)
+--meta-from-filename=TEMPLATE
+                   Specify template for auto-tagging from input file name.
+                   Use together with --edit-tags.
+                   .mp3 supports: $album, $albumartist, $artist, $comment, $date, $genre, $publisher, $title, $tracknumber, $tracktotal.
+
+ANDERE OPTIONEN:
+
+--parallel         Verarbeite Eingabedateien parallel (fmedia.conf::workers).
+                   Muss mit '--out' genutzt werden.
+--background       Lauf im Hintergrund
+--globcmd=STR      Sendet Befehle an einen anderen laufenden fmedia Prozess.
+                   Unterstützte Befehle:
+                     listen: Fange an auf eingehende Befehle zu hören
+                     play INPUT... : Füge Einträge zur Warteschlange hinzu und spiele das erste hinzugefügte ab
+                     add INPUT... : Füge Einträge zur Warteschlange hinzu
+                     clear: Leere die aktuelle Wartschlange
+                     next: Play next track in the current queue
+                     stop: Stoppe alle aktiven Stücke
+                     pause: Pause all active tracks
+                     unpause: Unpause all paused tracks
+                     quit: Beende den fmedia Prozess
+--globcmd.pipe-name=STR
+                   Setzt den Namen der Pipe für die Kommunikation zwischen fmedia Instanzen
+
+--http-ctl="[Option,...]"
+                    Enable HTTP server (http://<IP>:7314/) for handling remote commands.
+                    Supported commands:
+                      "POST /api/next": Play next track
+                      "POST /api/pause": Pause
+                      "POST /api/unpause": Unpause
+
+--playlist-heal="[Option,...]"
+                    Auto-correct the paths to files inside a .m3u playlist.
+                    Replace absolute file paths to relative paths, e.g.:
+                      for /path/list.m3u:
+                      /path/dir/file.mp3 -> dir/file.mp3
+                    Correct the file extension, e.g.:
+                      dir/file.mp3 -> dir/file.m4a
+                    Correct the file directory, e.g.:
+                      olddir/file.mp3 -> newdir/file.mp3
+                    Correct the file directory & extension, e.g.:
+                      olddir/file.mp3 -> newdir/file.m4a
+                    Note: can't detect file renamings.
+
+--conf=FN          Setzt Konfigurationsdatei (Standard: "fmedia.conf" im Programmverzeichnis)
+--gui              Benutze grafischen Eingabe-Modus (nur Windows, Linux)
+--notui            Benutze NICHT das Terminal
+--print-time       Zeige die Verarbeitungszeit jeder einzelnen Aufnahme an
+--debug            Zeige Debug-Informationen in der Standardausgabe (stdout) an
+-h, --help         Zeige Hilfe and und beende
+
+INSTALLIEREN:
+
+--install          Windows: Fügt das Verzeichnis "fmedia" zur Benutzungsumgebung hinzu und erzeugt ein Shortcut auf dem Desktop
+--uninstall        Deinstalliere alle Änderungen, die durch '--install' erzeugt wurden
+
+SOME EXAMPLES:
+
+Play:
+    fmedia play.mp3
+Record:
+    fmedia --record -o rec.flac
+Convert:
+    fmedia input.wav -o output.ogg
+Edit tags:
+    fmedia --edit-tags --meta='artist=ARTIST;title=TITLE' file.mp3
+Heal playlists:
+	fmedia --playlist-heal="" ./*.m3u8
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/help_es.txt
+================================================
+Uso:
+    fmedia [OPCIONES] [ENTRADA...]
+
+ENTRADA            Archivo de entrada, carpeta, URL o comodín
+                   @stdin.EXT: lee desde standard input.
+
+OPCIONES:
+
+Cadena típica de un tema: COLA -> ENTRADA -> FILTROS -> CODIFICACIÓN -> SALIDA
+
+DISPOSITIVOS DE AUDIO:
+
+--list-dev          Lista los dispositivos disponibles
+--dev=DEVNO         Usa el dispositivo reproducción
+--dev-capture=DEVNO Usa el dispositivo de captura
+--dev-loopback=DEVNO
+                    Usa el dispositivo de reproducción en modo loopback (graba lo que reproduce) (solo WASAPI)
+--playback-buffer=INT
+                    Length (in msec) of the playback buffer (See also fmedia.conf::*.out.buffer_length)
+
+AUDIO FORMAT:
+
+--format=STR       Indica el formato de audio (int8 | int16 | int24 | int32 | float32)
+--rate=INT         Indica la velocidad de sampleo
+                   Nota: algunas configuraciones pueden no funcionar con conversión de frecuencia de muestreo.
+--channels=STR     Define el número de canales
+                   Puede convertir estéreo a mono:
+                    --channels=mono: mezcla los canales
+                    --channels=left: usa solamente el canal izquierdo
+                    --channels=right: usa solamente el canal derecho
+
+QUEUE:
+
+--track=N1[,N2...] Selecciona un número de tema específico en la lista de reprducción
+--repeat-all       Repite todo
+--random           Selecciona el próximo tema al azar
+
+ENTRADA:
+
+--record           Captura audio.  Defina el formato de audio por defecto en fmedia.conf::record_format.
+--capture-buffer=INT
+                   Tamaño (en milisegundos) del buffer de captura (Vea también fmedia.conf::*.in.buffer_length)
+
+--flist=ARCHIVO    Lee nombres de archivo desde ARCHIVO
+--include='WILDCARD[;WILDCARD]'
+                   Solamente incluye archivos que cumplan con la condición (case-insensitive)
+--exclude='WILDCARD[;WILDCARD]'
+                   Excluye archivos y carpetas que cumplan con la condición (case-insensitive)
+-i, --info         Muestra información sin reproducir
+--tags             Imprime todos los meta tags
+--fseek=BYTE       Set input file offset
+-s, --seek=TIME    Seek to time: [[HH:]MM:]SS[.MSC]
+-u, --until=TIME   Stop at time
+                   Valores especiales:
+                     'playback-end': detiene la grabación cuando el último tema reproducido termina
+
+--cue-gaps=INT     Control track pregaps
+                   0: skip pregaps:
+                     track01.index01 .. track02.index00
+                   1: (default), gap is added to the previous track:
+                     track01.index01 .. track02.index01
+                   2: gap is added to the previous track (but track01's pregap is preserved):
+                     track01.index00 .. track02.index01
+                     track02.index01 .. track03.index01
+                   3: gap is added to the beginning of the current track:
+                     track01.index00 .. track02.index00
+
+FILTROSS:
+
+--volume=INT       Define el volumen (0% .. 125%)
+--gain=FLOAT       Definee la ganancia/atenuación en dB
+--dynanorm         Use Dynamic Audio Normalizer filter.
+                   Set parameters in section `mod_conf dynanorm.filter` in fmedia.conf.
+--auto-attenuate=FLOAT
+                   Set ceiling audio level in dB (always negative value) for loud tracks
+
+--start-dblevel=DB Skip initial audio until input signal level goes above DB (-100dB..0dB)
+--stop-dblevel=DB[;TIME][;MINTIME]
+                   Stop processing if input signal level goes below DB for TIME time (default: 5 sec).
+                   If MINTIME is specified, stop only after MINTIME time has passed.
+
+-P, --pcm-peaks    Analiza PCM y muestra algunos detalles
+--pcm-crc          Muestra CRC de datos PCM (se debe usar con --pcm-peaks)
+                   Útil para chequer los resultados de la conversión sin pérdida.
+
+--prebuffer=TIME   Start writing the recorded audio to a file by user's command, saving some previously recorded data (before the command is issued)
+--split=TIME       Split audio by equal time intervals
+
+--mix              Reproduce archivos de entrada simultáneamente.
+                   Defina el formato de audio en fmedia.conf::mod_conf "mixer.out".
+                   Nota: todas las entradas deben tener igual cantidad de canales y la misma velocidad de sampleo.
+
+CODIFICACIÓN:
+
+--vorbis-quality=FLOAT
+                   Calidad de codificación Vorbis: -1.0 .. 10.0
+--opus-bitrate=INT Calidad de codificación Opus: 6..510 (VBR)
+--mpeg-quality=INT Calidad de codificación MPEG: 9..0 (VBR) or 64..320 (CBR)
+--aac-quality=INT  Calidad de codificación AAC: 1..5 (VBR) or 8..800 (CBR, kbit/s)
+--aac-profile=STR  Define el perfil AAC: LC | HE | HEv2
+--flac-compression=INT
+                   Nivel de compresión FLAC: 0..8
+--stream-copy      Copia datos de audio sin recodificar. Formatos soportados: .ogg, .mp3.
+
+SALIDA:
+
+-o, --out=[NAME].EXT
+                   Escribe en un archivo sin reproducir (es decir, convierte audio)
+                   Si NAME es "@stdout", escribe a standard output.
+                   El formato de salida se elige con "EXT" (ver fmedia.conf::output_ext).
+                   Variables soportadas:
+                     $filepath: path to input file
+                     $filename: nombre (sin extensión) del archivo de entrada
+                     $date: fecha actual
+                     $time: hora actual
+                     $timems: hora actual con milisegundos
+                     $counter: contador secuencial incremental (comienza en 1)
+                   --out=.ogg es un abreviatura para --out='./$filename.ogg'
+                   El nombre de archivo puede ser generado automáticamente usando meta info,
+                     e.g.: --out '$tracknumber. $artist - $title.flac'
+-y, --overwrite    Sobreescribe el archivo de salida
+--preserve-date    Define la fecha y hora del archivo de salida igual al archivo de entrada.
+--out-copy         Reproduce Y copia datos a un archivo especificado por "--out"
+--out-copy-cmd     Reproduce Y copia datos a un archivo especificado por "--out",
+                     save each track only by user's command
+
+--meta='[clear;]NAME=STR;...'
+                   Set meta data
+                   If "clear;" is specified, skip all meta from input file.
+                   .mp3 supports: album, albumartist, artist, comment, date, genre, picture, publisher, title, tracknumber, tracktotal.
+                   .mp4 supports: album, albumartist, artist, comment, composer, copyright, date, discnumber, genre, lyrics, title, tracknumber.
+                   .flac, .ogg support tags of any name.
+                   Value may be read from file (e.g. album cover picture):
+                     "--meta=picture=@file:FILENAME"
+--edit-tags        Don't play files but just modify their meta tags.
+                   Set tags with '--meta'.
+                   Supported formats: .mp3(ID3v2+ID3v1)
+--meta-from-filename=TEMPLATE
+                   Specify template for auto-tagging from input file name.
+                   Use together with --edit-tags.
+                   .mp3 supports: $album, $albumartist, $artist, $comment, $date, $genre, $publisher, $title, $tracknumber, $tracktotal.
+
+OTRAS OPCIONES:
+
+--parallel         Procesa los archivos de entrada en paralelo (fmedia.conf::workers).
+                   Se debe usar con '--out'.
+--background       Crea un nuevo proceso que se ejecutará en segundo plano
+--globcmd=STR      Emvía comandos a otro proceso fmedia ejecutándose.
+                   Comandos soportados:
+                     listen: Start listening for incoming commands
+                     play INPUT... : Add items to queue and start playing the first added
+                     add INPUT... : Add items to queue
+                     clear: Clear the current queue
+                     next: Play next track in the current queue
+                     stop: Stop all active tracks
+                     pause: Pause all active tracks
+                     unpause: Unpause all paused tracks
+                     quit: Cerrar procesos fmedia
+--globcmd.pipe-name=STR
+                   Set name of the pipe for communication between fmedia instances
+
+--http-ctl="[Option,...]"
+                    Enable HTTP server (http://<IP>:7314/) for handling remote commands.
+                    Supported commands:
+                      "POST /api/next": Play next track
+                      "POST /api/pause": Pause
+                      "POST /api/unpause": Unpause
+
+--playlist-heal="[Option,...]"
+                    Auto-correct the paths to files inside a .m3u playlist.
+                    Replace absolute file paths to relative paths, e.g.:
+                      for /path/list.m3u:
+                      /path/dir/file.mp3 -> dir/file.mp3
+                    Correct the file extension, e.g.:
+                      dir/file.mp3 -> dir/file.m4a
+                    Correct the file directory, e.g.:
+                      olddir/file.mp3 -> newdir/file.mp3
+                    Correct the file directory & extension, e.g.:
+                      olddir/file.mp3 -> newdir/file.m4a
+                    Note: can't detect file renamings.
+
+--conf=FN          Define el archivo de configuración (por defecto: "fmedia.conf" desde la carpeta del programa)
+--gui              Se ejecuta en modo gráfico (Windows,Linux only)
+--notui            No usa terminal gráfica
+--print-time       Muestra el tiempo que demora procesar cada tema
+--debug            Muestra información de debug en stdout
+-h, --help         Muestra la ayuda
+
+INSTALL:
+
+--install          Windows: agrega la carpeta fmedia en el entorno del usuario y crea un acceso directo en el escritorio
+--uninstall        Deshacer cambios hechos por '--install'
+
+SOME EXAMPLES:
+
+Play:
+    fmedia play.mp3
+Record:
+    fmedia --record -o rec.flac
+Convert:
+    fmedia input.wav -o output.ogg
+Edit tags:
+    fmedia --edit-tags --meta='artist=ARTIST;title=TITLE' file.mp3
+Heal playlists:
+	fmedia --playlist-heal="" ./*.m3u8
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/help_fr.txt
+================================================
+Usage:
+    fmedia [OPTIONS] [INPUT...]
+
+INPUT              fichier, dossier, URL ou wildcard
+                   @stdin.EXT: Lecture à partir de l'entrée standard.
+
+OPTIONS:
+
+Enchainement typique d'une piste : QUEUE -> INPUT -> FILTERS -> ENCODING -> OUTPUT
+
+AUDIO DEVICES:
+
+--list-dev          Liste les périphériques audio et quitte.
+--dev=DEVNO         Utilise le périphérique de lecture.
+--dev-capture=DEVNO Utilise le périphérique de capture.
+--dev-loopback=DEVNO
+                    Utilise le périphérique de lecture en mode boucle (enregistrement à partir de la lecture) (WASAPI seulement).
+--playback-buffer=INT
+                    Length (in msec) of the playback buffer (See also fmedia.conf::*.out.buffer_length)
+
+AUDIO FORMAT:
+
+--format=STR       Détermine le format audio (int8 | int16 | int24 | int32 | float32)
+--rate=INT         Détermine le taux d'échantillonnage.
+                   Note : Certains paramètres peuvent ne pas fonctionner avec certains taux d'échantillonnage.
+--channels=STR     Détermine le numéro du canal.
+                   Conversion de la stéréo en mono :
+                    --channels=mono: convertit tous les canaux en un seul
+                    --channels=left: utilise uniquement le canal gauche
+                    --channels=right: utilise uniquement le canal droit
+QUEUE:
+
+--track=N1[,N2...] Sélectionne le numéro d'une piste spécifique dans la playlist.
+--repeat-all       Répète la totalité.
+--random           Choisit la prochaine piste aléatoirement.
+
+INPUT:
+
+--record           Enregistrement audio. Déterminer le format audio par défaut dans fmedia.conf::record_format.
+--capture-buffer=INT
+                   Length (in msec) of the capture buffer (See also fmedia.conf::*.in.buffer_length)
+
+--flist=FILE       Lit les noms de fichier à partir de FILE.
+--include='WILDCARD[;WILDCARD]'
+                   Ne prend en compte que les fichiers correspondant à une wildcard (sensible à la casse)
+--exclude='WILDCARD[;WILDCARD]'
+                   Exclue les fichiers et dossiers correspondant à une wildcard (sensible à la casse)
+-i, --info         Ne joue pas mais montre les infomations du média
+--tags             Imprime tous les meta tags
+--fseek=BYTE       Set input file offset                                                        (need translation)
+-s, --seek=TIME    Cherche une référence temporelle : [[HH:]MM:]SS[.MSC]
+-u, --until=TIME   Stoppe à l'instant T
+                   Valeurs speciales :
+                     'playback-end': arrête l'enregistrement quand la dernière piste est finie.
+
+--cue-gaps=INT     Controle les pregaps de la piste
+                   0: Ne joue pas les pregaps:
+                     track01.index01 .. track02.index00
+                   1: (défaut), un gap (espace) est ajouté à la piste précédente :
+                     track01.index01 .. track02.index01
+                   2: un gap est ajouté à la piste précédente (mais le prégap de la track01 est préservé) :
+                     track01.index00 .. track02.index01
+                     track02.index01 .. track03.index01
+                   3: un espace est ajouté au début de la piste utilisée :
+                     track01.index00 .. track02.index00
+
+FILTRES:
+
+--volume=INT       Détermine le volume (0% .. 125%)
+--gain=FLOAT       Détermine le gain/attenuation en dB
+--dynanorm         Utilise Dynamic Audio Normalizer filter.
+                   Détermine les paramêtres dans la section `mod_conf dynanorm.filter` dans fmedia.conf.
+--auto-attenuate=FLOAT
+                   Set ceiling audio level in dB (always negative value) for loud tracks
+
+--start-dblevel=DB Ignore le signal audio initial tant qu'il n'atteint pas un niveau en décibels (DB) donné.(-100dB..0dB)
+--stop-dblevel=DB[;TIME][;MINTIME]
+                   Arrête le traitement si le signal d'entrée descend sous un niveau de décibels donné DB pour une durée TIME (défaut : 5 sec).
+                   Si MINTIME est spécifié, arrête seulement après qu'un temps MINTIME se soit écoulé.
+
+-P, --pcm-peaks    Analyse PCM et imprime certains détails
+--pcm-crc          Imprime CRC des données PCM (doit être utilisé avec--pcm-peaks)
+                   Utile afin de vérifier les résutats d'une conversion audio sans perte (lossless)
+
+--prebuffer=TIME   Démarre l'enregistrement suite à une commande issue par l'utilisateur en sauvegardant les données audio préalablement stockées dans le buffer.
+--split=TIME       Tronçonne l'audio par intervals de temps égaux
+
+--mix              Joue les fichiers audio simultanément.
+                   Déterminer le format audio dans fmedia.conf::mod_conf "mixer.out".
+                   Note: Toutes les entrées doivent avoir un numéro de canal et une fréquence d'échantillonnage égaux à la sortie.
+
+ENCODAGE:
+
+--vorbis-quality=FLOAT
+                   Qualité de l'encodage Vorbis : -1.0 .. 10.0
+--opus-bitrate=INT Taux d'encodage Opus : 6..510 (VBR)
+--mpeg-quality=INT Qualité de l'encodage MPEG : 9..0 (VBR) or 64..320 (CBR)
+--aac-quality=INT  Qualité de l'encodage AAC : 1..5 (VBR) or 8..800 (CBR, kbit/s)
+--aac-profile=STR  Détermine le profil AAC : LC | HE | HEv2
+--flac-compression=INT
+                   Niveau de compression FLAC : 0..8
+--stream-copy      Copie les données audio sans re-encodage. Formats supportés: .ogg, .mp3.
+
+SORTIE:
+
+-o, --out=[NAME].EXT
+                   Ne joue pas mais écrit la sortie dans un fichier (i.e. conversion audio)
+                   Si NAME est "@stdout", écrit vers la sortie standard.
+                   Le format de sortie est choisi par "EXT" (voir fmedia.conf::output_ext).
+                   Variables supportées :
+                     $filepath: chemin vers le fichier d'entrée
+                     $filename: nom (sans extension) du fichier d'entrée
+                     $date: date
+                     $time: heure
+                     $timems: heure avec millisecondes
+                     $counter: incrémente le conteur séquentiellement (comment avec 1)
+                   --out=.ogg est un raccourcis pour--out='./$filename.ogg'
+                   Le nom de fichier peut être généré automatiquement en utilisant les méta infos,
+                     e.g.: --out '$tracknumber. $artist - $title.flac'
+-y, --overwrite    Ecrit par dessus le fichier de sortie
+--preserve-date    Transfère les données date/heure du fichier d'entrée au fichier de sortie.
+--out-copy         Joue ET copy des données vers le fichier de sortie spécifié par le switch "--out"
+--out-copy-cmd     Joue ET copy des données vers le fichier de sortie spécifié par le switch "--out",
+                     sauve chaque piste en respectant les commandes de l'utilisateur
+
+--meta='[clear;]NAME=STR;...'
+                   Détermine les meta data (données de référence)
+                   Si "clear;" est spécifié, ignorer toutes les références du fichier d'entrée.
+                   .mp3 supports: album, albumartist, artist, comment, date, genre, picture, publisher, title, tracknumber, tracktotal.
+                   .mp4 supports: album, albumartist, artist, comment, composer, copyright, date, discnumber, genre, lyrics, title, tracknumber.
+                   .flac, .ogg supporte les tags quelque soit leur nom.
+                   Donnée pouvant être lue à partir du fichier (e.g. image de la couverture de l'album):
+                     "--meta=picture=@file:FILENAME"
+--edit-tags        Don't play files but just modify their meta tags.
+                   Set tags with '--meta'.
+                   Supported formats: .mp3(ID3v2+ID3v1)
+--meta-from-filename=TEMPLATE
+                   Specify template for auto-tagging from input file name.
+                   Use together with --edit-tags.
+                   .mp3 supports: $album, $albumartist, $artist, $comment, $date, $genre, $publisher, $title, $tracknumber, $tracktotal.
+
+AUTRES OPTIONS:
+
+--parallel         Traite les fichiers entrée en parallèle (fmedia.conf::workers).
+                   Doit être utilisé avec '--out'.
+--background       Crée un nouveau processus qui jouera en arrière plan.
+--globcmd=STR      Envoie des commandes vers un autre processus fmedia en fonctionnement.
+                   Commandes supportées :
+                     listen: Ecoute et attend l'entrée de commandes.
+                     play INPUT... : Ajoute des éléments à la queue et commence à jouer le premier élément ajouté.
+                     add INPUT... : Ajoute des éléments à la queue.
+                     clear: Vide la queue courante.
+                     next: Play next track in the current queue
+                     stop: Arrête toutes les pistes actives
+                     pause: Pause all active tracks
+                     unpause: Unpause all paused tracks
+                     quit: Termine tous les processus fmedia
+--globcmd.pipe-name=STR
+                   Détermine le nom du pipe pour la communication entre instances de fmedia
+
+--http-ctl="[Option,...]"
+                    Enable HTTP server (http://<IP>:7314/) for handling remote commands.
+                    Supported commands:
+                      "POST /api/next": Play next track
+                      "POST /api/pause": Pause
+                      "POST /api/unpause": Unpause
+
+--playlist-heal="[Option,...]"
+                    Auto-correct the paths to files inside a .m3u playlist.
+                    Replace absolute file paths to relative paths, e.g.:
+                      for /path/list.m3u:
+                      /path/dir/file.mp3 -> dir/file.mp3
+                    Correct the file extension, e.g.:
+                      dir/file.mp3 -> dir/file.m4a
+                    Correct the file directory, e.g.:
+                      olddir/file.mp3 -> newdir/file.mp3
+                    Correct the file directory & extension, e.g.:
+                      olddir/file.mp3 -> newdir/file.m4a
+                    Note: can't detect file renamings.
+
+--conf=FN          Détermine le fichier deconfiguration (défaut: "fmedia.conf" dans le dossier du programme)
+--gui              Utilise fmedia en mode graphique(Windows,Linux seulement)
+--notui            N'utilise pas l'interface utilisateur en ligne de commande
+--print-time       Montre le temps utilisé pour le processus de chaque piste
+--debug            Imprime les infos de débuggage vers stdout
+-h, --help         Imprime les infos d'aide et quitte
+
+INSTALL:
+
+--install          Windows: ajoute un dossier fmedia dans l'environnement de l'utilisateur et crée un raccourcis sur le bureau
+--uninstall        Annule les changements effectués par '--install'
+
+SOME EXAMPLES:
+
+Play:
+    fmedia play.mp3
+Record:
+    fmedia --record -o rec.flac
+Convert:
+    fmedia input.wav -o output.ogg
+Edit tags:
+    fmedia --edit-tags --meta='artist=ARTIST;title=TITLE' file.mp3
+Heal playlists:
+	fmedia --playlist-heal="" ./*.m3u8
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/help_id.txt
+================================================
+Manual penggunaan:
+    fmedia [OPSI] [INPUT...]
+
+INPUT              Input file, direktori/folder, URL atau wildcard
+                   @stdin.EXT: membaca dari input standar pada terminal.
+
+PILIHAN:
+
+Urutan track secara umum: QUEUE -> INPUT -> FILTER -> ENCODING -> OUTPUT
+
+PERANGKAT AUDIO:
+
+--list-dev              Daftar perangkat suara yang tersedia dan keluar
+--dev=DEVNO             Penggunaan perangkat pemutaran (lihat berdasarkan nomor perangkat)
+--dev-capture=DEVNO     Penggunaan perangkat penangkap (lihat berdasarkan nomor perangkat)
+--dev-loopback=DEVNO
+                        Penggunaan perangkat pemutaran dalam mode loopback (merekam dari pemutaran) (hanya WASAPI)
+--playback-buffer=INT
+                    Length (in msec) of the playback buffer (See also fmedia.conf::*.out.buffer_length)
+
+FORMAT AUDIO:
+
+Secara default pengaturan ini digunakan untuk output. Saat merekam, akan menset berdasarkan input.
+--format=STR            Pengaturan tipe format audio (int8 | int16 | int24 | int32 | float32)
+--rate=INT              Pengaturan sample rate
+                        Catatan: beberapa opsi setingan mungkin tidak berfungsi secara bersamaan dengan konversi sample rate.
+--channels=STR          Pengaturan setingan nomor saluran/channel
+                        Dapat mengubah stereo ke mono:
+                         --channels=mono: menggabungkan semua saluran/channel menjadi satu
+                         --channels=left: menggunakan saluran/channel kiri saja
+                         --channels=right: gunakan saluran/channel kanan saja
+
+QUEUE / Antrian:
+
+--track=N1[,N2...]      Pilih urutan nomor track tertentu dalam playlist
+--repeat-all            Akan mengulang semua
+--random                Akan memilih track berikutnya secara acak
+
+INPUT:
+
+--record                Untuk merekam audio. Untuk pengaturan format audio default dapat diatur pada file fmedia.conf::record_format.
+--capture-buffer=INT    "Length" (dalam msec) dari capture buffer (Lihat juga file fmedia.conf::*.in.buffer_length)
+
+--flist=FILE            Membaca nama file dari parameter <FILE>
+--include='WILDCARD[;WILDCARD]'
+                        Akan menyertakan file yang cocok dengan karakter wildcard (tidak berpengaruh huruf besar/kecil - case insensitive)
+--exclude='WILDCARD[;WILDCARD]'
+                        Akan mengecualikan file & direktori yang cocok dengan wildcard (tidak berpengaruh huruf besar/kecil - case insensitive)
+-i, --info              Tidak memutar file tapi menampilkan informasi media file tersebut
+--tags                  Menampilkan semua tag meta
+--fseek=BYTE            Pengaturan offset file masukan
+-s, --seek=TIME         Pengaturan untuk melaju pada setingan TIME: [[HH:]MM:]SS[.MSC]
+-u, --until=TIME        Pengaturan untuk stop/berhenti tepat pada setingan TIME
+                        Parameter khusus:
+                         'playback-end': pengaturan untuk stop perekaman saat trek pemutaran terakhir selesai
+
+--cue-gaps=INT     Mengontrol track pregaps
+                   0: lewati pregaps:
+                     track01.index01 .. track02.index00
+                   1: (default), celah ditambahkan ke trek sebelumnya:
+                     track01.index01 .. track02.index01
+                   2: celah ditambahkan ke trek sebelumnya (tapi celah awal trek01 tetap digunakan):
+                     track01.index00 .. track02.index01
+                     track02.index01 .. track03.index01
+                   3: celah ditambahkan ke awal trek saat ini:
+                     track01.index00 .. track02.index00
+
+FILTER:
+
+--volume=INT           Pengaturan volume (0% .. 125%)
+--gain=FLOAT           Pengaturan penguatan / redaman dalam dB
+--dynanorm             Penggunaan filter Dynamic Audio Normalizer.
+                       Pengaturan parameter di bagian `mod_conf dynanorm.filter` di file fmedia.conf.
+--auto-attenuate=FLOAT
+                   Set ceiling audio level in dB (always negative value) for loud tracks
+
+--start-dblevel=DB     Melewati audio awal sampai level sinyal input melebihi DB (-100dB..0dB)
+--stop-dblevel=DB[;TIME][;MINTIME]
+                       Menghentikan proses jika level sinyal input turun di bawah DB untuk waktu TIME (default: 5 detik).
+                       Jika MINTIME ditentukan, akan berhenti hanya setelah waktu MINTIME telah berlalu.
+
+-P, --pcm-peaks        Menganalisis PCM dan menampilkan beberapa detail
+--pcm-crc              Menampilkan CRC data PCM (harus digunakan dengan --pcm-peaks)
+                       Berguna untuk memeriksa hasil konversi audio lossless.
+
+--prebuffer=TIME       Memulai menyimpan audio yang direkam ke file dengan perintah pengguna, menyimpan beberapa data yang direkam sebelumnya (sebelum perintah dijalankan)
+--split=TIME           Membagi audio dengan interval waktu yang sama
+
+--mix                   Putar file input secara bersamaan.
+                        Untuk pengaturan format audio pada file fmedia.conf::mod_conf "mixer.out".
+                        Catatan: semua masukan harus memiliki nomor saluran/channel dan sample rate yang sama dengan keluaran/output.
+
+ENCODING:
+
+--vorbis-quality=FLOAT
+                       Kualitas encoding format Vorbis: -1.0 .. 10.0
+--opus-bitrate=INT     Opus encoding bitrate: 6..510 (VBR)
+--mpeg-quality=INT     kualitas encoding format MPEG: 9..0 (VBR) atau 64..320 (CBR)
+--aac-quality=INT      kualitas encoding format AAC: 1..5 (VBR) atau 8..800 (CBR, kbit / s)
+--aac-profile=STR      Pengaturan profil AAC: LC | DIA | HEv2
+--flac-compression=INT
+                       Pengaturan tingkat kompresi FLAC: 0..8
+--stream-copy          Menyalin data audio tanpa pengkodean ulang. Format yang didukung: .ogg, .mp3.
+
+OUTPUT:
+
+-o, --out=[NAME].EXT
+                   Tidak memutar tetapi akan menyimpan OUTPUT menjadi file (sebagai konversi audio)
+                   Jika NAME adalah "@stdout", akan menyimpan ke OUTPUT standar.
+                   Format OUTPUT dipilih oleh "EXT" (lihat di file fmedia.conf::output_ext).
+                   Variabel yang dapat digunakan:
+                     $filepath: hirarki direktori ke file input
+                     $filename: nama (tanpa ekstensi) dari file input
+                     $date: tanggal sekarang
+                     $time: waktu saat ini
+                     $timems: waktu saat ini dengan milidetik
+                     $counter: penambahan secara berurutan
+                   --out=.ogg merupakan format ringkas dari perintah --out='./$filename.ogg'
+                   Nama file dapat dibuat secara otomatis menggunakan info meta,
+                     contoh: --out '$tracknumber. $artist - $title.flac '
+-y, --overwrite      Menimpa file keluaran
+--preserve-date      Pengaturan tanggal / waktu file output sama dengan file input.
+--out-copy         Memutar dan Menyalin data ke file keluaran yang ditentukan oleh tombol "--out"
+--out-copy-cmd     Memutar dan Menyalin data ke file keluaran yang ditentukan oleh tombol "--out",
+                     simpan setiap lagu berdasarkan perintah pengguna
+
+--meta='[clear;]NAMA=STR;...'
+                    Menset meta data
+                    Jika "clear;" digunakan, akan melewatkan semua meta dari file masukan.
+                    mendukung format .mp3: album, albumartist, artis, komentar, tanggal, genre, gambar, penerbit, judul, nomor trek, jumlah trek.
+                    mendukung format .mp4 : album, albumartist, artis, komentar, komposer, hak cipta, tanggal, discnumber, genre, lirik, judul, tracknumber.
+                    .flac, .ogg mendukung tag dengan nama apa pun.
+                    Dapat dibaca dari file (misalnya gambar sampul album):
+                       "--meta=picture=@file:FILENAME"
+--edit-tags         Don't play files but just modify their meta tags.
+                    Set tags with '--meta'.
+                    Supported formats: .mp3(ID3v2+ID3v1)
+--meta-from-filename=TEMPLATE
+                    Specify template for auto-tagging from input file name.
+                    Use together with --edit-tags.
+                    .mp3 supports: $album, $albumartist, $artist, $comment, $date, $genre, $publisher, $title, $tracknumber, $tracktotal.
+
+OPSI LAIN:
+
+--parallel           Proses file input secara paralel (lihat pada file bagian, fmedia.conf::workers).
+                     Harus digunakan dengan parameter '--out'.
+--background         Membuat proses baru yang akan berjalan pada background proses
+--globcmd=STR        Mengirim perintah ke proses fmedia lain yang sedang berjalan.
+                     Perintah yang didukung:
+                       listen: memulai mendengarkan perintah yang masuk
+                       play INPUT...: Menambahkan item ke antrean dan mulai putar yang pertama ditambahkan
+                       add INPUT...: Menambahkan item ke antrian
+                       clear: Menghapus antrian saat ini
+                       next: Play next track in the current queue
+                       stop: Menghentikan semua trek aktif
+                       pause: Pause all active tracks
+                       unpause: Unpause all paused tracks
+                       quit: Menutup proses fmedia
+--globcmd.pipe-name=STR
+                       Pengaturan nama jalur/pipa/saluran untuk komunikasi antara proses fmedia yang sedang bekerja
+
+--http-ctl="[Option,...]"
+                    Enable HTTP server (http://<IP>:7314/) for handling remote commands.
+                    Supported commands:
+                      "POST /api/next": Play next track
+                      "POST /api/pause": Pause
+                      "POST /api/unpause": Unpause
+
+--playlist-heal="[Option,...]"
+                    Auto-correct the paths to files inside a .m3u playlist.
+                    Replace absolute file paths to relative paths, e.g.:
+                      for /path/list.m3u:
+                      /path/dir/file.mp3 -> dir/file.mp3
+                    Correct the file extension, e.g.:
+                      dir/file.mp3 -> dir/file.m4a
+                    Correct the file directory, e.g.:
+                      olddir/file.mp3 -> newdir/file.mp3
+                    Correct the file directory & extension, e.g.:
+                      olddir/file.mp3 -> newdir/file.m4a
+                    Note: can't detect file renamings.
+
+--conf=FN              Pengaturan file konfigurasi (default: "fmedia.conf" dari direktori program)
+--gui                  Menjalankan dalam mode UI grafis (khusus Windows, Linux)
+--notui                Tidak menggunakan UI terminal
+--print-time           Menampilkan waktu yang dihabiskan untuk memproses setiap track
+--debug                Menampilkan info debug ke stdout
+-h, --help             Menampilkan informasi bantuan dan keluar
+
+INSTALL:
+
+--install              Untuk sistem operasi Windows: Menambahkan direktori fmedia pada perangkat pengguna dan membuat shortcut di desktop
+--uninstall            Menghapus perubahan yang dibuat dari parameter '--install'
+
+SOME EXAMPLES:
+
+Play:
+    fmedia play.mp3
+Record:
+    fmedia --record -o rec.flac
+Convert:
+    fmedia input.wav -o output.ogg
+Edit tags:
+    fmedia --edit-tags --meta='artist=ARTIST;title=TITLE' file.mp3
+Heal playlists:
+	fmedia --playlist-heal="" ./*.m3u8
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/help_ru.txt
+================================================
+Запуск:
+    fmedia [ПАРАМЕТРЫ] [ВХОД...]
+
+ВХОД               Входной файл, папка, URL или wildcard
+                   @stdin.EXT: читать из консоли.
+
+ПАРАМЕТРЫ
+
+Обычно цепочка фильтров следующая: ОЧЕРЕДЬ -> ВХОД -> ФИЛЬТРЫ -> КОДИРОВАНИЕ -> ВЫХОД
+
+УСТРОЙСТВА ЗВУКА:
+
+--list-dev          List available sound devices and exit
+--dev=DEVNO         Use playback device
+--dev-capture=DEVNO Use capture device
+--dev-loopback=DEVNO
+                    Use playback device in a loopback mode (record from playback) (WASAPI only)
+--playback-buffer=INT
+                    Length (in msec) of the playback buffer (See also fmedia.conf::*.out.buffer_length)
+
+ФОРМАТ ЗВУКА:
+
+--format=STR       Set audio format (int8 | int16 | int24 | int32 | float32)
+--rate=INT         Set sample rate
+                   Note: some settings may not work together with sample rate conversion.
+--channels=STR     Set channels number
+                   Can convert stereo to mono:
+                    --channels=mono: mix all channels together
+                    --channels=left: use left channel only
+                    --channels=right: use right channel only
+
+ОЧЕРЕДЬ:
+
+--track=N1[,N2...] Select specific track numbers in playlist
+--repeat-all       Repeat all
+--random           Choose the next track randomly
+
+ВХОД:
+--record           Capture audio.  Set default audio format in fmedia.conf::record_format.
+--capture-buffer=INT
+                   Length (in msec) of the capture buffer (See also fmedia.conf::*.in.buffer_length)
+
+--flist=FILE       Read filenames from FILE
+--include='WILDCARD[;WILDCARD]'
+                   Only include files matching a wildcard (case-insensitive)
+--exclude='WILDCARD[;WILDCARD]'
+                   Exclude files & directories matching a wildcard (case-insensitive)
+-i, --info         Don't play but show media information
+--tags             Print all meta tags
+--fseek=BYTE       Set input file offset
+-s, --seek=TIME    Seek to time: [[HH:]MM:]SS[.MSC]
+-u, --until=TIME   Stop at time
+                   Special values:
+                     'playback-end': stop recording when the last playback track is finished
+
+--cue-gaps=INT     Control track pregaps
+                   0: skip pregaps:
+                     track01.index01 .. track02.index00
+                   1: (default), gap is added to the previous track:
+                     track01.index01 .. track02.index01
+                   2: gap is added to the previous track (but track01's pregap is preserved):
+                     track01.index00 .. track02.index01
+                     track02.index01 .. track03.index01
+                   3: gap is added to the beginning of the current track:
+                     track01.index00 .. track02.index00
+
+ФИЛЬТРЫ:
+
+--volume=INT       Set volume (0% .. 125%)
+--gain=FLOAT       Set gain/attenuation in dB
+--dynanorm         Use Dynamic Audio Normalizer filter.
+                   Set parameters in section `mod_conf dynanorm.filter` in fmedia.conf.
+--auto-attenuate=FLOAT
+                   Set ceiling audio level in dB (always negative value) for loud tracks
+
+--start-dblevel=DB Skip initial audio until input signal level goes above DB (-100dB..0dB)
+--stop-dblevel=DB[;TIME][;MINTIME]
+                   Stop processing if input signal level goes below DB for TIME time (default: 5 sec).
+                   If MINTIME is specified, stop only after MINTIME time has passed.
+
+-P, --pcm-peaks    Analyze PCM and print some details
+--pcm-crc          Print CRC of PCM data (must be used with --pcm-peaks)
+                   Useful for checking the results of lossless audio conversion.
+
+--prebuffer=TIME   Start recording by a command from user, saving the previously bufferred seconds of audio
+--split=TIME       Split audio by equal time intervals
+
+--mix              Play input files simultaneously.
+                   Set audio format in fmedia.conf::mod_conf "mixer.out".
+                   Note: all inputs must have channels number and sample rate equal to the output.
+
+КОДИРОВАНИЕ:
+
+--vorbis-quality=FLOAT
+                   Vorbis encoding quality: -1.0 .. 10.0
+--opus-bitrate=INT Opus encoding bitrate: 6..510 (VBR)
+--mpeg-quality=INT MPEG encoding quality: 9..0 (VBR) or 64..320 (CBR)
+--aac-quality=INT  AAC encoding quality: 1..5 (VBR) or 8..800 (CBR, kbit/s)
+--aac-profile=STR  Set AAC profile: LC | HE | HEv2
+--flac-compression=INT
+                   FLAC compression level: 0..8
+--stream-copy      Copy audio data without re-encoding.  Supported formats: .ogg, .mp3.
+
+ВЫХОД:
+
+-o, --out=[NAME].EXT
+                   Don't play but write output to a file (i.e. convert audio)
+                   If NAME is "@stdout", write to standard output.
+                   Output format is chosen by "EXT" (see fmedia.conf::output_ext).
+                   Supported variables:
+                     $filepath: path to input file
+                     $filename: name (without extension) of the input file
+                     $date: current date
+                     $time: current time
+                     $timems: current time with milliseconds
+                     $counter: sequentially incrementing counter (starts from 1)
+                   --out=.ogg is a short for --out='./$filename.ogg'
+                   Filename may be generated automatically using meta info,
+                     e.g.: --out '$tracknumber. $artist - $title.flac'
+-y, --overwrite    Overwrite output file
+--preserve-date    Set output file date/time equal to input file.
+--out-copy         Play AND copy data to output file specified by "--out" switch
+--out-copy-cmd     Play AND copy data to output file specified by "--out" switch,
+                     but save each track only by user's command
+
+--meta='[clear;]NAME=STR;...'
+                    Set meta data
+                    If "clear;" is specified, skip all meta from input file.
+                    .mp3 supports: album, albumartist, artist, comment, date, genre, picture, publisher, title, tracknumber, tracktotal.
+                    .mp4 supports: album, albumartist, artist, comment, composer, copyright, date, discnumber, genre, lyrics, title, tracknumber.
+                    .flac, .ogg support tags of any name.
+                    Value may be read from file (e.g. album cover picture):
+                     "--meta=picture=@file:FILENAME"
+--edit-tags         Don't play files but just modify their meta tags.
+                    Set tags with '--meta'.
+                    Supported formats: .mp3(ID3v2+ID3v1)
+--meta-from-filename=TEMPLATE
+                    Specify template for auto-tagging from input file name.
+                    Use together with --edit-tags.
+                    .mp3 supports: $album, $albumartist, $artist, $comment, $date, $genre, $publisher, $title, $tracknumber, $tracktotal.
+
+ДРУГИЕ:
+
+--parallel         Process input files in parallel (fmedia.conf::workers).
+                   Must be used with '--out'.
+--background       Create a new process that will run in background
+--globcmd=STR      Send commands to another running fmedia process.
+                   Supported commands:
+                     listen: Start listening for incoming commands
+                     play INPUT... : Add items to queue and start playing the first added
+                     add INPUT... : Add items to queue
+                     clear: Clear the current queue
+                     next: Play next track in the current queue
+                     stop: Stop all active tracks
+                     pause: Pause all active tracks
+                     unpause: Unpause all paused tracks
+                     quit: Close fmedia process
+--globcmd.pipe-name=STR
+                   Set name of the pipe for communication between fmedia instances
+
+--http-ctl="[Option,...]"
+                    Enable HTTP server (http://<IP>:7314/) for handling remote commands.
+                    Supported commands:
+                      "POST /api/next": Play next track
+                      "POST /api/pause": Pause
+                      "POST /api/unpause": Unpause
+
+--playlist-heal="[Option,...]"
+                    Auto-correct the paths to files inside a .m3u playlist.
+                    Replace absolute file paths to relative paths, e.g.:
+                      for /path/list.m3u:
+                      /path/dir/file.mp3 -> dir/file.mp3
+                    Correct the file extension, e.g.:
+                      dir/file.mp3 -> dir/file.m4a
+                    Correct the file directory, e.g.:
+                      olddir/file.mp3 -> newdir/file.mp3
+                    Correct the file directory & extension, e.g.:
+                      olddir/file.mp3 -> newdir/file.m4a
+                    Note: can't detect file renamings.
+
+--conf=FN          Set configuration file (default: "fmedia.conf" from the program directory)
+--gui              Run in graphical UI mode (Windows,Linux only)
+--notui            Don't use terminal UI
+--print-time       Show the time spent for processing each track
+--debug            Print debug info to stdout
+-h, --help         Print help info and exit
+
+УСТАНОВКА В ОС:
+
+--install          Windows: add fmedia directory into user's environment and create a desktop shortcut
+--uninstall        Undo changes made by '--install'
+
+SOME EXAMPLES:
+
+Play:
+    fmedia play.mp3
+Record:
+    fmedia --record -o rec.flac
+Convert:
+    fmedia input.wav -o output.ogg
+Edit tags:
+    fmedia --edit-tags --meta='artist=ARTIST;title=TITLE' file.mp3
+Heal playlists:
+	fmedia --playlist-heal="" ./*.m3u8
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/theme.conf
+================================================
+# Themes for fmedia GUI
+# You can manually change the colors and add new themes here.
+# Restart fmedia to see the changes.
+
+theme "Default" {
+	wmain.bgcolor null
+	wabout.bgcolor null
+	wmain.lpos.color "#000000"
+	wmain.vlist.style explorer_theme grid_lines multi_select
+	wmain.vlist.color "#000000"
+	wmain.vlist.bgcolor white
+	wabout.labout.color "#000000"
+}
+
+theme "Dark" {
+	wmain.bgcolor "#303030"
+	wabout.bgcolor "#303030"
+	wmain.lpos.color silver
+	wmain.vlist.style explorer_theme multi_select
+	wmain.vlist.color silver
+	wmain.vlist.bgcolor "#303030"
+	wabout.labout.color silver
+}
+
+
+================================================
+File: bin/fmedia-1.31-windows-x64/fmedia/www/index.html
+================================================
+<!DOCTYPE html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+</head>
+<body>
+
+<p><span style="font-weight: bold; color: orange;">φ</span>fmedia instance web controller</p>
+
+<div>
+	<button id="pause">Pause</button>
+	<button id="unpause">Play (Unpause)</button>
+	<button id="next">Next</button>
+</div>
+
+<script>
+function id(id) { return document.getElementById(id); }
+function req(method, url) {
+	var h = new XMLHttpRequest();
+	h.open(method, url);
+	h.send(null);
+}
+function ctl(ev) {
+	req("POST", "/api/" + ev.target.id);
+}
+id("pause").onclick = ctl;
+id("unpause").onclick = ctl;
+id("next").onclick = ctl;
+</script>
+
+</body>
+</html>
+
+
+================================================
+File: whisper-autohotkey/go.mod
+================================================
+module de.mxro/whisper-autohotkey
+
+go 1.20
+
+require github.com/sashabaranov/go-openai v1.15.1 // indirect
+
+
+================================================
+File: whisper-autohotkey/go.sum
+================================================
+github.com/sashabaranov/go-openai v1.15.1 h1:BAV5LCVEzvZ3rN/Lh5NRVs2z6AahPt/jn5s2/cEEG0M=
+github.com/sashabaranov/go-openai v1.15.1/go.mod h1:lj5b/K+zjTSFxVLijLSTDZuP7adOgerWeFyZLUhAKRg=
+
+
+================================================
+File: whisper-autohotkey/script.ahk
+================================================
+Run, https://duckduckgo.com/?q=flowers&t=ffab&ia=web
+
+================================================
+File: whisper-autohotkey/.gitignore
+================================================
+config.json
+
+================================================
+File: whisper-autohotkey/cmd/whisper-autohotkey/ahk.go
+================================================
+package main
+
+import (
+	"os"
+	"os/exec"
+)
+
+func RunCommand(config Config, script string) (string, error) {
+
+	if err := os.WriteFile("script.ahk", []byte(script), 0666); err != nil {
+		return "", err
+	}
+
+	autoHotKeyPath := config.AutoHotKeyExec
+	if autoHotKeyPath == "" {
+		autoHotKeyPath = ".\\bin\\autohotkey-1.1.37.01\\AutoHotkeyU64.exe"
+	}
+	data, err := exec.Command(autoHotKeyPath, "script.ahk").Output()
+	if err != nil {
+		return "", err
+	}
+
+	output := string(data)
+
+	return output, nil
+}
+
+
+================================================
+File: whisper-autohotkey/cmd/whisper-autohotkey/gpt4.go
+================================================
+package main
+
+import (
+	"context"
+	"math"
+	"os"
+	"strings"
+
+	"github.com/sashabaranov/go-openai"
+)
+
+func BuildCommand(config Config, prompt string) (string, error) {
+
+	if strings.TrimSpace(prompt) == "" {
+		return "MsgBox, 32,, No input detected! Is your microphone working correctly?", nil
+	}
+
+	systemContext, err := os.ReadFile("./prompt.txt")
+	if err != nil {
+		return "", err
+	}
+
+	c := openai.NewClient(config.OpenapiKey)
+
+	response, err := c.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model: openai.GPT4,
+			// https://github.com/sashabaranov/go-openai#why-dont-we-get-the-same-answer-when-specifying-a-temperature-field-of-0-and-asking-the-same-question
+			Temperature: math.SmallestNonzeroFloat32,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleSystem,
+					Content: string(systemContext),
+				},
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "ACTION: " + prompt,
+				},
+			},
+		},
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return response.Choices[0].Message.Content, nil
+}
+
+
+================================================
+File: whisper-autohotkey/cmd/whisper-autohotkey/main.go
+================================================
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"os/exec"
+	"strings"
+	"unicode"
+	"unicode/utf16"
+)
+
+type Config struct {
+	OpenapiKey     string
+	AutoHotKeyExec string
+	Coding         bool
+}
+
+func writeTextToClipboard(text string) error {
+	// Create a temporary file
+	tmpFile, err := ioutil.TempFile("", "clip")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmpFile.Name()) // Clean up the file after we're done
+
+	utf16leBytes := utf16leEncode(text)
+	// Omit the BOM as it may cause issues with some programs
+	if len(utf16leBytes) >= 2 {
+		utf16leBytes = utf16leBytes[2:]
+	}
+	if _, err = tmpFile.Write(utf16leBytes); err != nil {
+		return err
+	}
+	if err = tmpFile.Close(); err != nil {
+		return err
+	}
+
+	// Use clip to copy the contents of the file to the clipboard
+	clipCmd := exec.Command("cmd", "/c", fmt.Sprintf("type %s | clip", tmpFile.Name()))
+	return clipCmd.Run()
+}
+
+// utf16leEncode encodes a string in UTF-16LE with a Byte Order Mark (BOM)
+func utf16leEncode(s string) []byte {
+	// Encode the string as UTF-16LE
+	encoded := utf16.Encode([]rune(s))
+
+	// Prepend the BOM
+	bom := []uint16{0xFEFF}
+	encoded = append(bom, encoded...)
+
+	// Convert uint16 slice to byte slice
+	b := make([]byte, 2*len(encoded))
+	for i, runeValue := range encoded {
+		b[2*i] = byte(runeValue)
+		b[2*i+1] = byte(runeValue >> 8)
+	}
+	return b
+}
+
+func toSnakeCase(text string) string {
+	// Replace spaces with underscores and convert to lowercase
+	return strings.ToLower(strings.ReplaceAll(text, " ", "_"))
+}
+
+func toCamelCase(text string) string {
+	var result string
+	capitalizeNext := false
+
+	for _, r := range text {
+		if r == ' ' || r == '_' {
+			capitalizeNext = true
+			continue
+		}
+		if capitalizeNext {
+			result += strings.ToUpper(string(r))
+			capitalizeNext = false
+		} else {
+			// result += strings.ToLower(string(r))
+			result += string(r)
+		}
+	}
+
+	return result
+}
+
+func toPascalCase(text string) string {
+	if text == "" {
+		return ""
+	}
+
+	camelCase := toCamelCase(text)
+	// Capitalize the first letter and attach the rest of the string
+	return strings.ToUpper(string(camelCase[0])) + camelCase[1:]
+}
+
+// truncatePrefix removes a case-insensitive prefix from 's' and trims any surrounding whitespaces and punctuation.
+// If 's' doesn't start with 'prefix', it returns 's' unchanged.
+func truncatePrefix(s, prefix string) string {
+	lowerS := strings.ToLower(s)
+	lowerPrefix := strings.ToLower(prefix)
+
+	if strings.HasPrefix(lowerS, lowerPrefix) {
+		// Calculate the length of the original prefix in the string
+		prefixLength := len(prefix)
+
+		// Remove the prefix
+		trimmedString := s[prefixLength:]
+
+		// Trim whitespaces and punctuation
+		return strings.TrimFunc(trimmedString, func(r rune) bool {
+			return unicode.IsSpace(r) || unicode.IsPunct(r)
+		})
+	}
+	return s
+}
+
+/*
+{
+	lowerS := strings.ToLower(s)
+	lowerPrefix := strings.ToLower(prefix)
+
+	if strings.HasPrefix(lowerS, lowerPrefix) {
+		// Calculate the length of the original prefix in the string
+		prefixLength := len(prefix)
+		// Remove the prefix and trim whitespaces
+		return strings.TrimSpace(s[prefixLength:])
+	}
+	return s
+}
+*/
+
+// parses the text to identify commands and applies the commands to the text
+func applyCommands(text string) string {
+	textPlus := text + "                    "
+	casing := strings.ToLower(strings.ReplaceAll(textPlus[0:10], " ", ""))
+	log.Println("Casing?:\n  " + casing)
+	if casing == "snakecase" {
+		text = truncatePrefix(text, "snake")
+		text = truncatePrefix(text, "case")
+		text = toSnakeCase(text)
+	} else if casing == "camelcase" {
+		text = truncatePrefix(text, "camel")
+		text = truncatePrefix(text, "case")
+		text = toCamelCase(text)
+	} else {
+		casing = strings.ToLower(strings.ReplaceAll(textPlus[0:11], " ", ""))
+		if casing == "pascalcase" {
+			text = truncatePrefix(text, "pascal")
+			text = truncatePrefix(text, "case")
+			text = toPascalCase(text)
+		}
+	}
+	return text
+}
+
+func main() {
+
+	// Open a file for logging
+	logFile, e := os.OpenFile("log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if e != nil {
+		panic(e)
+	}
+	defer logFile.Close()
+
+	// Set the log output to the file
+	log.SetOutput(logFile)
+	log.Println("")
+	log.Println("")
+	log.Println("========================================")
+	log.Println("Starting whisper-autohotkey")
+	err := assertThatConfigFileExists()
+	if err != nil {
+		log.Fatal("Error when creating config file: ", err)
+	}
+
+	content, err := readConfigFile()
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	var config Config
+	err = json.Unmarshal(content, &config)
+	if err != nil {
+		log.Fatal("Error during JSON parse: ", err)
+	}
+
+	// print config to log
+	log.Println("Config:")
+	log.Println("  OpenapiKey: " + "**************************") //config.OpenapiKey)
+	log.Println("  AutoHotKeyExec: " + config.AutoHotKeyExec)
+	log.Println("  Coding: " + fmt.Sprintf("%t", config.Coding))
+
+	if config.OpenapiKey == "" {
+		log.Fatal("Please provide your OpenAI key in the file config.json")
+	}
+
+	// argLength := len(os.Args[1:])
+	inputFileName := "rec.mp3"
+
+	// if argLength > 1 {
+	// 	inputFileName = os.Args[1:][1]
+	// 	log.Println("Processing file " + inputFileName)
+	// 	stats, err := os.Stat(inputFileName)
+	// 	if errors.Is(err, os.ErrNotExist) {
+	// 		log.Fatal("Input file does not exist")
+	// 	} else {
+	// 		log.Printf("File size %v", stats.Size())
+	// 	}
+	// }
+
+	text, err := Transcribe(inputFileName, config)
+
+	if err != nil {
+		log.Fatal("Cannot transcribe text: ", err)
+		return
+	}
+	log.Println("Transcription:\n" + text)
+	if config.Coding {
+		text = applyCommands(text)
+		log.Println("Code:\n  " + text)
+	}
+
+	log.Println("Ready to paste:\n" + text)
+	err = writeTextToClipboard(text)
+	if err != nil {
+		log.Fatal("Failed to write text to clipboard:", err)
+	}
+
+	log.Println("Text copied to clipboard")
+
+	ahkScript := `Send, ^v ; Ctrl+V for paste
+ExitApp ; Exit after executing
+`
+
+	// Assuming you have AutoHotKey installed and `paste.ahk` is in the same directory.
+	_, err = RunCommand(config, ahkScript)
+	if err != nil {
+		log.Fatal("Cannot run AutoHotKey command", err)
+	}
+
+	/*
+		log.Println("Prompt:\n  " + text)
+		command, err := BuildCommand(config, text)
+		if err != nil {
+			log.Fatal("Cannot interpret prompt", err)
+			return
+		}
+
+		fmt.Println("Running:\n  " + command)
+		output, err := RunCommand(config, command)
+		if err != nil {
+			log.Fatal("Cannot run command", err)
+		}
+		log.Println("Output:\n  " + output)
+	*/
+}
+
+func readConfigFile() ([]byte, error) {
+	content, err := os.ReadFile("./config.json")
+	return content, err
+}
+
+func assertThatConfigFileExists() error {
+	if !exists("./config.json") {
+		template, err := os.ReadFile("./config.template.json")
+		if err != nil {
+			return fmt.Errorf("cannot read template config file: %w", err)
+		}
+		err = os.WriteFile("./config.json", template, 0666)
+		if err != nil {
+			return fmt.Errorf("cannot write new config file: %w", err)
+		}
+		return nil
+	}
+	return nil
+}
+
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	return !errors.Is(err, os.ErrNotExist)
+}
+
+
+================================================
+File: whisper-autohotkey/cmd/whisper-autohotkey/whisper.go
+================================================
+package main
+
+import (
+	"context"
+	"errors"
+	"log"
+	"os"
+
+	"github.com/sashabaranov/go-openai"
+)
+
+func Transcribe(inputFileName string, config Config) (string, error) {
+
+	// Define the prompt variable and the language symbol
+	prompt := "This is a transcription in English, mainly about programming, coding and software development."
+	promptFileName := "transcriptionPrompt.txt"
+	languageSymbol := "en" // default language symbol
+
+	argLength := len(os.Args[1:])
+	if argLength >= 2 { // Check if at least two arguments are provided
+		languageSymbol = os.Args[1]
+		promptFileName = os.Args[2]
+
+		// log.Println("Processing file " + promptFileName)
+		stats, err := os.Stat(promptFileName)
+		if errors.Is(err, os.ErrNotExist) {
+			log.Fatal("Prompt file does not exist")
+		} else {
+			log.Printf("File size %v", stats.Size())
+		}
+		log.Printf("Language Symbol: %s", languageSymbol)
+	} else {
+		log.Println("Insufficient arguments. Using default values.")
+	}
+
+	content, err := os.ReadFile(promptFileName)
+	if err != nil {
+		log.Fatal("Failed reading file: ", err)
+	}
+	prompt = string(content)
+
+	c := openai.NewClient(config.OpenapiKey)
+	ctx := context.Background()
+
+	req := openai.AudioRequest{
+		Model:    openai.Whisper1,
+		Prompt:   prompt,
+		Language: languageSymbol,
+		FilePath: inputFileName,
+	}
+	response, err := c.CreateTranscription(ctx, req)
+	if err != nil {
+		return "", err
+	}
+
+	return response.Text, nil
+}
+
+
+================================================
+File: .github/workflows/build.yml
+================================================
+name: build
+run-name: ${{ github.actor }} is building
+on: [push]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+      - run: npm install -g @go-task/cli
+      - run: task --version
+      - run: task build
+
+
+================================================
+File: .github/workflows/publish.yml
+================================================
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    name: Publish 
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest 
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Create config from template
+      run: cat config.template.json > config.json
+    - uses: vimtor/action-zip@v1
+      with:
+        files: bin/ watch.ahk prompt.txt LICENSE config.template.json config.json
+        recursive: false
+        dest: autohotkey-chatgpt.zip
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: autohotkey-chatgpt.zip 
+        overwrite: true
+        asset_name: Autohotkey-ChatGPT.zip 
+        tag: ${{ github.ref }}
+

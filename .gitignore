@@ -35,7 +35,6 @@ chat protocols/
 *.tmp
 *.swp
 *.swo
-<<<<<<< HEAD
 *~
 
 # Project specific
@@ -45,10 +44,8 @@ t*
 
 # Keep in Git but ignore changes
 Backup/
-=======
 
 # Test Results
 tests/results/
 tests/logs/
 commit_msg.txt
->>>>>>> 69ed01ee81ddb5c3bc08b084d7d7a48472f60545

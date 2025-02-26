@@ -1,121 +1,94 @@
-# Roadmap
+# Development Roadmap
+Version: 1.1
+Timestamp: 2025-02-23 14:15 CET
 
-## Aktuelle Phase: Server-Integration & Timing-Optimierung
+## Current Phase: Server Integration & Performance Optimization
 
-### Phase 1: Server-Verständnis (Februar 2025)
+### Phase 1: Core Foundations (February 2025)
 
-#### Priorität 1: Server-Kommunikation
-- [ ] WhisperLive Server-Code analysieren
-- [ ] Dokumentation der Server-Parameter
-- [ ] Verständnis der Batch-Processing-Strategie
-- [ ] Buffer-Größen und Timing-Garantien ermitteln
+#### Server Integration
+- [ ] WhisperLive server code analysis
+- [ ] Server parameter documentation
+- [ ] Batch processing strategy
+- [ ] Buffer size optimization
 
-#### Priorität 2: Whisper-Integration
-- [ ] Whisper-Modell-Konfiguration dokumentieren
-- [ ] VAD-Einstellungen verstehen
-- [ ] Segmentierungslogik analysieren
-- [ ] Antwortformat vollständig dokumentieren
+#### Log Management
+- [ ] Rolling Logs (10-min window)
+- [ ] Automatic log rotation
+- [ ] Docker container integration
+- [ ] Log structure documentation
 
-#### Priorität 3: Timing-Tests
-- [ ] Minimale Textlänge ermitteln
-- [ ] Update-Frequenz messen
-- [ ] Korrektur-Verhalten testen
-- [ ] Timing-Parameter optimieren
+#### Audio Processing
+- [ ] Tumbling Window (130ms latency)
+  * 27 windows/3.5s processing
+  * Overlapping windows
+  * Thread safety
+  * Buffer management
 
-### Phase 2: Audio-Optimierungen (März 2025)
+- [ ] Audio Segmentation
+  * Energy-based classification
+  * Speech segment detection
+  * Parameter optimization
+  * Validation tests
 
-#### Audio-Verarbeitung
-- [ ] Tumbling Window implementieren (130ms Latenz erreicht)
-- [ ] Segmentierungs-Parameter optimieren
-- [ ] Queue-basierte Chunk-Verwaltung evaluieren
-- [ ] Async WebSocket-Integration testen
+### Phase 2: Optimization (March 2025)
 
-#### Performance-Monitoring
-- [ ] Latenz-Messungen implementieren
-- [ ] Audio-Qualitätsmetriken einführen
-- [ ] Segment-Erkennungsrate messen
-- [ ] Buffer-Auslastung überwachen
+#### Performance Metrics
+- [ ] Latency Measurements
+  * End-to-end delay
+  * Component latencies
+  * Bottleneck analysis
+  * Optimization potential
 
-### Phase 3: Client-Optimierung (April 2025)
+- [ ] Audio Quality
+  * Signal-to-noise ratio
+  * Segment detection rate
+  * Buffer overflow rate
+  * Processing quality
 
-#### Timing-Verbesserungen
-- [ ] Client-Buffer an Server anpassen
-- [ ] Verzögerungen optimieren
-- [ ] Fehlerbehandlung verbessern
-- [ ] Performance-Monitoring implementieren
+#### Text Processing
+- [ ] Windows API Integration
+  * SendMessage implementation
+  * Memory-based buffering
+  * Performance testing
+  * Stability validation
 
-#### Test-Framework
-- [ ] Automatisierte Timing-Tests
-- [ ] Regressions-Tests
-- [ ] Performance-Benchmarks
-- [ ] Stress-Tests
+#### Community Infrastructure
+- [ ] Issue templates
+- [ ] PR templates
+- [ ] Code of conduct
+- [ ] Review guidelines
 
-#### Dokumentation
-- [ ] Timing-Diagramme aktualisieren
-- [ ] Server-Client-Protokoll dokumentieren
-- [ ] Best Practices erstellen
-- [ ] Troubleshooting-Guide
+### Phase 3: User Experience (April 2025)
 
-### Phase 3: Benutzerfreundlichkeit (April 2025)
-
-#### UI/UX
-- [ ] Status-Visualisierung
-- [ ] Fortschrittsanzeige
-- [ ] Fehler-Feedback
-- [ ] Konfigurationsschnittstelle
-
-#### Stabilität
-- [ ] Verbindungs-Management verbessern
-- [ ] Ressourcen-Optimierung
-- [ ] Error-Recovery
-- [ ] Auto-Reconnect
+#### GUI Development
+- [ ] User interface design
+- [ ] Settings management
+- [ ] Visualization components
+- [ ] Status indicators
 
 #### Deployment
-- [ ] Release-Pipeline
-- [ ] Automatische Updates
-- [ ] Installations-Wizard
-- [ ] Systemintegration
+- [ ] Release automation
+- [ ] Installation wizard
+- [ ] Auto-updates
+- [ ] System integration
 
-## Langfristige Ziele
+## Success Metrics
 
-### Performance
-- [ ] Latenz-Optimierung
-- [ ] Ressourcenverbrauch minimieren
-- [ ] Streaming-Qualität verbessern
-- [ ] Auto-Tuning implementieren
+### Technical
+- Response time <200ms
+- System stability >99%
+- Error rate <1%
+- Test coverage >90%
 
-### Funktionalität
-- [ ] Mehrsprachenunterstützung
-- [ ] Sprachbefehle
-- [ ] Kontext-Awareness
-- [ ] Formatierungsoptionen
+### User Experience 
+- Setup success rate >95%
+- Configuration clarity
+- User retention
+- Support efficiency
 
-### Integration
-- [ ] API-Dokumentation
-- [ ] SDK entwickeln
-- [ ] Plugin-System
-- [ ] Cloud-Integration
-
-## Meilensteine
-
-1. **Server-Verständnis** (Ende Februar 2025)
-   - Vollständige Dokumentation der Server-Parameter
-   - Optimierte Timing-Konfiguration
-   - Verbesserte Fehlerbehandlung
-
-2. **Client-Optimierung** (Ende März 2025)
-   - Robustes Test-Framework
-   - Performance-Monitoring
-   - Dokumentierte Best Practices
-
-3. **Benutzerfreundlichkeit** (Ende April 2025)
-   - Intuitive Benutzeroberfläche
-   - Stabile Produktionsversion
-   - Automatisierte Deployment-Pipeline
-
-## Review-Zyklen
-
-- Wöchentliche Code-Reviews
-- Monatliche Performance-Audits
-- Quartalsweise Roadmap-Updates
-- Jährliche Architektur-Reviews
+## Review Cycles
+- Weekly code reviews
+- Monthly performance audits
+- Quarterly roadmap updates
+- Annual architecture review

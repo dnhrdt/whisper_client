@@ -1,219 +1,206 @@
-# Regression-Untersuchung: Server-Kommunikation (14.02.2025)
+# Regression Investigation: Server Communication (2025-02-14)
+Version: 1.0
+Timestamp: 2025-02-26 19:44 CET
 
-## Ausgangssituation
-- **Problem**: Keine Texte werden vom Server zurückgeliefert/verwertet
-- **Letzte Änderungen**: 
-  1. Float32 Normalisierung deaktiviert (13.02.2025 23:26)
-  2. Code-Restrukturierung (13.02.2025 22:40)
+## Initial Situation
+- **Problem**: No texts being returned/processed from server
+- **Recent Changes**: 
+  1. Float32 normalization disabled (2025-02-13 23:26)
+  2. Code restructuring (2025-02-13 22:40)
 
-## Untersuchungsplan
+## Investigation Plan
 
-### 1. Protokollierung
-- Jede Änderung wird in diesem Dokument protokolliert
-- Format pro Test:
+### 1. Documentation
+- Every change is logged in this document
+- Format per test:
   ```
-  ### Test X: [Beschreibung]
-  - Ausgangszustand: [...]
-  - Änderung: [...]
-  - Ergebnis: [...]
-  - Nächste Schritte: [...]
+  ### Test X: [Description]
+  - Initial State: [...]
+  - Change: [...]
+  - Result: [...]
+  - Next Steps: [...]
   ```
 
-### 2. Systematische Tests
+### 2. Systematic Tests
 
-#### A. WebSocket-Kommunikation
-1. Verbindungsaufbau prüfen
-   - Server-Ready Status
-   - Handshake erfolgreich?
-   - Konfiguration korrekt übermittelt?
+#### A. WebSocket Communication
+1. Check connection establishment
+   - Server-ready status
+   - Handshake successful?
+   - Configuration correctly transmitted?
 
-2. Nachrichtenfluss analysieren
-   - Werden Audio-Daten gesendet?
-   - Server-Antworten im Log?
-   - Nachrichtenformat korrekt?
+2. Analyze message flow
+   - Are audio data being sent?
+   - Server responses in log?
+   - Message format correct?
 
-#### B. Audio-Verarbeitung
-1. Format-Überprüfung
+#### B. Audio Processing
+1. Format verification
    - Client: int16 vs float32
-   - Server-Erwartung prüfen
-   - Sampling-Rate und Kanäle
+   - Check server expectations
+   - Sampling rate and channels
 
-2. Datenübertragung
-   - Puffer-Größe
+2. Data transmission
+   - Buffer size
    - Timing
-   - Datenverlust?
+   - Data loss?
 
-#### C. Text-Verarbeitung
-1. Callback-Kette
+#### C. Text Processing
+1. Callback chain
    - WebSocket → TextManager
-   - Event-Handling
-   - Fehlerbehandlung
+   - Event handling
+   - Error handling
 
 ### 3. Logging
-- Debug-Level aktiviert
-- Separate Log-Datei: logs/regression_investigation.log
-- Protokollierung:
-  - WebSocket-Nachrichten
-  - Audio-Datenformat
-  - Server-Antworten
-  - Callback-Aufrufe
+- Debug level activated
+- Separate log file: logs/regression_investigation.log
+- Logging includes:
+  - WebSocket messages
+  - Audio data format
+  - Server responses
+  - Callback invocations
 
 ## Tests
 
-### Test 1: Logging-Setup
-- **Ausgangszustand**: 
-  - Veraltete Referenz auf _whisperlive_logs.txt
-  - Regression-Logger noch nicht vollständig konfiguriert
+### Test 1: Logging Setup
+- **Initial State**: 
+  - Outdated reference to _whisperlive_logs.txt
+  - Regression logger not fully configured
 
-- **Änderungen**:
-  - Entfernung der _whisperlive_logs.txt-Referenzen
-  - Integration des Regression-Loggers mit detailliertem Format
-  - Dokumentation der Server-Log-Location (WSL: /home/michael/appdata/whisperlive/logs)
+- **Changes**:
+  - Removed _whisperlive_logs.txt references
+  - Integrated regression logger with detailed format
+  - Documented server log location (WSL: /home/michael/appdata/whisperlive/logs)
 
-- **Ergebnis**:
-  - Logging-System bereit für detaillierte Fehleranalyse
-  - Server-Logs nun über Docker-Volume zugänglich
-  - Regression Investigation Logger aktiviert
+- **Result**:
+  - Logging system ready for detailed error analysis
+  - Server logs now accessible via Docker volume
+  - Regression Investigation Logger activated
 
-### Test 2: WebSocket Code-Analyse
-- **Ausgangszustand**:
-  - Drei Versionen des WebSocket-Codes verfügbar:
-    1. Letzte funktionierende Version
-    2. Erster fehlerhafter Edit
-    3. Zweiter fehlerhafter Edit
+### Test 2: WebSocket Code Analysis
+- **Initial State**:
+  - Three versions of WebSocket code available:
+    1. Last working version
+    2. First faulty edit
+    3. Second faulty edit
 
-- **Gefundene Unterschiede**:
-  1. Timing der processing_enabled Flag:
-     - Funktionierend: Flag wird erst nach Warten auf letzte Segmente deaktiviert
-     - Fehlerhaft: Flag wird zu früh deaktiviert, blockiert eingehende Nachrichten
+- **Found Differences**:
+  1. Timing of processing_enabled flag:
+     - Working: Flag deactivated only after waiting for last segments
+     - Faulty: Flag deactivated too early, blocking incoming messages
 
-  2. Cleanup-Prozess:
-     - Funktionierend: 
+  2. Cleanup process:
+     - Working: 
        * stop_processing() → send_end_of_audio() → wait → disable processing
-       * Vollständige Wartezeit auf Server-Antworten
-     - Fehlerhaft:
-       * Sofortige Deaktivierung der Verarbeitung
-       * Unvollständige Wartezeit auf Server-Antworten
+       * Complete wait time for server responses
+     - Faulty:
+       * Immediate deactivation of processing
+       * Incomplete wait time for server responses
 
-  3. Nachrichtenverarbeitung:
-     - Funktionierend: Server hat Zeit, letzte Segmente zu senden
-     - Fehlerhaft: Vorzeitige Deaktivierung verhindert Empfang letzter Segmente
+  3. Message processing:
+     - Working: Server has time to send last segments
+     - Faulty: Premature deactivation prevents receiving last segments
 
-- **Schlussfolgerung**:
-  Die Regression wurde durch eine Änderung in der Reihenfolge der Cleanup-Operationen verursacht, 
-  die zu einer vorzeitigen Deaktivierung der Nachrichtenverarbeitung führt.
+- **Conclusion**:
+  The regression was caused by a change in the cleanup operations sequence,
+  leading to premature deactivation of message processing.
 
-### Test 3: Server-Log Zugriff
+### Test 3: Server Log Access
 - **Problem**:
-  - Dokumentation in development.md nicht aktuell
-  - WSL-Symlink Zugriff erfordert Vorbedingungen
+  - Documentation needs updating
+  - WSL symlink access requires prerequisites
 
-- **Erkenntnisse**:
-  - Server-Logs sind über Symlink in logs/logs/server.log verfügbar
-  - Symlink erfordert WSL-Filesystem-Aktivierung durch:
-    * Entweder WSL-Terminal öffnen
-    * Oder WSL-Filesystem (U:\) in Windows aufrufen
-  - Grund: WSL-Symlinks werden erst nach Filesystem-Aktivierung gemountet
+- **Findings**:
+  - Server logs available via symlink in logs/logs/server.log
+  - Symlink requires WSL filesystem activation through:
+    * Either opening WSL terminal
+    * Or accessing WSL filesystem (U:\) in Windows
+  - Reason: WSL symlinks are mounted only after filesystem activation
 
-- **Korrektur**:
-  - Dokumentation sollte WSL-Symlink Voraussetzungen erwähnen
-  - Entwickler müssen WSL-Filesystem vor Log-Zugriff aktivieren
-  - Logging-Pfade sollten konsistent dokumentiert werden
+- **Correction**:
+  - Documentation should mention WSL symlink prerequisites
+  - Developers must activate WSL filesystem before log access
+  - Logging paths should be consistently documented
 
-### Test 4: Code-Wiederherstellung
-- **Ausgangszustand**:
-  - WebSocket-Code mit fehlerhafter Verarbeitungsreihenfolge
-  - Vorzeitige Deaktivierung der Nachrichtenverarbeitung
-  - Fehlende Wartezeit auf Server-Antworten
+### Test 4: Code Restoration
+- **Initial State**:
+  - WebSocket code with incorrect processing sequence
+  - Premature deactivation of message processing
+  - Missing wait time for server responses
 
-- **Durchgeführte Änderungen**:
-  1. Wiederherstellung der send_end_of_audio() Methode:
-     - Eigenständige Methode für END_OF_AUDIO Signal
-     - Integrierte 20-Sekunden Wartezeit
-     - Verbesserte Fehlerbehandlung
+- **Changes Made**:
+  1. Restored send_end_of_audio() method:
+     - Standalone method for END_OF_AUDIO signal
+     - Integrated 20-second wait time
+     - Improved error handling
 
-  2. Korrektur der stop_processing() Methode:
-     - Entfernung des problematischen wait_thread
-     - Korrekte Reihenfolge: erst Signal senden, dann auf Antwort warten
-     - Deaktivierung der Verarbeitung erst nach Empfang letzter Segmente
+  2. Fixed stop_processing() method:
+     - Removed problematic wait_thread
+     - Correct sequence: send signal first, then wait for response
+     - Processing deactivation only after receiving last segments
 
-  3. Verbesserung der cleanup() Methode:
-     - Korrekte Reihenfolge der Operationen
-     - Vollständige Wartezeit auf Server-Antworten
-     - Robustere Fehlerbehandlung
+  3. Improved cleanup() method:
+     - Correct operation sequence
+     - Complete wait time for server responses
+     - More robust error handling
 
-- **Erwartetes Ergebnis**:
-  - Wiederherstellung der Server-Kommunikation
-  - Korrekte Verarbeitung der letzten Segmente
-  - Saubere Beendigung der Verbindung
+- **Expected Result**:
+  - Server communication restored
+  - Correct processing of last segments
+  - Clean connection termination
 
-## Ergebnisse
+## Results
 
-Die Regression wurde durch eine fehlerhafte Änderung in der Verarbeitungsreihenfolge verursacht:
-1. Vorzeitige Deaktivierung der Nachrichtenverarbeitung verhinderte den Empfang letzter Segmente
-2. Fehlende Wartezeiten führten zu unvollständiger Server-Kommunikation
-3. Thread-basierte Lösung war instabil und führte zu Race Conditions
+The regression was caused by a faulty change in processing sequence:
+1. Premature deactivation of message processing prevented receiving last segments
+2. Missing wait times led to incomplete server communication
+3. Thread-based solution was unstable and led to race conditions
 
-Die Lösung besteht aus:
-1. Wiederherstellung der korrekten Verarbeitungsreihenfolge
-2. Implementierung robuster Wartezeiten
-3. Vereinfachung der Thread-Verwaltung
+The solution consists of:
+1. Restoration of correct processing sequence
+2. Implementation of robust wait times
+3. Simplification of thread management
 
-### Test 5: Audio-Format Korrektur
-- **Ausgangszustand**:
-  - Audio-Daten wurden als rohe int16 Daten gesendet
-  - Server erwartet normalisierte float32 Daten
-  - Keine Transkriptionen vom Server
+### Test 5: Audio Format Correction
+- **Initial State**:
+  - Audio data sent as raw int16 data
+  - Server expects normalized float32 data
+  - No transcriptions from server
 
-- **Durchgeführte Änderungen**:
-  1. Float32-Normalisierung reaktiviert:
-     - Konvertierung von int16 zu float32
-     - Normalisierung durch Division durch 32768.0
-     - Korrekte Datentypen für Server-Verarbeitung
+- **Changes Made**:
+  1. Float32 normalization reactivated:
+     - Conversion from int16 to float32
+     - Normalization by division by 32768.0
+     - Correct data types for server processing
 
-- **Ergebnis**:
-  - Server kann Audio-Daten korrekt verarbeiten
-  - Transkriptionen werden wieder empfangen
-  - Vollständige Verarbeitungskette wiederhergestellt
+- **Result**:
+  - Server can correctly process audio data
+  - Transcriptions being received again
+  - Complete processing chain restored
 
-### Test 6: Verbindungshandling
+### Test 6: Connection Handling
 - **Problem**:
-  - Verbindung wurde zu früh geschlossen
-  - Status der 20-Sekunden-Wartezeit unklar
-  - F13-Tastendrücke wurden nicht korrekt angezeigt
+  - Connection closed too early
+  - Status of 20-second wait unclear
+  - F13 key presses not correctly displayed
 
-- **Durchgeführte Änderungen**:
-  1. Verbindungshandling verbessert:
-     - WebSocket-Verbindung bleibt während Wartezeit offen
-     - Nur Audio-Verarbeitung wird deaktiviert
-     - Klarere Reihenfolge: Erst Aufnahme stoppen, dann warten
+- **Changes Made**:
+  1. Improved connection handling:
+     - WebSocket connection remains open during wait time
+     - Only audio processing is deactivated
+     - Clearer sequence: Stop recording first, then wait
 
-  2. Status-Meldungen verbessert:
-     - "Stoppe Aufnahme..." beim Beenden der Aufnahme
-     - "Warte auf letzte Texte vom Server..." während der 20s
-     - "Audio-Verarbeitung beendet" nach der Wartezeit
+  2. Improved status messages:
+     - "Stopping recording..." when ending recording
+     - "Waiting for last texts from server..." during 20s
+     - "Audio processing ended" after wait time
 
-- **Ergebnis**:
-  - Verbindung bleibt für Nachzügler-Texte offen
-  - Benutzer sieht klaren Status der Verarbeitung
-  - Korrekte Anzeige der Tastendrücke
-- **Ausgangszustand**:
-  - Audio-Daten wurden als rohe int16 Daten gesendet
-  - Server erwartet normalisierte float32 Daten
-  - Keine Transkriptionen vom Server
+- **Result**:
+  - Connection stays open for late texts
+  - User sees clear processing status
+  - Correct display of key presses
 
-- **Durchgeführte Änderungen**:
-  1. Float32-Normalisierung reaktiviert:
-     - Konvertierung von int16 zu float32
-     - Normalisierung durch Division durch 32768.0
-     - Korrekte Datentypen für Server-Verarbeitung
-
-- **Erwartetes Ergebnis**:
-  - Server kann Audio-Daten korrekt verarbeiten
-  - Transkriptionen werden wieder empfangen
-  - Vollständige Verarbeitungskette wiederhergestellt
-
-Nächste Schritte:
-1. Durchführung der Sprachtests zur Verifikation
-2. Monitoring der Server-Logs für erfolgreiche Kommunikation
-3. Dokumentation der Learnings für zukünftige Änderungen
+Next Steps:
+1. Conduct speech tests for verification
+2. Monitor server logs for successful communication
+3. Document learnings for future changes
