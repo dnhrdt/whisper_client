@@ -1,87 +1,88 @@
 """
-Zentrale Konfigurationsdatei für den Whisper-Client
+Central configuration file for the Whisper Client
 """
 
-# Basis-Timing-Konstanten
-BASE_DELAY = 0.1        # Grundlegende Verzögerung für Polling/Checks
-BASE_TIMEOUT = 2.0      # Grundlegender Timeout für Threads/Operationen
-BASE_RETRY = 2.0        # Grundlegende Wartezeit für Retries
-BASE_WAIT = 1.0        # Grundlegende Wartezeit für Nachrichten/Verarbeitung
+# Base Timing Constants
+BASE_DELAY = 0.1        # Basic delay for polling/checks
+BASE_TIMEOUT = 2.0      # Basic timeout for threads/operations
+BASE_RETRY = 2.0        # Basic wait time for retries
+BASE_WAIT = 1.0         # Basic wait time for message processing
 
-# Thread-Management
-THREAD_TIMEOUT = BASE_TIMEOUT          # Standard Thread-Timeout
-WS_THREAD_TIMEOUT = THREAD_TIMEOUT     # WebSocket Thread-Timeout
-AUDIO_THREAD_TIMEOUT = THREAD_TIMEOUT  # Audio Thread-Timeout
-HOTKEY_THREAD_TIMEOUT = THREAD_TIMEOUT # Hotkey Thread-Timeout
-TERMINAL_THREAD_TIMEOUT = THREAD_TIMEOUT # Terminal Thread-Timeout
+# Thread Management
+THREAD_TIMEOUT = BASE_TIMEOUT          # Default thread timeout
+WS_THREAD_TIMEOUT = THREAD_TIMEOUT     # WebSocket thread timeout
+AUDIO_THREAD_TIMEOUT = THREAD_TIMEOUT  # Audio thread timeout
+HOTKEY_THREAD_TIMEOUT = THREAD_TIMEOUT # Hotkey thread timeout
+TERMINAL_THREAD_TIMEOUT = THREAD_TIMEOUT # Terminal thread timeout
 
-# Polling und Checks
-POLL_INTERVAL = BASE_DELAY             # Standard Polling-Intervall
-WS_POLL_INTERVAL = POLL_INTERVAL       # WebSocket Verbindungsprüfung
-HOTKEY_POLL_INTERVAL = POLL_INTERVAL   # Hotkey-Prüfung
-TERMINAL_MONITOR_INTERVAL = BASE_DELAY * 100  # Terminal-Überwachung (10 Sekunden)
+# Polling and Checks
+POLL_INTERVAL = BASE_DELAY             # Default polling interval
+MAIN_POLL_INTERVAL = POLL_INTERVAL     # Main loop polling interval
+WS_POLL_INTERVAL = POLL_INTERVAL       # WebSocket connection check
+HOTKEY_POLL_INTERVAL = POLL_INTERVAL   # Hotkey check
+TERMINAL_MONITOR_INTERVAL = BASE_DELAY * 100  # Terminal monitoring (10 seconds)
 
-# Retry-Mechanismen
-RETRY_DELAY = BASE_RETRY               # Standard Retry-Delay
-WS_RETRY_DELAY = RETRY_DELAY           # WebSocket Reconnect-Delay
-WS_RECONNECT_DELAY = RETRY_DELAY * 1.5 # Wartezeit vor Reconnect
-WS_MAX_RETRY_DELAY = RETRY_DELAY * 15  # Maximale Wartezeit (30 Sekunden)
+# Retry Mechanisms
+RETRY_DELAY = BASE_RETRY               # Default retry delay
+WS_RETRY_DELAY = RETRY_DELAY           # WebSocket reconnect delay
+WS_RECONNECT_DELAY = RETRY_DELAY * 1.5 # Wait time before reconnect
+WS_MAX_RETRY_DELAY = RETRY_DELAY * 15  # Maximum wait time (30 seconds)
 
-# Wartezeiten für Nachrichten/Verarbeitung
-MESSAGE_WAIT = BASE_WAIT               # Standard Nachrichtenverarbeitung
-WS_MESSAGE_WAIT = MESSAGE_WAIT         # WebSocket Nachrichtenverarbeitung
-WS_FINAL_WAIT = BASE_WAIT * 30        # Wartezeit auf letzte Texte
+# Wait Times for Message Processing
+MESSAGE_WAIT = BASE_WAIT               # Default message processing
+WS_MESSAGE_WAIT = MESSAGE_WAIT         # WebSocket message processing
+WS_FINAL_WAIT = BASE_WAIT * 30        # Wait time for final texts
 
-# Verbindungs-Timeouts
-WS_CONNECT_TIMEOUT = BASE_TIMEOUT * 2.5  # Timeout für Verbindungsaufbau
-WS_READY_TIMEOUT = BASE_TIMEOUT * 5     # Timeout für Server-Ready Signal
+# Connection Timeouts
+WS_CONNECT_TIMEOUT = BASE_TIMEOUT * 2.5  # Timeout for connection establishment
+WS_READY_TIMEOUT = BASE_TIMEOUT * 5      # Timeout for server-ready signal
 
-# Tastatur und Clipboard
-KEY_PRESS_DELAY = BASE_DELAY * 0.5     # Verzögerung zwischen Tastendrücken
-CLIPBOARD_TIMEOUT = BASE_WAIT          # Timeout für Clipboard-Operationen
+# Keyboard and Clipboard
+KEY_PRESS_DELAY = BASE_DELAY * 0.5     # Delay between key presses
+CLIPBOARD_TIMEOUT = BASE_WAIT          # Timeout for clipboard operations
 
-# Fehlerbehandlung
-ERROR_DELAY = BASE_DELAY               # Wartezeit nach Fehlern
-HOTKEY_ERROR_DELAY = ERROR_DELAY       # Hotkey Fehler-Delay
-HOTKEY_SHUTDOWN_WAIT = ERROR_DELAY     # Wartezeit für Hotkey-Shutdown
+# Error Handling
+ERROR_DELAY = BASE_DELAY               # Wait time after errors
+HOTKEY_ERROR_DELAY = ERROR_DELAY       # Hotkey error delay
+HOTKEY_SHUTDOWN_WAIT = ERROR_DELAY     # Wait time for hotkey shutdown
 
-# Text-Verarbeitung
-MIN_OUTPUT_INTERVAL = BASE_WAIT * 0.5  # Minimaler Abstand zwischen Ausgaben
-MAX_SENTENCE_WAIT = BASE_TIMEOUT       # Maximale Wartezeit auf Satzende
+# Text Processing
+MIN_OUTPUT_INTERVAL = BASE_WAIT * 0.5  # Minimum interval between outputs
+MAX_SENTENCE_WAIT = BASE_TIMEOUT       # Maximum wait time for sentence end
 
-# Terminal-Management
-TERMINAL_INACTIVITY_TIMEOUT = 300      # Timeout für inaktive Terminals (5 Minuten)
+# Terminal Management
+TERMINAL_INACTIVITY_TIMEOUT = 300      # Timeout for inactive terminals (5 minutes)
 
-# Test-Timeouts und Delays
-TEST_SUITE_TIMEOUT = 120    # Timeout für Test-Suite in Sekunden
-TEST_SERVER_READY_DELAY = 0.5  # Wartezeit bis Server bereit (Sekunden)
-TEST_AUDIO_PROCESS_DELAY = 0.5  # Wartezeit für Audio-Verarbeitung (Sekunden)
+# Test Timeouts and Delays
+TEST_SUITE_TIMEOUT = 120    # Timeout for test suite in seconds
+TEST_SERVER_READY_DELAY = 0.5  # Wait time until server ready (seconds)
+TEST_AUDIO_PROCESS_DELAY = 0.5  # Wait time for audio processing (seconds)
 
-# WebSocket-Einstellungen
+# WebSocket Settings
 WS_HOST = "localhost"
 WS_PORT = 9090
 WS_URL = f"ws://{WS_HOST}:{WS_PORT}"
 
-# Audio-Einstellungen
+# Audio Settings
 AUDIO_CHUNK = 4096
-AUDIO_FORMAT = "paInt16"  # wird in audio.py zu pyaudio.paInt16 konvertiert
+AUDIO_FORMAT = "paInt16"  # converted to pyaudio.paInt16 in audio.py
 AUDIO_CHANNELS = 1
 AUDIO_RATE = 16000
-AUDIO_DEVICE_INDEX = 1  # Poly BT700 Index
-AUDIO_BUFFER_SECONDS = 1.0  # Sekunden Audio pro Puffer
+AUDIO_DEVICE_INDEX = 1  # Poly BT700 index
+AUDIO_BUFFER_SECONDS = 1.0  # Seconds of audio per buffer
 
-# Whisper-Einstellungen
+# Whisper Settings
 WHISPER_LANGUAGE = "de"
 WHISPER_TASK = "transcribe"
 WHISPER_USE_VAD = True
 WHISPER_BACKEND = "faster_whisper"
 
-# Logging-Einstellungen
+# Logging Settings
 LOG_DIR = "logs"
 LOG_LEVEL_FILE = "DEBUG"
-LOG_LEVEL_CONSOLE = "DEBUG"  # Temporär auf DEBUG für Tests
+LOG_LEVEL_CONSOLE = "DEBUG"  # Temporarily set to DEBUG for testing
 
-# Spezielle Logging-Einstellungen für Regression-Untersuchung
+# Special Logging Settings for Regression Investigation
 REGRESSION_LOG_FILE = "logs/regression_investigation.log"
 REGRESSION_LOG_FORMAT = {
     'default': "%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s",
@@ -91,7 +92,7 @@ REGRESSION_LOG_FORMAT = {
     'error': "%(asctime)s.%(msecs)03d - ERROR - %(message)s\n%(stack)s"
 }
 
-# Logging-Formate für verschiedene Ereignisse
+# Logging Formats for Different Events
 LOG_FORMAT_FILE = {
     'default': "%(asctime)s - %(levelname)s - %(message)s",
     'connection': "%(asctime)s - CONNECTION: %(message)s",
@@ -107,25 +108,25 @@ LOG_FORMAT_CONSOLE = {
     'error': "❌ %(message)s"
 }
 
-# Hotkey-Einstellungen
-HOTKEY_TOGGLE_RECORDING = "f13"  # Kann auf G915 programmiert werden
-HOTKEY_EXIT = "f14"  # Kann auf G915 programmiert werden
+# Hotkey Settings
+HOTKEY_TOGGLE_RECORDING = "f13"  # Can be programmed on G915
+HOTKEY_EXIT = "f14"  # Can be programmed on G915
 
-# Text-Verarbeitung
-MAX_RECENT_TRANSCRIPTIONS = 10  # Anzahl der gespeicherten letzten Transkriptionen
-SENTENCE_END_MARKERS = ['.', '!', '?', '...']  # Satzende-Marker für Textausgabe
+# Text Processing
+MAX_RECENT_TRANSCRIPTIONS = 10  # Number of stored recent transcriptions
+SENTENCE_END_MARKERS = ['.', '!', '?', '...']  # Sentence end markers for text output
 
-# Ausgabe-Einstellungen
+# Output Settings
 class OutputMode:
-    """Verfügbare Ausgabemodi"""
-    CLIPBOARD = "clipboard"  # Text in Zwischenablage + Strg+V
-    PROMPT = "prompt"       # Direkte Prompt-Integration
-    BOTH = "both"          # Beide Modi gleichzeitig
+    """Available output modes"""
+    CLIPBOARD = "clipboard"  # Text to clipboard + Ctrl+V
+    PROMPT = "prompt"       # Direct prompt integration
+    BOTH = "both"          # Both modes simultaneously
 
-# Aktiver Ausgabemodus
+# Active output mode
 OUTPUT_MODE = OutputMode.BOTH
 
-# Prompt-Integration
-PROMPT_WINDOW_TITLE = "Visual Studio Code"  # Fenstertitel für Prompt-Erkennung
-PROMPT_INPUT_DELAY = BASE_DELAY * 3        # Verzögerung zwischen Zeichen bei Prompt-Eingabe
-PROMPT_SUBMIT_DELAY = BASE_DELAY * 5       # Verzögerung nach Enter-Taste
+# Prompt Integration
+PROMPT_WINDOW_TITLE = "Visual Studio Code"  # Window title for prompt detection
+PROMPT_INPUT_DELAY = BASE_DELAY * 3         # Delay between characters in prompt input
+PROMPT_SUBMIT_DELAY = BASE_DELAY * 5        # Delay after Enter key

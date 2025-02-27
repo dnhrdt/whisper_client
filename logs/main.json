@@ -1,0 +1,582 @@
+{
+  "entries": [
+    {
+      "timestamp": "2025-02-14T23:29:16+01:00",
+      "type": "feat",
+      "component": "repo",
+      "description": "VSCode Snippets für Git Commits eingerichtet",
+      "details": [
+        "Git Commit Snippets implementiert (commit/commitc)",
+        "Dokumentation in development.md erweitert",
+        "Beispiele und Best Practices hinzugefügt",
+        "Snippet-Nutzung dokumentiert"
+      ],
+      "files_changed": [
+        ".vscode/git.code-snippets",
+        "docs/development.md",
+        "LICENSE",
+        "commit_msg.txt"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "low"
+    },
+    {
+      "timestamp": "2025-02-14T22:57:19.466619+01:00",
+      "type": "refactor",
+      "component": "tests",
+      "description": "Timing-Delays in config.py ausgelagert",
+      "details": [],
+      "files_changed": [
+        "docs/development.md",
+        "docs/diagrams/architecture/system_modules.md",
+        "docs/diagrams/sequence/audio_processing.md",
+        "docs/diagrams/timing/system_timings.md",
+        "docs/roadmap.md",
+        "tests/results/config_default_1739567236.json"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T22:07:02.519422+01:00",
+      "type": "feat",
+      "component": "tests",
+      "description": "Test-Steuerung verbessert",
+      "details": [],
+      "files_changed": [
+        "config.py",
+        "run_tests.py",
+        "tests/results/config_default_1739567052.json",
+        "tests/timing_tests.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T22:03:08.525175+01:00",
+      "type": "test",
+      "component": "timing",
+      "description": "Tests für manuelle Steuerung angepasst",
+      "details": [],
+      "files_changed": [
+        "config.py",
+        "run_tests.py",
+        "src/hotkeys.py",
+        "tests/results/config_default_1739566449.json",
+        "tests/run_timing_tests.py",
+        "tests/timing_tests.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T21:51:54.086372+01:00",
+      "type": "test",
+      "component": "timing",
+      "description": "Systematische Timing-Tests implementiert",
+      "details": [],
+      "files_changed": [
+        "run_tests.py",
+        "tests/results/config_default_1739566101.json",
+        "tests/run_tests.bat",
+        "tests/timing_tests.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T21:46:51.573719+01:00",
+      "type": "refactor",
+      "component": "timing",
+      "description": "Timing-System hierarchisch organisiert",
+      "details": [],
+      "files_changed": [
+        "tests/run_timing_tests.py",
+        "tests/timing_tests.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T21:45:48.228539+01:00",
+      "type": "refactor",
+      "component": "timing",
+      "description": "Timing-Parameter zentralisiert",
+      "details": [],
+      "files_changed": [
+        "config.py",
+        "docs/development.md"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T21:38:50.967279+01:00",
+      "type": "chore",
+      "component": "git",
+      "description": "PowerShell-Hook entfernt",
+      "details": [],
+      "files_changed": [
+        "config.py",
+        "development_log.json",
+        "docs/development.md",
+        "main.py",
+        "src/audio.py",
+        "src/hotkeys.py",
+        "src/terminal.py",
+        "src/text.py",
+        "src/websocket.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T21:26:05.319998+01:00",
+      "type": "feat",
+      "component": "git",
+      "description": "Python-basierter pre-commit Hook",
+      "details": [],
+      "files_changed": [
+        ""
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T21:25:57.052018+01:00",
+      "type": "fix",
+      "component": "websocket",
+      "description": "Verbesserte Timing-Steuerung",
+      "details": [],
+      "files_changed": [
+        "development_log.json",
+        "docs/development.md",
+        "scripts/update_dev_log.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T21:10:00+01:00",
+      "type": "improvement",
+      "component": "websocket",
+      "description": "Timing-Parameter zentralisiert und optimiert",
+      "details": [
+        "Alle Timing-Parameter in config.py ausgelagert",
+        "Zusätzliche Wartezeiten für Nachrichtenverarbeitung",
+        "Verbesserte Polling-Intervalle für Verbindungsprüfung",
+        "Maximale Reconnect-Wartezeit begrenzt",
+        "Verbindungsabbau-Prozess optimiert",
+        "Dokumentation um Timing-Details erweitert"
+      ],
+      "files_changed": [
+        "src/websocket.py",
+        "config.py",
+        "docs/development.md"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [
+          "test_server_flow.py"
+        ],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-14T20:23:00+01:00",
+      "type": "fix",
+      "component": "core",
+      "description": "Regression behoben: Audio-Format und Verbindungshandling",
+      "details": [
+        "Float32-Normalisierung reaktiviert für korrekte Server-Verarbeitung",
+        "Verbindungshandling verbessert mit 20s Wartezeit für letzte Texte",
+        "Status-Meldungen für Benutzer klarer gestaltet",
+        "Dokumentation aktualisiert mit Audio-Format und Verbindungs-Details"
+      ],
+      "files_changed": [
+        "src/audio.py",
+        "src/websocket.py",
+        "main.py",
+        "docs/development.md"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [
+          "test_server_flow.py",
+          "test_text_processing.py"
+        ],
+        "tests_added": []
+      },
+      "regression_potential": "low"
+    },
+    {
+      "timestamp": "2025-02-14T16:40:00+01:00",
+      "type": "improvement",
+      "component": "server",
+      "description": "Server-Log-Konfiguration verbessert",
+      "details": [
+        "Container-Logs mit Timestamps und Details erweitert",
+        "Volume-Mapping für persistente Logs eingerichtet: /home/michael/appdata/whisperlive/logs:/app/logs",
+        "Symlink für einfachen Log-Zugriff erstellt: /logs/logs",
+        "Ermöglicht besseres Debugging der Server-Komponente und VAD-Analyse"
+      ],
+      "files_changed": [],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [
+          "test_server_flow.py"
+        ],
+        "tests_added": []
+      },
+      "regression_potential": "low"
+    },
+    {
+      "timestamp": "2025-02-13T23:26:00+01:00",
+      "type": "fix",
+      "component": "audio",
+      "description": "Versuch: Float32 Normalisierung deaktiviert",
+      "details": [
+        "Deaktivierung der Float32 Normalisierung",
+        "Verwendung von raw int16 Audio-Daten",
+        "Versuch die Server-Kommunikation zu reparieren",
+        "Möglicherweise rückgängig zu machen, falls nicht erfolgreich"
+      ],
+      "files_changed": [
+        "src/audio.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [
+          "test_server_flow.py"
+        ],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-13T22:40:40.131617",
+      "type": "refactor",
+      "component": "core",
+      "description": "Code-Restrukturierung für bessere Wartbarkeit",
+      "files_changed": [
+        "src/audio.py",
+        "src/websocket.py",
+        "src/logging.py",
+        "src/text.py",
+        "src/utils.py",
+        "main.py",
+        "config.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "high"
+    },
+    {
+      "timestamp": "2025-02-13T13:48:16.040903",
+      "type": "feature",
+      "component": "text",
+      "description": "Prompt-Integration implementiert",
+      "details": [
+        "Konfigurierbare Ausgabemodi (Clipboard/Prompt/Both)",
+        "Automatische Prompt-Fenstererkennung",
+        "Intelligente Texteingabe mit Verzögerungen",
+        "Robuste Fehlerbehandlung und Fallback-Mechanismen"
+      ],
+      "files_changed": [
+        "src/text.py",
+        "config.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [
+          "test_prompt_output.py"
+        ],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-13T13:21:28.567120",
+      "type": "feature",
+      "component": "terminal",
+      "description": "Terminal-Management implementiert",
+      "details": [
+        "Zentrale Verwaltung aller Terminals",
+        "Automatisches Schließen inaktiver Terminals",
+        "Aktivitätsverfolgung für Audio und WebSocket",
+        "Robuste Cleanup-Logik"
+      ],
+      "files_changed": [
+        "src/terminal.py",
+        "main.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-12T22:40:55+01:00",
+      "type": "improvement",
+      "component": "audio",
+      "description": "Verbesserung der Audio- und Hotkey-Steuerung",
+      "details": [
+        "Robustere Hotkey-Erkennung mit Zustandsverfolgung",
+        "Verbesserte Audio-Thread-Verwaltung und Cleanup",
+        "Detaillierteres Debug-Logging für Fehleranalyse"
+      ],
+      "files_changed": [
+        "src/hotkeys.py",
+        "src/audio.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [
+          "test_server_flow.py"
+        ],
+        "tests_added": []
+      },
+      "regression_potential": "medium"
+    },
+    {
+      "timestamp": "2025-02-12T22:28:57+01:00",
+      "type": "improvement",
+      "component": "hotkeys",
+      "description": "Verbesserung der Hotkey-Steuerung",
+      "details": [
+        "Robustere Hotkeys mit F13/F14 statt Alt+Space/ESC",
+        "Verbesserte Tastendruckerkennung mit Loslass-Prüfung"
+      ],
+      "files_changed": [
+        "src/hotkeys.py",
+        "config.py"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "low"
+    },
+    {
+      "timestamp": "2025-02-15T21:58:00+01:00",
+      "type": "chore",
+      "component": "repo",
+      "description": "Neue Dokumentationsstruktur implementiert",
+      "details": [
+        "Dokumentation in docs/development/ reorganisiert",
+        "Inkrementelles Logging-System eingeführt",
+        "development_log_000.json als Basis-Version",
+        ".gitignore für neue Struktur angepasst"
+      ],
+      "files_changed": [
+        ".gitignore",
+        "docs/development/logs/development_log_000.json",
+        "docs/development/logs/development_log_001.json"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "low"
+    },
+    {
+      "timestamp": "2025-02-15T22:01:00+01:00",
+      "type": "chore",
+      "component": "repo",
+      "description": "Repository aufgeräumt",
+      "details": [
+        "Überflüssige Dateien und Verzeichnisse entfernt",
+        "Alte Logs und Scripts bereinigt",
+        "Temporäre Dateien gelöscht",
+        "Cache-Verzeichnisse entfernt"
+      ],
+      "files_changed": [
+        "context.json (gelöscht)",
+        "development_log.json (gelöscht)",
+        "list_devices.py (gelöscht)",
+        "logs/logs (gelöscht)",
+        "scripts/update_dev_log.py (gelöscht)"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "low"
+    },
+    {
+      "timestamp": "2025-02-15T22:16:00+01:00",
+      "type": "chore",
+      "component": "repo",
+      "description": "Zusätzliche Aufräumarbeiten",
+      "details": [
+        "Verzeichnisstruktur überprüft",
+        "Bestätigt dass alle überflüssigen Dateien entfernt wurden",
+        "Tests-Verzeichnis erstellt für zukünftige Test-Dateien",
+        "Finale Struktur verifiziert"
+      ],
+      "files_changed": [
+        "tests/ (erstellt)"
+      ],
+      "commit_hash": "",
+      "test_impact": {
+        "tests_affected": [],
+        "tests_added": []
+      },
+      "regression_potential": "low"
+    }
+  ],
+  "meta": {
+    "last_updated": "2025-02-15T22:16:00+01:00",
+    "format_version": "1.0",
+    "notes": [
+      "Chronologische Entwicklungshistorie mit Fokus auf Änderungen und deren Auswirkungen",
+      "regression_potential bewertet mögliche Auswirkungen auf andere Systemteile",
+      "test_impact dokumentiert betroffene und neue Tests",
+      "Erste inkrementelle Log-Datei nach Umstellung auf neue Struktur",
+      "Aufräumarbeiten nach Umstellung auf neue Struktur",
+      "Finale Überprüfung und Bereinigung der Projektstruktur"
+    ],
+    "previous_log": "development_log_002.json"
+  },
+  "timestamp": "2025-02-16T01:19:00+01:00",
+  "type": "regression",
+  "title": "Regression: Verbindungsabbruch und Timing-Probleme",
+  "findings": [
+    {
+      "component": "Tumbling Window",
+      "status": "success",
+      "details": [
+        "130ms durchschnittliche Latenz",
+        "Stabile Verarbeitung von 27 Fenstern in 3.5s",
+        "Überlappende Fenster für bessere Audio-Übergänge",
+        "Direkt implementierbar"
+      ]
+    },
+    {
+      "component": "Queue-basierte Chunk-Verwaltung",
+      "status": "concept",
+      "details": [
+        "Thread- und Async-basierte Implementierungen",
+        "AudioChunk Datenmodell mit Metadaten",
+        "Entkopplung von Aufnahme und Verarbeitung",
+        "Bessere Integration mit WebSocket durch Async-Variante"
+      ]
+    },
+    {
+      "component": "Audio-Segmentierung",
+      "status": "partial",
+      "details": [
+        "Erfolgreiche Sprach-Segment-Erkennung",
+        "Energie-basierte Klassifizierung funktioniert",
+        "Segment-Dauern (0.06s) benötigen Optimierung",
+        "Parameteroptimierung erforderlich"
+      ]
+    }
+  ],
+  "next_steps": [
+    "Fokus auf Speech-Tests fortsetzen",
+    "Optimierungen für spätere Integration vormerken",
+    "Parameter für Segmentierung evaluieren"
+  ],
+  "impact": "high",
+  "priority": "medium",
+  "status": "investigating",
+  "description": "Nach Umstellung auf non-streaming Variante treten mehrere Probleme auf",
+  "observations": [
+    {
+      "type": "connection",
+      "detail": "Mehrfache parallele Verbindungen werden aufgebaut",
+      "evidence": "Server-Log zeigt multiple Verbindungen in kurzer Zeit:\n23:38:48 - New client connected\n23:39:02 - New client connected\n23:39:18 - New client connected"
+    },
+    {
+      "type": "processing",
+      "detail": "Server verarbeitet weiter nach END_OF_AUDIO",
+      "evidence": "Endlose Audio-Sendung trotz completed=true Flag vom Server"
+    },
+    {
+      "type": "timing",
+      "detail": "Verbindungsabbruch während der Verarbeitung",
+      "evidence": "Connection closed (Status: 1000) nach END_OF_AUDIO, aber vor Verarbeitungsende"
+    }
+  ],
+  "attempted_fixes": [
+    {
+      "timestamp": "2025-02-16T00:45:00+01:00",
+      "description": "Einführung von wait_mode für WAIT-Status",
+      "outcome": "failed",
+      "reason": "Keine Auswirkung auf Hauptproblem"
+    },
+    {
+      "timestamp": "2025-02-16T01:00:00+01:00",
+      "description": "Implementierung von processing_complete Flag",
+      "outcome": "failed",
+      "reason": "Führte zu Rekursion bei stop_processing"
+    },
+    {
+      "timestamp": "2025-02-16T01:02:00+01:00",
+      "description": "Versuch Audio-Thread direkt zu stoppen",
+      "outcome": "failed",
+      "reason": "Kein Effekt auf Server-Verarbeitung"
+    }
+  ],
+  "current_state": {
+    "code_version": "pre-regression",
+    "status": "reverted",
+    "next_steps": "Systematische Analyse der Server-Client-Kommunikation erforderlich"
+  },
+  "lessons_learned": [
+    "Keine Änderungen ohne vollständiges Verständnis der Server-Client-Kommunikation",
+    "Testanweisungen genau befolgen",
+    "Feedback abwarten vor weiteren Änderungen",
+    "Änderungen einzeln und kontrolliert durchführen"
+  ]
+}

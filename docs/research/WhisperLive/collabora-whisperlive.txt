@@ -444,7 +444,7 @@ setup(
         "torch",
         "torchaudio",
         "websockets",
-        "onnxruntime==1.16.0",
+        "onnxruntime==1.17.0",
         "scipy",
         "websocket-client",
         "numba",
@@ -7202,7 +7202,7 @@ class TestVoiceActivityDetection(unittest.TestCase):
 ================================================
 File: whisper_live/__version__.py
 ================================================
-__version__ = "0.6.2"
+__version__ = "0.6.3"
 
 
 ================================================

@@ -1,0 +1,18 @@
+# Projekt-spezifische Verzeichnisse
+/backup/          # Obsolete Dateien und Chatlogs
+
+# Umgebungsvariablen und Konfiguration
+.env*
+**/config/secrets.*
+**/credentials.*
+
+# IDE und System
+.vscode/
+.DS_Store
+
+# Performance
+__pycache__/
+*.pyc
+/dist/
+/build/
+.cache/

@@ -1,0 +1,81 @@
+# Project Guidelines
+
+## Basic Working Principles
+- NO actions without explicit user confirmation
+- When problems arise, FIRST analyze, THEN present solution proposals
+- Always proceed step by step, never multiple changes simultaneously
+- Present development steps for confirmation
+- In case of uncertainties, ask IMMEDIATELY
+- NO premature optimizations - only with user approval
+
+## Documentation & Versioning
+- EVERY Markdown file MUST have the following header:
+  ```markdown
+  # Title
+  Version: X.YY
+  Timestamp: YYYY-MM-DD HH:MM CET
+  ```
+- Update version and timestamp with EVERY change
+- No exceptions to the header rule!
+- Update Memory Bank with significant changes
+- Document development history in incremental logs
+
+## Environment & Setup
+- Windows PowerShell environment
+- Use only PowerShell-specific syntax
+- No Unix/Bash-style commands
+- Clear terminal before operations
+- One operation at a time
+- Wait for feedback before next step
+
+## Project Intelligence
+Systematically capture and update the following aspects in .clinerules:
+- Implementation patterns and their success
+- User preferences for code style and workflow
+- Common challenges and solutions
+- Technical constraints and workarounds
+- Best practices from development
+- Optimization potential (only after validation)
+
+## Code Standards
+- Follow PEP 8 conventions
+- Use typed functions (Python 3.12+)
+- Write comprehensive docstrings
+- Error handling following project standards
+
+## Test Workflow
+1. Clear terminal
+2. Restart program
+3. Execute test
+4. Analyze server logs
+5. Check sentence processing
+6. Document results
+7. Wait for feedback
+8. Only then: propose changes
+
+## Commit Format
+- Format: <type>(<scope>): <description>
+- Commit after each functional change
+- Documentation parallel to code
+- Track changes in logs
+
+## Communication
+- Address problems early
+- Report status regularly
+- Always wait for feedback
+- No premature conclusions
+- Ask when uncertain
+- Changes only after confirmation
+
+## Security
+- No API keys/credentials in code
+- Use .env for access data
+- Observe WebSocket security
+- Protect external audio device configuration
+
+## Status Change Rules
+- Explicit approval required for:
+  * Test completion marking
+  * Next step transitions
+  * Task completion
+  * Project flow changes

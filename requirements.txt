@@ -9,3 +9,6 @@ websocket-client==1.7.0
 keyboard==0.13.5
 pywin32==306
 pyperclip==1.8.2
+
+# Resampling
+librosa==0.10.1
