@@ -1,11 +1,13 @@
 # Active Development Context
-Version: 1.5
-Timestamp: 2025-02-27 13:38 CET
+Version: 2.1
+Timestamp: 2025-02-27 17:13 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
 
 ## Recent Updates
+- Versioning and timestamp headers added to all source files [T127]
+- Source code files translated from German to English [T126]
 - Documentation migration to English completed and committed to GitHub
 - Memory Bank structure fully implemented and validated
 - Added .gitattributes for consistent line endings
@@ -20,6 +22,8 @@ This file serves as the source of truth for current development state and recent
 - Test framework ready for organic evolution
 - Research phase planned for WhisperLive server
 - Investigation of similar applications planned
+- Client-side resampling implemented
+- Windows SendMessage API prototyped
 
 Note: Historical investigation files and backups maintained in original German for reference purposes.
 
@@ -31,6 +35,12 @@ Note: Historical investigation files and backups maintained in original German f
   * Parameter documentation needed
   * Processing triggers investigation
   * Batch processing analysis
+  * Client-side resampling to 16kHz is standard
+  * `soundcard` library offers cross-platform system audio capture
+  * Audio is typically processed in chunks of 4096 samples
+  * `faster_whisper` and `tensorrt` are the recommended backends
+  * TensorRT optimization can significantly improve performance
+  * OpenMP thread control is available via `--omp_num_threads`
 - Similar Application Analysis
   * Code review of existing solutions
   * Feature comparison
@@ -249,7 +259,7 @@ Note: Historical investigation files and backups maintained in original German f
 - Shared: Problem analysis and solution design
 
 ## Development Log References
-- Current increment: logs/increments/log_001.json
+- Current increment: logs/increments/log_003.json
 - Recent major changes: logs/main.json
 - Previous quarter: logs/archive/2025_Q1.json
 
@@ -261,9 +271,7 @@ Note: Historical investigation files and backups maintained in original German f
 Note: Task IDs [Txxx] reference specific entries in development logs
 
 ## Next Steps
-1. Begin WhisperLive server research
-2. Analyze similar applications
-3. Document findings
-4. Plan implementation improvements
+1. Prototype Windows SendMessage API approach
+2. Create text processing validation test framework
 
 Note: Development will be guided by research findings. The test framework will evolve naturally as specific needs arise during development.

@@ -1,0 +1,23 @@
+{
+  "type": "normal",
+  "task_id": "T127",
+  "component": "core",
+  "description": "Implement versioning and timestamp headers in code files",
+  "details": [
+    "Added standardized version and timestamp headers to all source files",
+    "Format consistent with documentation files",
+    "Provides change tracking and version correlation within the files"
+  ],
+  "files_changed": [
+    "src/text.py",
+    "src/audio.py",
+    "src/hotkeys.py",
+    "src/logging.py",
+    "src/terminal.py",
+    "src/utils.py",
+    "src/websocket.py",
+    "src/__init__.py"
+  ],
+  "timestamp": "2025-02-27T17:11:00+01:00",
+  "status": "completed"
+}

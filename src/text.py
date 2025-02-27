@@ -1,5 +1,11 @@
 """
-Text-Verarbeitungsmodul für den Whisper-Client
+Text Processing Module for the Whisper Client
+Version: 1.0
+Timestamp: 2025-02-27 17:12 CET
+
+This module handles text processing, formatting, and output for the Whisper Client.
+It includes functionality for sentence detection, duplicate handling, and text insertion
+using various methods including Windows SendMessage API.
 """
 import time
 import win32gui
@@ -10,27 +16,36 @@ import pyperclip
 import config
 from src import logger
 
+def send_message(hwnd, text):
+    """Sends text to a window using the SendMessage API."""
+    try:
+        # Send WM_SETTEXT message
+        win32gui.SendMessage(hwnd, win32con.WM_SETTEXT, 0, text)
+        logger.info(f"✓ Text sent to window {hwnd}")
+    except Exception as e:
+        logger.error(f"⚠️ Error sending text: {e}")
+
 class TextManager:
     def __init__(self):
-        self.current_sentence = []  # Sammelt Segmente für vollständige Sätze
-        self.last_output_time = 0  # Zeitstempel der letzten Ausgabe
-        self.incomplete_sentence_time = 0  # Zeitstempel für unvollständige Sätze
-        self.processed_segments = set()  # Menge der bereits verarbeiteten Segmente
+        self.current_sentence = []  # Collects segments for complete sentences
+        self.last_output_time = 0  # Timestamp of the last output
+        self.incomplete_sentence_time = 0  # Timestamp for incomplete sentences
+        self.processed_segments = set()  # Set of already processed segments
         self.common_abbreviations = {
             "Dr.", "Prof.", "Hr.", "Fr.", "Nr.", "Tel.", "Str.", "z.B.", "d.h.", "u.a.",
             "etc.", "usw.", "bzw.", "ca.", "ggf.", "inkl.", "max.", "min.", "vs."
         }
-        self.test_output = []  # Speichert Ausgaben während des Tests
+        self.test_output = []  # Stores outputs during testing
     
     def is_duplicate(self, text):
-        """Prüft, ob ein Text ein Duplikat ist"""
-        # Normalisiere Text für Vergleich
+        """Checks if a text is a duplicate"""
+        # Normalize text for comparison
         normalized_text = ' '.join(text.lower().split())
         return normalized_text in self.processed_segments
 
     def is_sentence_end(self, text):
-        """Prüft, ob ein Text ein Satzende markiert"""
-        # Prüfe auf Abkürzungen am Ende des Texts
+        """Checks if a text marks the end of a sentence"""
+        # Check for abbreviations at the end of the text
         text_lower = text.lower()
         for abbr in self.common_abbreviations:
             if text_lower.endswith(abbr.lower()) and not any(
@@ -38,11 +53,11 @@ class TextManager:
                 for p in config.SENTENCE_END_MARKERS
             ):
                 return False
-        # Prüfe auf Satzzeichen
+        # Check for sentence punctuation
         return any(text.endswith(p) for p in config.SENTENCE_END_MARKERS)
 
     def output_sentence(self, current_time=None):
-        """Gibt den aktuellen Satz aus"""
+        """Outputs the current sentence"""
         if not self.current_sentence:
             return
             
@@ -55,19 +70,19 @@ class TextManager:
         self.last_output_time = current_time
         self.incomplete_sentence_time = current_time
         
-        # Leere die verarbeiteten Segmente
+        # Clear the processed segments
         self.processed_segments.clear()
 
     def should_force_output(self, current_time):
-        """Prüft ob der aktuelle Satz ausgegeben werden soll"""
+        """Checks if the current sentence should be output"""
         if not self.current_sentence:
             return False
             
-        # Prüfe auf Timeout
+        # Check for timeout
         if current_time - self.incomplete_sentence_time > config.MAX_SENTENCE_WAIT:
             return True
             
-        # Prüfe auf kompletten Satz
+        # Check for complete sentence
         current_text = ' '.join(self.current_sentence)
         if any(current_text.endswith(marker) for marker in config.SENTENCE_END_MARKERS):
             return True
@@ -75,11 +90,11 @@ class TextManager:
         return False
 
     def process_segments(self, segments):
-        """Verarbeitet empfangene Textsegmente"""
-        logger.info("\n🎯 Verarbeite neue Textsegmente:")
+        """Processes received text segments"""
+        logger.info("\n🎯 Processing new text segments:")
         current_time = time.time()
         
-        # Hole den letzten Text aus den Segmenten
+        # Get the last text from the segments
         if not segments:
             return
             
@@ -90,17 +105,17 @@ class TextManager:
             
         logger.info(f"  → Segment: {text}")
         
-        # Teile Text in Sätze
+        # Split text into sentences
         sentences = []
         current_sentence = ""
         
-        # Gehe durch jeden Buchstaben
+        # Go through each character
         for i, char in enumerate(text):
             current_sentence += char
             
-            # Prüfe auf Satzende
+            # Check for sentence end
             if any(text[i-len(marker)+1:i+1] == marker for marker in config.SENTENCE_END_MARKERS if i >= len(marker)-1):
-                # Prüfe auf Abkürzungen
+                # Check for abbreviations
                 is_abbreviation = False
                 for abbr in self.common_abbreviations:
                     if current_sentence.strip().lower().endswith(abbr.lower()):
@@ -111,105 +126,113 @@ class TextManager:
                     sentences.append(current_sentence.strip())
                     current_sentence = ""
         
-        # Rest hinzufügen
+        # Add the rest
         if current_sentence.strip():
             sentences.append(current_sentence.strip())
         
-        # Verarbeite jeden Satz einzeln
+        # Process each sentence individually
         for sentence in sentences:
-            # Normalisiere Text für Duplikatserkennung
+            # Normalize text for duplicate detection
             normalized_text = ' '.join(sentence.lower().split())
             
-            # Prüfe auf Duplikate
+            # Check for duplicates
             if normalized_text in self.processed_segments:
-                logger.info(f"    ⚠️ Duplikat übersprungen: {sentence}")
+                logger.info(f"    ⚠️ Duplicate skipped: {sentence}")
                 continue
                 
-            # Speichere Text für Duplikatserkennung
+            # Save text for duplicate detection
             self.processed_segments.add(normalized_text)
             
-            # Aktualisiere Zeitstempel für unvollständige Sätze
+            # Update timestamp for incomplete sentences
             if not self.current_sentence:
                 self.incomplete_sentence_time = current_time
             
-            # Füge Text zum aktuellen Satz hinzu
+            # Add text to the current sentence
             if not self.current_sentence:
                 self.current_sentence = [sentence]
             else:
-                # Prüfe ob der neue Text den alten enthält
+                # Check if the new text contains the old one
                 old_text = ' '.join(self.current_sentence)
                 if sentence.startswith(old_text):
                     self.current_sentence = [sentence]
                 else:
                     self.current_sentence.append(sentence)
-            logger.info(f"    ✓ Zum Satz hinzgefügt: {sentence}")
+            logger.info(f"    ✓ Added to sentence: {sentence}")
             
-            # Prüfe ob Ausgabe nötig
+            # Check if output is necessary
             if self.should_force_output(current_time):
-                logger.info("    ⚡ Ausgabe wird erzwungen")
-                # Warte nur wenn nötig
+                logger.info("    ⚡ Output is forced")
+                # Wait only if necessary
                 wait_time = config.MIN_OUTPUT_INTERVAL - (current_time - self.last_output_time)
                 if wait_time > 0:
                     time.sleep(wait_time)
                 self.output_sentence(current_time)
 
     def format_sentence(self, text):
-        """Formatiert einen Satz für die Ausgabe"""
-        # Entferne mehrfache Leerzeichen
+        """Formats a sentence for output"""
+        # Remove multiple spaces
         text = ' '.join(text.split())
         
-        # Stelle sicher, dass Satzzeichen korrekt gesetzt sind
+        # Ensure that punctuation marks are set correctly
         for marker in config.SENTENCE_END_MARKERS:
             if marker in text and not text.endswith(marker):
                 text = text.replace(marker, marker + ' ')
         
-        # Prüfe ob der Text Teil eines größeren Satzes ist
+        # Check if the text is part of a larger sentence
         starts_sentence = not any(
             text.lower().startswith(word) for word in ['und', 'oder', 'aber', 'denn']
         )
         
-        # Erste Buchstabe groß wenn es ein Satzanfang ist
+        # First letter uppercase if it's the beginning of a sentence
         if text and starts_sentence and not any(text.startswith(abbr) for abbr in self.common_abbreviations):
             text = text[0].upper() + text[1:]
             
         return text
     
     def insert_text(self, text):
-        """Text ausgeben basierend auf konfiguriertem Modus"""
+        """Output text based on configured mode"""
         try:
-            # Text in Zwischenablage kopieren für alle Modi
+            # Copy text to clipboard for all modes
             self._set_clipboard_text(text)
-            logger.info(f"\n📋 Verarbeitet: {text}")
-            logger.info(f"Ausgabemodus: {config.OUTPUT_MODE}")
+            logger.info(f"\n📋 Processed: {text}")
+            logger.info(f"Output mode: {config.OUTPUT_MODE}")
             
-            # Speichere Text für Tests
+            # Save text for tests
             self.test_output.append(text)
             
-            # Schreibe in Test-Log-Datei
+            # Write to test log file
             with open("tests/speech_test_output.log", "a", encoding="utf-8") as f:
                 f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {text}\n")
             
-            # Aktives Fenster identifizieren
+            # Identify active window
             hwnd = win32gui.GetForegroundWindow()
             if not hwnd:
-                logger.warning("⚠️ Kein aktives Fenster gefunden")
+                logger.warning("⚠️ No active window found")
                 return
             
-            # Text in aktives Fenster einfügen
-            if config.OUTPUT_MODE in [config.OutputMode.PROMPT, config.OutputMode.BOTH]:
+            # Insert text into active window
+            if config.OUTPUT_MODE == config.OutputMode.PROMPT:
                 self._send_text_to_prompt(text)
-                logger.info("✓ Text an aktives Fenster gesendet")
+                logger.info("✓ Text sent to active window")
+            elif config.OUTPUT_MODE == config.OutputMode.SENDMESSAGE:
+                send_message(hwnd, text)
+                logger.info("✓ Text sent to window using SendMessage API")
             elif config.OUTPUT_MODE == config.OutputMode.CLIPBOARD:
                 self._send_paste_command()
-                logger.info("✓ In Zwischenablage eingefügt")
+                logger.info("✓ Inserted into clipboard")
+            elif config.OUTPUT_MODE == config.OutputMode.BOTH:
+                if config.OUTPUT_MODE == config.OutputMode.BOTH:
+                    self._send_text_to_prompt(text)
+                    send_message(hwnd, text)
+                    logger.info("✓ Text sent to active window")
             
         except Exception as e:
-            logger.error(f"⚠️ Fehler bei Texteingabe: {e}")
-            logger.info("⌨️  Alternativ: Drücke Strg+V zum manuellen Einfügen")
+            logger.error(f"⚠️ Error during text input: {e}")
+            logger.info("⌨️  Alternative: Press Ctrl+V to paste manually")
     
     def _set_clipboard_text(self, text):
-        """Text in die Zwischenablage kopieren mit mehreren Methoden"""
-        # Primäre Methode: Win32 API
+        """Copy text to clipboard using multiple methods"""
+        # Primary method: Win32 API
         try:
             win32clipboard.OpenClipboard()
             win32clipboard.EmptyClipboard()
@@ -217,30 +240,30 @@ class TextManager:
             win32clipboard.CloseClipboard()
             return
         except Exception as e:
-            logger.debug(f"Win32 Clipboard Fehler: {e}")
+            logger.debug(f"Win32 Clipboard error: {e}")
             
         # Backup: pyperclip
         try:
             pyperclip.copy(text)
         except Exception as e:
-            logger.error(f"⚠️ Clipboard Fehler: {e}")
+            logger.error(f"⚠️ Clipboard error: {e}")
     
     def _send_paste_command(self):
-        """Sendet Strg+V Tastenkombination"""
+        """Sends Ctrl+V key combination"""
         try:
-            # Simuliere Strg+V
-            win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)  # Strg drücken
-            win32api.keybd_event(ord('V'), 0, 0, 0)  # V drücken
-            time.sleep(config.KEY_PRESS_DELAY)  # Verzögerung zwischen Tastendrücken
-            win32api.keybd_event(ord('V'), 0, win32con.KEYEVENTF_KEYUP, 0)  # V loslassen
-            win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)  # Strg loslassen
-            time.sleep(config.KEY_PRESS_DELAY)  # Verzögerung für Verarbeitung
+            # Simulate Ctrl+V
+            win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)  # Press Ctrl
+            win32api.keybd_event(ord('V'), 0, 0, 0)  # Press V
+            time.sleep(config.KEY_PRESS_DELAY)  # Delay between key presses
+            win32api.keybd_event(ord('V'), 0, win32con.KEYEVENTF_KEYUP, 0)  # Release V
+            win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)  # Release Ctrl
+            time.sleep(config.KEY_PRESS_DELAY)  # Delay for processing
         except Exception as e:
-            logger.error(f"⚠️ Fehler bei Tastatureingabe: {e}")
+            logger.error(f"⚠️ Error during keyboard input: {e}")
             raise
     
     def _find_prompt_window(self):
-        """Findet das Prompt-Fenster anhand des Titels"""
+        """Finds the prompt window by title"""
         try:
             def callback(hwnd, windows):
                 if win32gui.IsWindowVisible(hwnd):
@@ -254,34 +277,34 @@ class TextManager:
             return windows[0] if windows else None
             
         except Exception as e:
-            logger.error(f"⚠️ Fehler bei Fenstersuche: {e}")
+            logger.error(f"⚠️ Error during window search: {e}")
             return None
     
     def _send_text_to_prompt(self, text):
-        """Sendet Text direkt an den Prompt"""
+        """Sends text directly to the prompt"""
         try:
-            # Text in Zwischenablage kopieren
+            # Copy text to clipboard
             self._set_clipboard_text(text)
             
-            # Strg+V zum Einfügen
-            win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)  # Strg drücken
-            win32api.keybd_event(ord('V'), 0, 0, 0)  # V drücken
-            time.sleep(config.KEY_PRESS_DELAY)  # Verzögerung zwischen Tastendrücken
-            win32api.keybd_event(ord('V'), 0, win32con.KEYEVENTF_KEYUP, 0)  # V loslassen
-            win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)  # Strg loslassen
+            # Ctrl+V to paste
+            win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)  # Press Ctrl
+            win32api.keybd_event(ord('V'), 0, 0, 0)  # Press V
+            time.sleep(config.KEY_PRESS_DELAY)  # Delay between key presses
+            win32api.keybd_event(ord('V'), 0, win32con.KEYEVENTF_KEYUP, 0)  # Release V
+            win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)  # Release Ctrl
             
-            # Enter drücken
-            time.sleep(0.05)  # Kurze Pause
+            # Press Enter
+            time.sleep(0.05)  # Short pause
             win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
             win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
             time.sleep(config.PROMPT_SUBMIT_DELAY)
             
         except Exception as e:
-            logger.error(f"⚠️ Fehler bei Prompt-Eingabe: {e}")
+            logger.error(f"⚠️ Error during prompt input: {e}")
             raise
     
     def get_test_output(self):
-        """Gibt die gesammelten Test-Ausgaben zurück und leert den Puffer"""
+        """Returns the collected test outputs and clears the buffer"""
         output = self.test_output.copy()
         self.test_output = []
         return output

@@ -1,6 +1,6 @@
 # Development Progress
-Version: 1.5
-Timestamp: 2025-02-27 13:40 CET
+Version: 2.1
+Timestamp: 2025-02-27 17:13 CET
 
 ## Current Focus: Research & Investigation
 
@@ -66,18 +66,24 @@ Timestamp: 2025-02-27 13:40 CET
 
 ### Current Tasks
 1. **WhisperLive Server Research**
-   - [ ] Document current understanding
-   - [ ] Investigate output format
-   - [ ] Research processing parameters
-   - [ ] Analyze batch processing strategy
-   - [ ] Study connection handling
+   - [x] Document current understanding
+   - [x] Investigate output format
+   - [x] Research processing parameters
+   - [x] Analyze batch processing strategy
+   - [x] Study connection handling
+   - [x] Document WebSocket message format
+   - [x] Plan client-side resampling implementation
+   - [x] Translate headers and annotations in main code files to English [T126]
+   - [x] Implement versioning and timestamp headers in code files [T127]
+   - [ ] Prototype Windows SendMessage API approach
+   - [ ] Create text processing validation test framework
 
 2. **Similar Applications Analysis**
-   - [ ] Identify relevant projects
-   - [ ] Review implementations
-   - [ ] Compare features
-   - [ ] Extract best practices
-   - [ ] Document findings
+   - [x] Identify relevant projects
+   - [x] Review implementations
+   - [x] Compare features
+   - [x] Extract best practices
+   - [x] Document findings
 
 3. **Test Migration (Phase 3: Test Runner)** ✓
    - [x] Create unified test runner
@@ -122,14 +128,12 @@ Timestamp: 2025-02-27 13:40 CET
    - See docs/todo/documentation.md
 
 ## Development Log References
-- Latest: logs/increments/log_001.json
+- Latest: logs/increments/log_003.json
 - Major: logs/main.json
 - History: logs/archive/2025_Q1.json
 
 ## Next Steps
-1. Begin WhisperLive server research
-2. Analyze similar applications
-3. Document findings
-4. Plan implementation improvements
+1. Create text processing validation test framework
+2. Prototype Windows SendMessage API approach
 
 Note: Development will be guided by research findings. The test framework will evolve naturally as specific needs arise during development.

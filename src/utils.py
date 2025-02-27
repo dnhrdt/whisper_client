@@ -1,5 +1,11 @@
 """
-Hilfsfunktionen für den Whisper-Client
+Utility Functions for the Whisper Client
+Version: 1.0
+Timestamp: 2025-02-27 17:12 CET
+
+This module provides utility functions for the Whisper Client.
+It includes functions for server status checking, project status updates,
+task history tracking, and displaying messages to the user.
 """
 import socket
 import json
@@ -9,7 +15,7 @@ import config
 from src import logger
 
 def check_server_status(host=config.WS_HOST, port=config.WS_PORT):
-    """Prüft ob der WhisperLive Server läuft"""
+    """Checks if the WhisperLive Server is running"""
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(2)
@@ -20,61 +26,61 @@ def check_server_status(host=config.WS_HOST, port=config.WS_PORT):
         return False
 
 def update_project_status(description=None, changes=None, status=None, files=None):
-    """Aktualisiert den Projektstatus und die Task-Historie"""
+    """Updates the project status and task history"""
     try:
-        # Projekte-Datei aktualisieren
+        # Update projects file
         projects_file = "projects.json"
         if os.path.exists(projects_file):
             with open(projects_file, 'r', encoding='utf-8') as f:
                 projects = json.load(f)
             
-            # Aktuelles Projekt finden
+            # Find current project
             project_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
             for project in projects["projects"]:
                 if project["path"] == project_path:
-                    # Status aktualisieren
+                    # Update status
                     if status:
                         project["status"] = status
                     
-                    # Task hinzufügen
+                    # Add task
                     if description and changes:
                         task = {
                             "description": description,
                             "status": "completed",
                             "details": changes[0]["description"] if changes else None
                         }
-                        project["current_tasks"].insert(0, task)  # Neuster Task zuerst
+                        project["current_tasks"].insert(0, task)  # Newest task first
                     
-                    # Zeitstempel aktualisieren
+                    # Update timestamp
                     current_time = datetime.now().isoformat()
                     project["last_updated"] = current_time
                     projects["meta"]["last_updated"] = current_time
                     break
             
-            # Speichern
+            # Save
             with open(projects_file, 'w', encoding='utf-8') as f:
                 json.dump(projects, f, indent=2, ensure_ascii=False)
     
     except Exception as e:
-        logger.error(f"⚠️ Fehler beim Aktualisieren des Projektstatus: {e}")
+        logger.error(f"⚠️ Error updating project status: {e}")
     
-    # Task-Historie aktualisieren
+    # Update task history
     if description and changes:
         update_task_history(description, changes, "completed", files)
 
 def update_task_history(description, changes, status="completed", files=None):
-    """Aktualisiert die Task-Historie"""
+    """Updates the task history"""
     history_file = "task_history.json"
     
     try:
-        # Lade bestehende Historie
+        # Load existing history
         if os.path.exists(history_file):
             with open(history_file, 'r', encoding='utf-8') as f:
                 history = json.load(f)
         else:
             history = {"tasks": []}
         
-        # Neuen Task hinzufügen
+        # Add new task
         task = {
             "timestamp": datetime.now().isoformat(),
             "description": description,
@@ -84,46 +90,46 @@ def update_task_history(description, changes, status="completed", files=None):
         if files:
             task["files"] = files
         
-        history["tasks"].insert(0, task)  # Neuster Task zuerst
+        history["tasks"].insert(0, task)  # Newest task first
         
-        # Speichern
+        # Save
         with open(history_file, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=2, ensure_ascii=False)
             
     except Exception as e:
-        logger.error(f"⚠️ Fehler beim Aktualisieren der Task-Historie: {e}")
+        logger.error(f"⚠️ Error updating task history: {e}")
 
 def show_startup_message():
-    """Zeigt die Startmeldung an"""
+    """Shows the startup message"""
     startup_msg = f"""
 === Whisper Client ===
-🔥 Client gestartet!
-⌨️  Drücke {config.HOTKEY_TOGGLE_RECORDING} zum Starten/Stoppen der Aufnahme
-⚡ Drücke {config.HOTKEY_EXIT} zum Beenden
+🔥 Client started!
+⌨️  Press {config.HOTKEY_TOGGLE_RECORDING} to start/stop recording
+⚡ Press {config.HOTKEY_EXIT} to exit
 --------------------------------------------------"""
     
-    # Nur an Logger senden
+    # Only send to logger
     for line in startup_msg.split('\n'):
         if line.strip():
             logger.info(line)
 
 def show_server_error():
-    """Zeigt Fehlermeldung bei nicht erreichbarem Server"""
+    """Shows error message when server is not reachable"""
     error_msg = """
-⚠️ WhisperLive Server ist nicht erreichbar!
+⚠️ WhisperLive Server is not reachable!
 
-Bitte starte den Server mit einem der folgenden Befehle:
+Please start the server with one of the following commands:
 
-1. Direkt aus dem Quellcode:
+1. Directly from the source code:
    cd path/to/whisperlive
    python server.py
 
-2. Oder als Docker Container:
+2. Or as a Docker Container:
    docker run -p 9090:9090 whisperlive
 
-Danach starte diesen Client erneut."""
+Then restart this client."""
     
-    # Nur an Logger senden
+    # Only send to logger
     for line in error_msg.split('\n'):
         if line.strip():
             logger.error(line)

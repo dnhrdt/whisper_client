@@ -1,5 +1,11 @@
 """
-Terminal-Management für den Whisper-Client
+Terminal Management for the Whisper Client
+Version: 1.0
+Timestamp: 2025-02-27 17:12 CET
+
+This module provides terminal management functionality for the Whisper Client.
+It tracks terminal status, handles terminal registration and cleanup, and
+monitors terminals for inactivity.
 """
 import time
 import threading
@@ -10,51 +16,51 @@ from src import logger
 import config
 
 class TerminalStatus(Enum):
-    """Status eines Terminals"""
-    ACTIVE = "active"          # Terminal ist aktiv und wird verwendet
-    INACTIVE = "inactive"      # Terminal ist inaktiv (keine Aktivität für INACTIVITY_TIMEOUT)
-    CLOSING = "closing"        # Terminal wird geschlossen
-    CLOSED = "closed"         # Terminal wurde geschlossen
+    """Status of a terminal"""
+    ACTIVE = "active"          # Terminal is active and in use
+    INACTIVE = "inactive"      # Terminal is inactive (no activity for INACTIVITY_TIMEOUT)
+    CLOSING = "closing"        # Terminal is being closed
+    CLOSED = "closed"          # Terminal has been closed
 
 @dataclass
 class TerminalInfo:
-    """Informationen über ein Terminal"""
-    id: str                    # Eindeutige ID des Terminals
-    name: str                  # Benutzerfreundlicher Name (z.B. "Audio-Terminal")
-    status: TerminalStatus     # Aktueller Status
-    last_activity: float       # Zeitstempel der letzten Aktivität
-    process: Optional[object]  # Prozess-Handle (optional)
+    """Information about a terminal"""
+    id: str                    # Unique ID of the terminal
+    name: str                  # User-friendly name (e.g., "Audio Terminal")
+    status: TerminalStatus     # Current status
+    last_activity: float       # Timestamp of last activity
+    process: Optional[object]  # Process handle (optional)
 
 class TerminalManager:
-    """Zentrale Verwaltung aller Terminals"""
+    """Central management of all terminals"""
     
     def __init__(self):
         self.terminals: Dict[str, TerminalInfo] = {}
         self.lock = threading.Lock()
         
-        # Monitoring-Thread starten
+        # Start monitoring thread
         self.monitoring = True
         self.monitor_thread = threading.Thread(target=self._monitor_terminals)
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
         
-        logger.info("Terminal-Manager gestartet")
+        logger.info("Terminal Manager started")
     
     def register_terminal(self, id: str, name: str, process: Optional[object] = None) -> TerminalInfo:
         """
-        Registriert ein neues Terminal
+        Registers a new terminal
         
         Args:
-            id: Eindeutige ID des Terminals
-            name: Benutzerfreundlicher Name
-            process: Optional, Prozess-Handle
+            id: Unique ID of the terminal
+            name: User-friendly name
+            process: Optional, process handle
             
         Returns:
-            TerminalInfo: Informationen über das registrierte Terminal
+            TerminalInfo: Information about the registered terminal
         """
         with self.lock:
             if id in self.terminals:
-                raise ValueError(f"Terminal mit ID {id} existiert bereits")
+                raise ValueError(f"Terminal with ID {id} already exists")
             
             terminal = TerminalInfo(
                 id=id,
@@ -64,31 +70,31 @@ class TerminalManager:
                 process=process
             )
             self.terminals[id] = terminal
-            logger.debug(f"Terminal registriert: {name} (ID: {id})")
+            logger.debug(f"Terminal registered: {name} (ID: {id})")
             return terminal
     
     def update_activity(self, id: str):
-        """Aktualisiert den Zeitstempel der letzten Aktivität"""
+        """Updates the timestamp of the last activity"""
         with self.lock:
             if id in self.terminals:
                 self.terminals[id].last_activity = time.time()
                 if self.terminals[id].status == TerminalStatus.INACTIVE:
                     self.terminals[id].status = TerminalStatus.ACTIVE
-                    logger.debug(f"Terminal reaktiviert: {self.terminals[id].name}")
+                    logger.debug(f"Terminal reactivated: {self.terminals[id].name}")
     
     def close_terminal(self, id: str):
         """
-        Schließt ein Terminal
+        Closes a terminal
         
         Args:
-            id: ID des zu schließenden Terminals
+            id: ID of the terminal to close
         """
         with self.lock:
             if id in self.terminals:
                 terminal = self.terminals[id]
                 if terminal.status not in [TerminalStatus.CLOSING, TerminalStatus.CLOSED]:
                     terminal.status = TerminalStatus.CLOSING
-                    logger.debug(f"Terminal wird geschlossen: {terminal.name}")
+                    logger.debug(f"Terminal is being closed: {terminal.name}")
                     
                     # Prozess beenden falls vorhanden
                     if terminal.process:
@@ -98,27 +104,27 @@ class TerminalManager:
                             pass
                     
                     terminal.status = TerminalStatus.CLOSED
-                    logger.debug(f"Terminal geschlossen: {terminal.name}")
+                    logger.debug(f"Terminal closed: {terminal.name}")
     
     def get_terminal_info(self, id: str) -> Optional[TerminalInfo]:
         """
-        Gibt Informationen über ein Terminal zurück
+        Returns information about a terminal
         
         Args:
-            id: Terminal-ID
+            id: Terminal ID
             
         Returns:
-            Optional[TerminalInfo]: Terminal-Informationen oder None wenn nicht gefunden
+            Optional[TerminalInfo]: Terminal information or None if not found
         """
         with self.lock:
             return self.terminals.get(id)
     
     def get_active_terminals(self) -> Dict[str, TerminalInfo]:
         """
-        Gibt alle aktiven Terminals zurück
+        Returns all active terminals
         
         Returns:
-            Dict[str, TerminalInfo]: Dictionary mit Terminal-IDs und Informationen
+            Dict[str, TerminalInfo]: Dictionary with terminal IDs and information
         """
         with self.lock:
             return {
@@ -128,14 +134,14 @@ class TerminalManager:
     
     def _monitor_terminals(self):
         """
-        Überwacht Terminals auf Inaktivität
-        Läuft in eigenem Thread
+        Monitors terminals for inactivity
+        Runs in its own thread
         """
         while self.monitoring:
             try:
                 current_time = time.time()
                 
-                # Liste der zu schließenden Terminals
+                # List of terminals to close
                 to_close = []
                 
                 with self.lock:
@@ -144,29 +150,29 @@ class TerminalManager:
                             inactive_time = current_time - terminal.last_activity
                             if inactive_time > config.TERMINAL_INACTIVITY_TIMEOUT:
                                 terminal.status = TerminalStatus.INACTIVE
-                                logger.debug(f"Terminal inaktiv: {terminal.name}")
+                                logger.debug(f"Terminal inactive: {terminal.name}")
                                 to_close.append(id)
                 
-                # Inaktive Terminals schließen
+                # Close inactive terminals
                 for id in to_close:
                     self.close_terminal(id)
                     
             except Exception as e:
-                logger.error(f"Fehler im Terminal-Monitor: {e}")
+                logger.error(f"Error in terminal monitor: {e}")
             
-            time.sleep(config.TERMINAL_MONITOR_INTERVAL)  # Intervall für Terminal-Überwachung
+            time.sleep(config.TERMINAL_MONITOR_INTERVAL)  # Interval for terminal monitoring
     
     def cleanup(self):
-        """Ressourcen freigeben"""
+        """Release resources"""
         self.monitoring = False
         
-        # Alle Terminals schließen
+        # Close all terminals
         with self.lock:
             for id in list(self.terminals.keys()):
                 self.close_terminal(id)
         
-        # Auf Monitor-Thread warten
+        # Wait for monitor thread
         if self.monitor_thread.is_alive():
             self.monitor_thread.join(timeout=config.TERMINAL_THREAD_TIMEOUT)
         
-        logger.info("Terminal-Manager beendet")
+        logger.info("Terminal Manager stopped")

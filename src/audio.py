@@ -1,11 +1,24 @@
 """
-Audio-Verarbeitungsmodul für den Whisper-Client
+Audio Processing Module for the Whisper Client
+Version: 1.0
+Timestamp: 2025-02-27 17:12 CET
+
+This module handles audio recording, processing, and resampling for the Whisper Client.
+It provides functionality for microphone access, audio capture, and conversion to the
+format required by the WhisperLive server.
 """
 import pyaudio
 import numpy as np
 import threading
 import config
+import librosa
 from src import logger
+
+def resample_to_16kHZ(audio_data, current_rate):
+    """Resamples audio data to 16kHz using librosa."""
+    y = np.frombuffer(audio_data, dtype=np.float32)
+    resampled_audio = librosa.resample(y, orig_sr=current_rate, target_sr=16000)
+    return resampled_audio.tobytes()
 
 class AudioManager:
     def __init__(self):
@@ -14,21 +27,21 @@ class AudioManager:
         self.recording = False
         self.recording_lock = threading.Lock()
         
-        # Audio-Format aus Config laden
+        # Load audio format from config
         self.chunk = config.AUDIO_CHUNK
         self.format = getattr(pyaudio, config.AUDIO_FORMAT)
         self.channels = config.AUDIO_CHANNELS
         self.rate = config.AUDIO_RATE
         self.device_index = config.AUDIO_DEVICE_INDEX
         
-        # Mikrofon initialisieren
+        # Initialize microphone
         self._init_microphone()
     
     def _init_microphone(self):
-        """Mikrofonzugriff initialisieren und testen"""
+        """Initialize and test microphone access"""
         if not self._check_microphone():
-            logger.error("⚠️ Mikrofon nicht verfügbar!")
-            raise RuntimeError("Kein Mikrofon gefunden")
+            logger.error("⚠️ Microphone not available!")
+            raise RuntimeError("No microphone found")
             
         # Teste Mikrofonzugriff
         try:
@@ -41,13 +54,13 @@ class AudioManager:
                 frames_per_buffer=self.chunk
             )
             test_stream.close()
-            logger.info("✓ Mikrofontest erfolgreich")
+            logger.info("✓ Microphone test successful")
         except Exception as e:
-            logger.error(f"⚠️ Mikrofontest fehlgeschlagen: {e}")
+            logger.error(f"⚠️ Microphone test failed: {e}")
             raise
     
     def _check_microphone(self):
-        """Prüft ob das konfigurierte Mikrofon verfügbar ist"""
+        """Checks if the configured microphone is available"""
         try:
             info = self.audio.get_host_api_info_by_index(0)
             num_devices = info.get('deviceCount')
@@ -55,20 +68,20 @@ class AudioManager:
             if self.device_index < num_devices:
                 device_info = self.audio.get_device_info_by_index(self.device_index)
                 if device_info.get('maxInputChannels') > 0:
-                    # Korrigiere Windows-Umlaute
+                    # Correct Windows umlauts
                     name = device_info.get('name', '').encode('latin-1').decode('utf-8')
-                    logger.info(f"✓ Mikrofon gefunden: {name}")
+                    logger.info(f"✓ Microphone found: {name}")
                     return True
             
-            logger.error("⚠️ Mikrofon nicht verfügbar")
+            logger.error("⚠️ Microphone not available")
             return False
             
         except Exception as e:
-            logger.error(f"⚠️ Fehler bei Mikrofonprüfung: {e}")
+            logger.error(f"⚠️ Error checking microphone: {e}")
             return False
     
     def is_device_available(self):
-        """Prüft ob das Audiogerät noch verfügbar ist"""
+        """Checks if the audio device is still available"""
         try:
             device_info = self.audio.get_device_info_by_index(self.device_index)
             return device_info.get('maxInputChannels') > 0
@@ -76,16 +89,16 @@ class AudioManager:
             return False
     
     def start_recording(self, callback):
-        """Startet die Audio-Aufnahme"""
+        """Starts audio recording"""
         with self.recording_lock:
             if self.recording:
                 return
             
-            # Prüfe ob Mikrofon noch verfügbar
+            # Check if microphone is still available
             if not self.is_device_available():
-                logger.warning("⚠️ Mikrofon nicht mehr verfügbar")
+                logger.warning("⚠️ Microphone no longer available")
                 if not self._check_microphone():
-                    logger.error("⚠️ Kein Mikrofon gefunden!")
+                    logger.error("⚠️ No microphone found!")
                     return
             
             try:
@@ -98,9 +111,9 @@ class AudioManager:
                     frames_per_buffer=self.chunk
                 )
                 self.recording = True
-                logger.info("🎤 Aufnahme gestartet...")
+                logger.info("🎤 Recording started...")
                 
-                # Aufnahme-Thread starten
+                # Start recording thread
                 self.record_thread = threading.Thread(
                     target=self._record_audio,
                     args=(callback,)
@@ -109,82 +122,87 @@ class AudioManager:
                 self.record_thread.start()
                 
             except Exception as e:
-                logger.error(f"⚠️ Fehler beim Starten der Aufnahme: {e}")
+                logger.error(f"⚠️ Error starting recording: {e}")
                 self.recording = False
     
     def stop_recording(self):
-        """Stoppt die Audio-Aufnahme"""
+        """Stops audio recording"""
         with self.recording_lock:
             if not self.recording:
                 return
             
-            logger.debug("Stoppe Aufnahme...")
+            logger.debug("Stopping recording...")
             self.recording = False
             
-            # Stream sofort schließen um weitere Daten zu verhindern
+            # Close stream immediately to prevent further data
             if self.stream:
                 try:
                     self.stream.stop_stream()
                     self.stream.close()
                     self.stream = None
-                    logger.debug("Audio-Stream geschlossen")
+                    logger.debug("Audio stream closed")
                 except Exception as e:
-                    logger.error(f"Fehler beim Schließen des Streams: {e}")
+                    logger.error(f"Error closing stream: {e}")
             
-            # Warte auf Audio-Thread mit längerem Timeout
+            # Wait for audio thread with longer timeout
             if hasattr(self, 'record_thread') and self.record_thread.is_alive():
-                logger.debug("Warte auf Audio-Thread...")
+                logger.debug("Waiting for audio thread...")
                 self.record_thread.join(timeout=config.AUDIO_THREAD_TIMEOUT)
                 if self.record_thread.is_alive():
-                    logger.warning("Audio-Thread reagiert nicht - Beende Thread...")
-                    # Thread als Daemon markiert, wird beim Programm-Ende beendet
+                    logger.warning("Audio thread not responding - Terminating thread...")
+                    # Thread marked as daemon, will be terminated when program ends
                     self.record_thread = None
             
-            logger.info("\n⏹️ Aufnahme gestoppt")
+            logger.info("\n⏹️ Recording stopped")
     
     def _record_audio(self, callback):
-        """Audio aufnehmen und an Callback senden"""
-        buffer = []  # Audio-Puffer für stabilere Übertragung
-        logger.debug("Audio-Thread gestartet")
+        """Record audio and send to callback"""
+        buffer = []  # Audio buffer for more stable transmission
+        logger.debug("Audio thread started")
         
         try:
             while self.recording and self.stream and self.stream.is_active():
                 try:
                     data = self.stream.read(self.chunk, exception_on_overflow=False)
-                    # Konvertiere zu float32 Array
+                    # Convert to float32 array
                     audio_array = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
                     
-                    # Füge normalisierte float32 Daten zum Puffer hinzu
+                    # Add normalized float32 data to buffer
                     buffer.append(audio_array)
                     
-                    # Prüfe ob genug Audio für einen Puffer vorhanden
-                    buffer_size = int(config.AUDIO_BUFFER_SECONDS * 4)  # 4 chunks pro Sekunde
+                    # Check if enough audio is available for a buffer
+                    buffer_size = int(config.AUDIO_BUFFER_SECONDS * 4)  # 4 chunks per second
                     if len(buffer) >= buffer_size:
                         combined_data = np.concatenate(buffer)
+                        
+                        # Resample to 16kHz
+                        resampled_data = resample_to_16kHZ(combined_data.tobytes(), self.rate)
                         if self.recording:  # Nochmal prüfen vor dem Senden
-                            callback(combined_data.tobytes())
-                        buffer = []  # Puffer leeren
+                            callback(resampled_data)
+                        buffer = []  # Clear buffer
                         
                 except Exception as e:
-                    logger.error(f"⚠️ Fehler bei der Aufnahme: {e}")
+                    logger.error(f"⚠️ Error during recording: {e}")
                     break
                     
         finally:
-            # Sende verbleibende Puffer-Daten
+            # Send remaining buffer data
             if buffer:
                 try:
                     combined_data = np.concatenate(buffer)
-                    callback(combined_data.tobytes())
-                    logger.debug(f"Letzte {len(buffer)} Puffer-Chunks gesendet")
+                    # Resample to 16kHz
+                    resampled_data = resample_to_16kHZ(combined_data.tobytes(), self.rate)
+                    callback(resampled_data)
+                    logger.debug(f"Last {len(buffer)} buffer chunks sent")
                 except Exception as e:
-                    logger.error(f"Fehler beim Senden der letzten Puffer-Daten: {e}")
+                    logger.error(f"Error sending last buffer data: {e}")
             
             buffer = []
-            logger.debug("Audio-Thread beendet")
+            logger.debug("Audio thread terminated")
             self.recording = False
     
     def cleanup(self):
-        """Ressourcen freigeben"""
+        """Release resources"""
         self.stop_recording()
         if self.audio:
             self.audio.terminate()

@@ -1,6 +1,6 @@
 # System Architecture & Patterns
-Version: 1.5
-Timestamp: 2025-02-27 13:42 CET
+Version: 1.6
+Timestamp: 2025-02-27 15:57 CET
 
 ## Document Purpose
 This document outlines how the system is built, key technical decisions, architectural patterns, and development philosophies used throughout the WhisperClient project.
@@ -203,7 +203,7 @@ logs/
       'text': "%(asctime)s - TEXT: %(message)s",
       'error': "%(asctime)s - ERROR: %(message)s"
   }
-  ```
+```
 
 - Log File Management:
   * Daily rotation
