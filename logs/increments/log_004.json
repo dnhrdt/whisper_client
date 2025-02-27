@@ -1,0 +1,16 @@
+{
+  "type": "minor",
+  "task_id": "T128",
+  "component": "core",
+  "description": "Translated main.py and added version header",
+  "details": [
+    "Translated comments and docstrings in main.py to English",
+    "Added standardized version and timestamp header",
+    "Completed the translation of all source files"
+  ],
+  "files_changed": [
+    "main.py"
+  ],
+  "timestamp": "2025-02-27T17:30:00+01:00",
+  "status": "completed"
+}

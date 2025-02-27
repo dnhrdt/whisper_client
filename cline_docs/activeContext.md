@@ -1,11 +1,12 @@
 # Active Development Context
-Version: 2.1
-Timestamp: 2025-02-27 17:13 CET
+Version: 2.2
+Timestamp: 2025-02-27 17:30 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
 
 ## Recent Updates
+- Main program (main.py) translated to English [T128]
 - Versioning and timestamp headers added to all source files [T127]
 - Source code files translated from German to English [T126]
 - Documentation migration to English completed and committed to GitHub
@@ -259,7 +260,7 @@ Note: Historical investigation files and backups maintained in original German f
 - Shared: Problem analysis and solution design
 
 ## Development Log References
-- Current increment: logs/increments/log_003.json
+- Current increment: logs/increments/log_004.json
 - Recent major changes: logs/main.json
 - Previous quarter: logs/archive/2025_Q1.json
 

@@ -1,5 +1,11 @@
 """
-Hauptprogramm des Whisper-Clients
+Main Program for the Whisper Client
+Version: 1.0
+Timestamp: 2025-02-27 17:30 CET
+
+This is the main entry point for the Whisper Client application.
+It initializes all components, manages the application lifecycle,
+and handles user interactions through hotkeys.
 """
 import sys
 import time
@@ -45,7 +51,7 @@ class WhisperClient:
         self.websocket.set_text_callback(self.on_text_segments)
     
     def start(self):
-        """Startet den Client"""
+        """Starts the client"""
         # Hotkeys registrieren
         self.hotkey_manager.register_hotkey(config.HOTKEY_TOGGLE_RECORDING, self.toggle_recording)
         self.hotkey_manager.register_hotkey(config.HOTKEY_EXIT, self.cleanup)
@@ -55,7 +61,7 @@ class WhisperClient:
         try:
             self.websocket.connect()
         except Exception as e:
-            logger.error(f"⚠️ Verbindungsfehler: {e}")
+            logger.error(f"⚠️ Connection error: {e}")
             return False
         
         # Hauptschleife
@@ -73,17 +79,17 @@ class WhisperClient:
         return True
     
     def on_text_segments(self, segments):
-        """Callback für neue Textsegmente"""
+        """Callback for new text segments"""
         # Terminal-Aktivität aktualisieren
         self.terminal_manager.update_activity(self.websocket_terminal.id)
         # Textsegmente verarbeiten
         self.text_manager.process_segments(segments)
     
     def toggle_recording(self):
-        """Aufnahme starten/stoppen"""
+        """Start/stop recording"""
         if not self.audio_manager.recording:
             if not self.websocket.connected:
-                logger.error("⚠️ Keine Verbindung zum Server")
+                logger.error("⚠️ No connection to server")
                 return
             # Aktiviere Verarbeitung und starte Aufnahme
             self.websocket.start_processing()
@@ -92,23 +98,23 @@ class WhisperClient:
             self.terminal_manager.update_activity(self.audio_terminal.id)
         else:
             # Beende zuerst die Aufnahme
-            logger.info("Stoppe Aufnahme...")
+            logger.info("Stopping recording...")
             self.audio_manager.stop_recording()
             
             # Dann sende END_OF_AUDIO und warte auf letzte Texte
-            logger.info("Warte auf letzte Texte vom Server...")
+            logger.info("Waiting for final texts from server...")
             self.websocket.stop_processing()
     
     def on_audio_data(self, audio_data):
-        """Callback für Audio-Daten"""
+        """Callback for audio data"""
         # Terminal-Aktivität aktualisieren
         self.terminal_manager.update_activity(self.audio_terminal.id)
         # Audio-Daten senden
         self.websocket.send_audio(audio_data)
     
     def cleanup(self):
-        """Ressourcen freigeben und Programm beenden"""
-        logger.info("\n🛑 Programm wird beendet...")
+        """Release resources and exit program"""
+        logger.info("\n🛑 Program is shutting down...")
         self.running = False  # Hauptschleife beenden
         
         # Stoppe zuerst die Aufnahme
@@ -123,7 +129,7 @@ class WhisperClient:
         self.hotkey_manager.stop()
         self.terminal_manager.cleanup()
         
-        # Warte kurz damit die Hauptschleife beendet werden kann
+        # Wait briefly so the main loop can terminate
         time.sleep(config.MAIN_SHUTDOWN_WAIT)
         sys.exit(0)
 
@@ -140,22 +146,22 @@ def main():
         # Client starten
         client = WhisperClient()
         if not client.start():
-            logger.error("⚠️ Client konnte nicht gestartet werden")
+            logger.error("⚠️ Client could not be started")
             sys.exit(1)
     except Exception as e:
-        logger.error(f"\n⚠️ Kritischer Fehler: {e}")
-        logger.error("🛑 Programm wird beendet...")
+        logger.error(f"\n⚠️ Critical error: {e}")
+        logger.error("🛑 Program is shutting down...")
         sys.exit(1)
 
 if __name__ == "__main__":
     try:
         # Task-Historie aktualisieren
         update_task_history(
-            description="Code-Restrukturierung",
+            description="Code Restructuring",
             changes=[
                 {
                     "type": "refactor",
-                    "description": "Code in separate Module aufgeteilt für bessere Wartbarkeit"
+                    "description": "Split code into separate modules for better maintainability"
                 }
             ],
             status="in_development",
@@ -170,6 +176,6 @@ if __name__ == "__main__":
             ]
         )
     except Exception as e:
-        logger.debug(f"Task-Historie konnte nicht aktualisiert werden: {e}")
+        logger.debug(f"Task history could not be updated: {e}")
     
     main()

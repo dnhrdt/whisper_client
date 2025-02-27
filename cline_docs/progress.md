@@ -1,6 +1,6 @@
 # Development Progress
-Version: 2.1
-Timestamp: 2025-02-27 17:13 CET
+Version: 2.2
+Timestamp: 2025-02-27 17:30 CET
 
 ## Current Focus: Research & Investigation
 
@@ -75,6 +75,7 @@ Timestamp: 2025-02-27 17:13 CET
    - [x] Plan client-side resampling implementation
    - [x] Translate headers and annotations in main code files to English [T126]
    - [x] Implement versioning and timestamp headers in code files [T127]
+   - [x] Translate main program (main.py) to English [T128]
    - [ ] Prototype Windows SendMessage API approach
    - [ ] Create text processing validation test framework
 
@@ -128,7 +129,7 @@ Timestamp: 2025-02-27 17:13 CET
    - See docs/todo/documentation.md
 
 ## Development Log References
-- Latest: logs/increments/log_003.json
+- Latest: logs/increments/log_004.json
 - Major: logs/main.json
 - History: logs/archive/2025_Q1.json
 
