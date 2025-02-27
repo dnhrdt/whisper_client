@@ -1,9 +1,89 @@
 # System Architecture & Patterns
-Version: 1.2
-Timestamp: 2025-02-26 20:42 CET
+Version: 1.5
+Timestamp: 2025-02-27 13:42 CET
 
 ## Document Purpose
-This document outlines how the system is built, key technical decisions, and architectural patterns used throughout the WhisperClient project.
+This document outlines how the system is built, key technical decisions, architectural patterns, and development philosophies used throughout the WhisperClient project.
+
+## Testing Philosophy
+
+### Core Testing Axiom
+> "The test framework is a tool, not a deliverable"
+
+This axiom guides our testing approach:
+1. Focus on core functionality over test infrastructure
+2. Implement comprehensive tests only for complex issues
+3. Prefer manual verification for straightforward features
+4. Keep test framework minimal and maintainable
+5. Add complexity only when truly needed
+
+### Testing Strategy
+1. **Essential Testing**
+   - Core functionality must be tested
+   - Focus on timing and integration
+   - Verify critical paths
+   - Document test purposes clearly
+   - Tests evolve with development needs
+
+2. **Test Runner Implementation**
+   - Category-based execution (timing, integration, speech)
+   - Minimal configuration (--verbose only)
+   - Clear result reporting with emojis
+   - Proper error handling
+   - See test_runner_usage.md for details
+
+2. **Manual Verification**
+   - Preferred for straightforward features
+   - Used for basic functionality checks
+   - Appropriate for UI/UX testing
+   - Efficient for quick validations
+
+3. **Comprehensive Testing**
+   - Reserved for complex issues
+   - Used when debugging difficult problems
+   - Implemented for critical components
+   - Added when manual testing is insufficient
+
+4. **Test Framework Guidelines**
+   - Keep it simple and maintainable
+   - Add features only when needed
+   - Focus on utility over complexity
+   - Support core development goals
+   - Let tests evolve organically
+   - Avoid premature test infrastructure
+   - Create tests for specific problems
+   - Validate approach through usage
+
+## Memory Bank Workflow
+
+### Critical Memory Bank Rules
+1. **ALWAYS Check Memory Bank First**
+   - Before ANY task or tool use
+   - Before exploring other documentation
+   - Before making ANY changes
+   - No exceptions to this rule
+
+2. **Memory Bank Verification**
+   - Read ALL Memory Bank files
+   - Verify versions and timestamps
+   - Understand complete context
+   - Document any missing information
+
+3. **Memory Bank Warning**
+   - Memory resets are complete
+   - Previous context is ONLY in Memory Bank
+   - Skipping Memory Bank leads to errors
+   - Example: Task exploration before Memory Bank check can lead to misaligned solutions
+
+4. **Memory Bank First Pattern**
+   ```mermaid
+   flowchart TD
+       A[New Task] --> B[Check Memory Bank]
+       B --> C{Complete Context?}
+       C -->|No| D[Update Memory Bank]
+       D --> B
+       C -->|Yes| E[Proceed with Task]
+   ```
 
 ## How The System Is Built
 

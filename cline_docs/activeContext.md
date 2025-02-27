@@ -1,6 +1,6 @@
 # Active Development Context
-Version: 1.2
-Timestamp: 2025-02-26 20:41 CET
+Version: 1.5
+Timestamp: 2025-02-27 13:38 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
@@ -9,14 +9,91 @@ This file serves as the source of truth for current development state and recent
 - Documentation migration to English completed and committed to GitHub
 - Memory Bank structure fully implemented and validated
 - Added .gitattributes for consistent line endings
-- German test cases intentionally preserved
-- Test directory identified for Phase 2 improvements
+- Test documentation migrated to /docs/testing/
+- Test directory structure reorganized
+- Migration roadmap established
+- German test cases preserved and documented
+- Test output messages standardized to English
+- Language policy documented in test inventory
+- Simplified test runner implemented and documented
+- Pragmatic testing approach validated
+- Test framework ready for organic evolution
+- Research phase planned for WhisperLive server
+- Investigation of similar applications planned
 
 Note: Historical investigation files and backups maintained in original German for reference purposes.
 
 ## Current Focus
 
-### 1. Core Stability
+### 1. Research & Investigation (NEW)
+- WhisperLive Server Research
+  * Better understanding of output format
+  * Parameter documentation needed
+  * Processing triggers investigation
+  * Batch processing analysis
+- Similar Application Analysis
+  * Code review of existing solutions
+  * Feature comparison
+  * Implementation patterns
+  * Best practices extraction
+
+### 2. Test Framework Progress ✓
+- Simplified Test Runner Complete
+  * Basic category support implemented
+  * Essential functionality preserved
+  * Documentation created
+  * Minimal maintenance overhead
+- Test Migration Status
+  * Phase 1 (Documentation & Planning) ✓
+  * Phase 2 (Basic Reorganization) ✓
+  * Phase 3 (Simplified Test Runner) ✓
+  * Phase 4 deferred for organic evolution
+- Testing Philosophy Validated
+  * "The test framework is a tool, not a deliverable"
+  * Tests will evolve with development
+  * Focus on solving specific problems
+  * Avoid premature optimization
+
+### 2. Test Structure Progress
+- Documentation Structure ✓
+  * /docs/testing/ directory created
+  * All test docs moved and updated
+  * Version headers standardized
+  * German focus documented
+
+- Directory Structure ✓
+  * /tests/timing/ (Priority 1)
+  * /tests/integration/ (Priority 2)
+  * /tests/speech/ (Priority 3)
+  * /tests/poc/ (preserved)
+
+- Documentation Hierarchy ✓
+  * test_architecture.md
+  * documentation-structure.md
+  * timing_tests.md
+  * integration_tests.md
+  * speech_tests.md
+  * migration_roadmap.md
+
+### 3. Completed Migration Tasks
+- Test inventory created and gaps identified
+- Files migrated to new structure
+- POC integration planned
+- Language standardization complete:
+  * Documentation in English
+  * German docstrings preserved
+  * Test output messages in English
+  * German speech test cases preserved
+
+### 4. Pending Migration Tasks
+- Create simplified test runner
+  * Basic category support
+  * Essential timing test functionality
+  * Minimal maintenance overhead
+- Document test runner usage
+- Verify migrated tests
+
+### 4. Core Stability
 - Server Communication
   * Buffer size optimization needed
   * Processing triggers not documented
@@ -59,13 +136,24 @@ Note: Historical investigation files and backups maintained in original German f
 - Memory Bank migration completed and committed
 - Documentation hierarchy established
 - Line ending consistency implemented via .gitattributes
-- Test framework needs restructuring (Phase 2)
-- Current status: Documentation phase complete, ready for test improvements
+- Test documentation migrated to /docs/testing/
+- Test framework restructuring in progress (Phase 2)
+- Migration roadmap created [docs/testing/migration_roadmap.md]
+- Language policy established:
+  * Documentation in English for accessibility
+  * German docstrings preserved in code
+  * Test output messages in English
+  * German speech test cases preserved
+- Current status: Test migration must complete before further development
 
 ### 5. Test Framework
-- Restructuring test architecture
-- Implementing timing tests
-- Building integration tests
+- Test documentation structure complete
+- Directory structure established:
+  * /tests/timing/ (Priority 1)
+  * /tests/integration/ (Priority 2)
+  * /tests/speech/ (Priority 3)
+  * /tests/poc/ (preserved)
+- Migration roadmap tracking progress
 - Latest changes: See [T125] in log_001.json
 
 ## Recent Changes
@@ -112,6 +200,8 @@ Note: Historical investigation files and backups maintained in original German f
 - Feature priority post-stability
 
 ### Blocking Issues
+- Test migration must complete before further development
+- See migration_roadmap.md for completion criteria
 - Server communication uncertainties
 - Audio timing problems [T120]
 - Text processing stability issues
@@ -145,6 +235,14 @@ Note: Historical investigation files and backups maintained in original German f
 - Documentation-first approach
 - Regular validation points
 
+### Migration Workflow
+1. Complete test inventory
+2. Move files to new structure
+3. Update import statements
+4. Verify functionality
+5. Create missing tests
+6. Document progress
+
 ### Team Structure
 - Human: Project direction and validation
 - AI: Implementation and documentation
@@ -161,3 +259,11 @@ Note: Historical investigation files and backups maintained in original German f
 - Current investigation in docs/investigations/timing_202502.md
 
 Note: Task IDs [Txxx] reference specific entries in development logs
+
+## Next Steps
+1. Begin WhisperLive server research
+2. Analyze similar applications
+3. Document findings
+4. Plan implementation improvements
+
+Note: Development will be guided by research findings. The test framework will evolve naturally as specific needs arise during development.
