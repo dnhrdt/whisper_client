@@ -1,6 +1,6 @@
 # System Architecture & Patterns
-Version: 1.6
-Timestamp: 2025-02-27 15:57 CET
+Version: 1.7
+Timestamp: 2025-02-28 18:54 CET
 
 ## Document Purpose
 This document outlines how the system is built, key technical decisions, architectural patterns, and development philosophies used throughout the WhisperClient project.
