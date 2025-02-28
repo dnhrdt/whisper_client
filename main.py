@@ -1,7 +1,7 @@
 """
 Main Program for the Whisper Client
-Version: 1.0
-Timestamp: 2025-02-27 17:30 CET
+Version: 1.1
+Timestamp: 2025-02-28 23:25 CET
 
 This is the main entry point for the Whisper Client application.
 It initializes all components, manages the application lifecycle,
@@ -12,7 +12,7 @@ import time
 import websocket
 import config
 import uuid
-from src.audio import AudioManager
+from src.audio import AudioManager, AudioProcessor
 from src.websocket import WhisperWebSocket
 from src.text import TextManager
 from src.utils import check_server_status, show_startup_message, show_server_error, update_task_history
@@ -32,6 +32,7 @@ class WhisperClient:
         self.text_manager = TextManager()
         self.websocket = WhisperWebSocket()
         self.audio_manager = AudioManager()
+        self.audio_processor = AudioProcessor()
         self.hotkey_manager = HotkeyManager()
         
         # Terminals registrieren
@@ -93,7 +94,13 @@ class WhisperClient:
                 return
             # Aktiviere Verarbeitung und starte Aufnahme
             self.websocket.start_processing()
+            
+            # Start audio processing with tumbling window
+            self.audio_processor.start_processing(self.on_processed_audio)
+            
+            # Start audio recording
             self.audio_manager.start_recording(self.on_audio_data)
+            
             # Terminal-Aktivität aktualisieren
             self.terminal_manager.update_activity(self.audio_terminal.id)
         else:
@@ -101,16 +108,24 @@ class WhisperClient:
             logger.info("Stopping recording...")
             self.audio_manager.stop_recording()
             
+            # Stop audio processing
+            self.audio_processor.stop_processing()
+            
             # Dann sende END_OF_AUDIO und warte auf letzte Texte
             logger.info("Waiting for final texts from server...")
             self.websocket.stop_processing()
     
     def on_audio_data(self, audio_data):
-        """Callback for audio data"""
+        """Callback for raw audio data"""
         # Terminal-Aktivität aktualisieren
         self.terminal_manager.update_activity(self.audio_terminal.id)
-        # Audio-Daten senden
-        self.websocket.send_audio(audio_data)
+        # Process audio data through tumbling window
+        self.audio_processor.process_audio(audio_data)
+    
+    def on_processed_audio(self, processed_audio):
+        """Callback for processed audio data from tumbling window"""
+        # Send processed audio to WebSocket
+        self.websocket.send_audio(processed_audio)
     
     def cleanup(self):
         """Release resources and exit program"""
@@ -119,6 +134,9 @@ class WhisperClient:
         
         # Stoppe zuerst die Aufnahme
         self.audio_manager.stop_recording()
+        
+        # Stop audio processing
+        self.audio_processor.stop_processing()
         
         # Dann die Verarbeitung
         self.websocket.stop_processing()
@@ -157,22 +175,20 @@ if __name__ == "__main__":
     try:
         # Task-Historie aktualisieren
         update_task_history(
-            description="Code Restructuring",
+            description="Tumbling Window Integration",
             changes=[
                 {
+                    "type": "feat",
+                    "description": "Integrated Tumbling Window with WebSocket client"
+                },
+                {
                     "type": "refactor",
-                    "description": "Split code into separate modules for better maintainability"
+                    "description": "Updated audio processing flow to use Tumbling Window"
                 }
             ],
             status="in_development",
             files=[
-                "src/audio.py",
-                "src/websocket.py",
-                "src/logging.py",
-                "src/text.py",
-                "src/utils.py",
-                "main.py",
-                "config.py"
+                "main.py"
             ]
         )
     except Exception as e:

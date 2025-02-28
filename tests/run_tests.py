@@ -93,6 +93,7 @@ class TestRunner:
         from tests.integration.test_sendmessage_api import test_sendmessage_api
         import tests.integration.test_text_buffer
         import tests.integration.test_tumbling_window
+        import tests.integration.test_tumbling_window_websocket
         import unittest
         
         self.start_test_suite("integration")
@@ -102,6 +103,7 @@ class TestRunner:
         self.run_test("Text Processing - Edge Cases", run_edge_case_tests)
         self.run_test("Text Buffer", lambda: unittest.TextTestRunner().run(unittest.defaultTestLoader.loadTestsFromModule(tests.integration.test_text_buffer)))
         self.run_test("Tumbling Window", lambda: unittest.TextTestRunner().run(unittest.defaultTestLoader.loadTestsFromModule(tests.integration.test_tumbling_window)))
+        self.run_test("Tumbling Window WebSocket Integration", lambda: unittest.TextTestRunner().run(unittest.defaultTestLoader.loadTestsFromModule(tests.integration.test_tumbling_window_websocket)))
         
         # Skip UI tests if running in CI/CD environment
         if "--no-ui" not in sys.argv:

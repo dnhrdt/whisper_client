@@ -1,10 +1,34 @@
 # Development Progress
-Version: 2.7
-Timestamp: 2025-02-28 23:17 CET
+Version: 2.9
+Timestamp: 2025-02-28 23:34 CET
 
 ## Current Focus: Audio Processing with Tumbling Window
 
 ### Recently Completed
+1. **Integration Test for Tumbling Window with WebSocket Client** ✓
+   - Test Implementation
+     * Created test_tumbling_window_websocket.py in tests/integration
+     * Implemented tests for audio flow from AudioProcessor to WebSocket
+     * Added tests for window size and overlap verification
+     * Created mock WebSocket client for testing
+     * Added main.py integration test with mocking
+   - Test Coverage
+     * Audio data flow verification
+     * Window size and overlap verification
+     * Callback chain verification
+     * Proper cleanup verification
+     * Main.py integration verification
+
+2. **Tumbling Window Integration with WebSocket Client** ✓
+   - Integration Implementation
+     * Updated main.py to use AudioProcessor with TumblingWindow
+     * Modified audio data flow to process through TumblingWindow before sending to server
+     * Added proper cleanup and resource management
+     * Implemented callback chain for processed audio
+   - Task History
+     * Updated task history with integration details [T136]
+     * Documented changes in Memory Bank
+
 1. **Tumbling Window Implementation for Audio Processing** ✓
    - Core Implementation
      * TumblingWindow class with configurable window size and overlap
@@ -125,7 +149,17 @@ Timestamp: 2025-02-28 23:17 CET
      * Integration with TumblingWindow
      * Support for test mode
      * Clean start/stop functionality
-   - [ ] Integrate with WebSocket client
+   - [x] Integrate with WebSocket client [T136]
+     * Updated main.py to use AudioProcessor
+     * Modified audio data flow through TumblingWindow
+     * Added proper cleanup and resource management
+     * Implemented callback chain for processed audio
+   - [x] Create integration tests [T138]
+     * Created test_tumbling_window_websocket.py
+     * Implemented audio flow tests
+     * Added window size and overlap verification
+     * Created mock WebSocket client
+     * Added main.py integration test
    - [ ] Optimize performance for production use
 
 2. **Text Processing Validation**
@@ -212,7 +246,7 @@ Timestamp: 2025-02-28 23:17 CET
 - History: logs/archive/2025_Q1.json
 
 ## Next Steps
-1. Integrate Tumbling Window with WebSocket client
+1. Run the integration tests to verify functionality
 2. Optimize Tumbling Window performance for production
 3. Extend text processing tests for new features
 4. Improve server communication stability

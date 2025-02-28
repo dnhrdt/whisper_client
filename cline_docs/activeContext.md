@@ -1,11 +1,22 @@
 # Active Development Context
-Version: 2.8
-Timestamp: 2025-02-28 23:17 CET
+Version: 3.0
+Timestamp: 2025-02-28 23:34 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
 
 ## Recent Updates
+- Integration test created for Tumbling Window with WebSocket client [T138]
+  * Created test_tumbling_window_websocket.py in tests/integration
+  * Implemented tests for audio flow from AudioProcessor to WebSocket
+  * Added tests for window size and overlap verification
+  * Created mock WebSocket client for testing
+  * Added main.py integration test with mocking
+- Tumbling Window integrated with WebSocket client [T136]
+  * Updated main.py to use AudioProcessor with TumblingWindow
+  * Modified audio data flow to process through TumblingWindow before sending to server
+  * Added proper cleanup and resource management
+  * Updated task history with integration details
 - Memory-based buffering for text processing implemented and tested [T133]
   * Thread-safe ring buffer implementation
   * Improved duplicate detection with temporal context
@@ -63,12 +74,17 @@ Note: Historical investigation files and backups maintained in original German f
   * Integration with TumblingWindow
   * Support for test mode
   * Clean start/stop functionality
-- Documentation created
+- Integration with WebSocket client completed ✓
+  * Updated main.py to use AudioProcessor
+  * Modified audio data flow through TumblingWindow
+  * Added proper cleanup and resource management
+  * Implemented callback chain for processed audio
+  * Created integration tests to verify functionality
+- Documentation created ✓
   * Detailed implementation in src/audio.py
   * Configuration options in config.py
   * Integration tests in tests/integration/test_tumbling_window.py
 - Next steps:
-  * Integrate with WebSocket client
   * Optimize performance for production use
   * Add additional audio processing features
 
@@ -243,6 +259,17 @@ Note: Historical investigation files and backups maintained in original German f
 ## Recent Changes
 
 ### Audio Processing Updates
+- Integration test created for Tumbling Window with WebSocket client [T138]
+  * Created test_tumbling_window_websocket.py in tests/integration
+  * Implemented tests for audio flow from AudioProcessor to WebSocket
+  * Added tests for window size and overlap verification
+  * Created mock WebSocket client for testing
+  * Added main.py integration test with mocking
+- Tumbling Window integrated with WebSocket client [T136]
+  * Updated main.py to use AudioProcessor with TumblingWindow
+  * Modified audio data flow to process through TumblingWindow before sending to server
+  * Added proper cleanup and resource management
+  * Updated task history with integration details
 - Tumbling Window implementation completed [T135]
   * Based on successful proof-of-concept (130ms average latency)
   * Configurable window size and overlap
@@ -286,13 +313,12 @@ Note: Historical investigation files and backups maintained in original German f
 ## Active Work
 
 ### Immediate Tasks
-1. Integrate Tumbling Window with WebSocket client
-2. Optimize Tumbling Window performance for production
-3. Extend text processing tests for new features
-4. Improve server communication stability
-5. Document server parameters
-6. Adjust client timing
-7. Logging system integration
+1. Optimize Tumbling Window performance for production
+2. Extend text processing tests for new features
+3. Improve server communication stability
+4. Document server parameters
+5. Adjust client timing
+6. Logging system integration
 
 ### Required Decisions
 - GUI development timeline
@@ -366,7 +392,7 @@ Note: Historical investigation files and backups maintained in original German f
 Note: Task IDs [Txxx] reference specific entries in development logs
 
 ## Next Steps
-1. Integrate Tumbling Window with WebSocket client
+1. Run the integration tests to verify functionality
 2. Optimize Tumbling Window performance for production
 3. Extend text processing tests for new features
 4. Improve server communication stability
