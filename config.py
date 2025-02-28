@@ -121,10 +121,11 @@ class OutputMode:
     """Available output modes"""
     CLIPBOARD = "clipboard"  # Text to clipboard + Ctrl+V
     PROMPT = "prompt"       # Direct prompt integration
+    SENDMESSAGE = "sendmessage"  # Windows SendMessage API
     BOTH = "both"          # Both modes simultaneously
 
 # Active output mode
-OUTPUT_MODE = OutputMode.BOTH
+OUTPUT_MODE = OutputMode.SENDMESSAGE  # Using SendMessage API for best performance
 
 # Prompt Integration
 PROMPT_WINDOW_TITLE = "Visual Studio Code"  # Window title for prompt detection

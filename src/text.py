@@ -1,7 +1,7 @@
 """
 Text Processing Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-02-27 17:12 CET
+Version: 1.1
+Timestamp: 2025-02-28 18:14 CET
 
 This module handles text processing, formatting, and output for the Whisper Client.
 It includes functionality for sentence detection, duplicate handling, and text insertion
@@ -19,11 +19,24 @@ from src import logger
 def send_message(hwnd, text):
     """Sends text to a window using the SendMessage API."""
     try:
-        # Send WM_SETTEXT message
-        win32gui.SendMessage(hwnd, win32con.WM_SETTEXT, 0, text)
-        logger.info(f"✓ Text sent to window {hwnd}")
+        # Get window class name
+        class_name = win32gui.GetClassName(hwnd)
+        logger.debug(f"Window class: {class_name}")
+        
+        # Send appropriate message based on control type
+        if class_name in ["Edit", "RichEdit", "RichEdit20W", "RICHEDIT50W"]:
+            # For edit controls, use EM_REPLACESEL
+            win32gui.SendMessage(hwnd, win32con.EM_REPLACESEL, 1, text)
+            logger.info(f"✓ Text sent to edit control {hwnd} using EM_REPLACESEL")
+        else:
+            # For other controls, use WM_SETTEXT
+            win32gui.SendMessage(hwnd, win32con.WM_SETTEXT, 0, text)
+            logger.info(f"✓ Text sent to window {hwnd} using WM_SETTEXT")
+        
+        return True
     except Exception as e:
         logger.error(f"⚠️ Error sending text: {e}")
+        return False
 
 class TextManager:
     def __init__(self):
@@ -192,7 +205,7 @@ class TextManager:
     def insert_text(self, text):
         """Output text based on configured mode"""
         try:
-            # Copy text to clipboard for all modes
+            # Copy text to clipboard for all modes (as fallback)
             self._set_clipboard_text(text)
             logger.info(f"\n📋 Processed: {text}")
             logger.info(f"Output mode: {config.OUTPUT_MODE}")
@@ -210,21 +223,47 @@ class TextManager:
                 logger.warning("⚠️ No active window found")
                 return
             
+            # Check if it's VS Code
+            window_title = win32gui.GetWindowText(hwnd)
+            is_vscode = "Visual Studio Code" in window_title
+            if is_vscode:
+                logger.debug(f"Detected VS Code window: {window_title}")
+            
+            # Find edit control for VS Code
+            edit_hwnd = None
+            if is_vscode:
+                edit_hwnd = self._find_vscode_edit_control(hwnd)
+                if edit_hwnd:
+                    logger.debug(f"Found VS Code edit control: {edit_hwnd}")
+            
             # Insert text into active window
             if config.OUTPUT_MODE == config.OutputMode.PROMPT:
                 self._send_text_to_prompt(text)
-                logger.info("✓ Text sent to active window")
+                logger.info("✓ Text sent to active window using prompt mode")
             elif config.OUTPUT_MODE == config.OutputMode.SENDMESSAGE:
-                send_message(hwnd, text)
-                logger.info("✓ Text sent to window using SendMessage API")
+                # Try SendMessage with the appropriate window handle
+                target_hwnd = edit_hwnd if edit_hwnd else hwnd
+                success = send_message(target_hwnd, text)
+                
+                # Fallback to clipboard if SendMessage fails
+                if not success:
+                    logger.warning("⚠️ SendMessage failed, falling back to clipboard")
+                    self._send_paste_command()
+                    logger.info("✓ Inserted using clipboard fallback")
+                else:
+                    logger.info("✓ Text sent using SendMessage API")
             elif config.OUTPUT_MODE == config.OutputMode.CLIPBOARD:
                 self._send_paste_command()
-                logger.info("✓ Inserted into clipboard")
+                logger.info("✓ Inserted using clipboard")
             elif config.OUTPUT_MODE == config.OutputMode.BOTH:
-                if config.OUTPUT_MODE == config.OutputMode.BOTH:
-                    self._send_text_to_prompt(text)
-                    send_message(hwnd, text)
-                    logger.info("✓ Text sent to active window")
+                # Try SendMessage first
+                target_hwnd = edit_hwnd if edit_hwnd else hwnd
+                success = send_message(target_hwnd, text)
+                
+                # Always do prompt mode
+                self._send_text_to_prompt(text)
+                
+                logger.info("✓ Text sent using both methods")
             
         except Exception as e:
             logger.error(f"⚠️ Error during text input: {e}")
@@ -302,6 +341,74 @@ class TextManager:
         except Exception as e:
             logger.error(f"⚠️ Error during prompt input: {e}")
             raise
+    
+    def _find_vscode_edit_control(self, parent_hwnd):
+        """Find the edit control within VS Code"""
+        result = []
+        
+        # VS Code uses a complex structure with Electron/Chromium
+        # We need to search more deeply for potential edit areas
+        def callback(hwnd, controls):
+            class_name = win32gui.GetClassName(hwnd)
+            # Log all controls for debugging
+            text = win32gui.GetWindowText(hwnd)
+            if text or class_name not in ["", "Static"]:
+                logger.debug(f"Control: {hwnd}, Class: {class_name}, Text: {text[:20] + '...' if len(text) > 20 else text}")
+            
+            # Look for potential edit controls
+            if class_name in ["Edit", "RichEdit", "RichEdit20W", "RICHEDIT50W"]:
+                controls.append((hwnd, class_name, "standard_edit"))
+            # VS Code's main editor might be in Chromium's structure
+            elif class_name == "Chrome_RenderWidgetHostHWND":
+                controls.append((hwnd, class_name, "chrome_render"))
+            # Electron apps often use Atom as a base
+            elif "Atom" in class_name:
+                controls.append((hwnd, class_name, "atom"))
+            # Look for the Monaco editor component
+            elif "Monaco" in text or "monaco" in text.lower():
+                controls.append((hwnd, class_name, "monaco"))
+            return True
+        
+        try:
+            # First try direct children
+            win32gui.EnumChildWindows(parent_hwnd, callback, result)
+            
+            if not result:
+                # If no results, try a recursive approach to find deeper controls
+                def recursive_find(hwnd, depth=0, max_depth=5):
+                    if depth > max_depth:
+                        return
+                    
+                    try:
+                        win32gui.EnumChildWindows(hwnd, lambda child_hwnd, _: (
+                            callback(child_hwnd, result),
+                            recursive_find(child_hwnd, depth + 1, max_depth)
+                        ), None)
+                    except Exception:
+                        pass  # Some windows might not allow enumeration
+                
+                recursive_find(parent_hwnd)
+            
+            if result:
+                logger.debug(f"Found {len(result)} potential edit controls in VS Code")
+                for i, (hwnd, class_name, control_type) in enumerate(result):
+                    logger.debug(f"  {i+1}. Handle: {hwnd}, Class: {class_name}, Type: {control_type}")
+                
+                # Prioritize standard edit controls if found
+                for hwnd, _, control_type in result:
+                    if control_type == "standard_edit":
+                        return hwnd
+                
+                # Otherwise return the first control found
+                return result[0][0]
+            else:
+                logger.debug("No potential edit controls found in VS Code")
+                # If no edit control found, return the parent window as fallback
+                return parent_hwnd
+        except Exception as e:
+            logger.error(f"⚠️ Error finding VS Code edit control: {e}")
+            # Return parent window as fallback
+            return parent_hwnd
     
     def get_test_output(self):
         """Returns the collected test outputs and clears the buffer"""

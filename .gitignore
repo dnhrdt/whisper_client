@@ -45,7 +45,5 @@ t*
 # Keep in Git but ignore changes
 Backup/
 
-# Test Results
-tests/results/
-tests/logs/
+# Temporary files
 commit_msg.txt
