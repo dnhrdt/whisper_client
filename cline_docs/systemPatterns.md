@@ -1,6 +1,6 @@
 # System Architecture & Patterns
-Version: 1.7
-Timestamp: 2025-02-28 18:54 CET
+Version: 1.8
+Timestamp: 2025-02-28 19:19 CET
 
 ## Document Purpose
 This document outlines how the system is built, key technical decisions, architectural patterns, and development philosophies used throughout the WhisperClient project.
@@ -116,6 +116,42 @@ This axiom guides our testing approach:
 
 ### Development Logging Strategy
 Note: This describes the development change tracking system.
+
+### Logging Checklist
+1. **When to Update Logs**
+   - After implementing a new feature
+   - After fixing a bug
+   - After significant refactoring
+   - After updating documentation
+   - After changing configuration
+   - Before committing changes to the repository
+
+2. **Which Log Files to Update**
+   - For all changes: Create a new incremental log in `logs/increments/`
+   - For critical changes: Also add an entry to `logs/main.json`
+   - For changes affecting tests: Update test documentation
+
+3. **Log Format Guidelines**
+   - Follow the format specified in the "Log Levels & Details" section
+   - Use the correct log type (critical, normal, minor) based on the change
+   - Include all relevant details (files changed, components affected, etc.)
+   - Use ISO-8601 format for timestamps (YYYY-MM-DDThh:mm:ss+01:00)
+
+4. **Memory Bank Integration**
+   - Coordinate log updates with Memory Bank updates (not as separate steps)
+   - As part of the same workflow, ensure:
+     * `activeContext.md` reflects the latest changes
+     * `progress.md` is updated with completed tasks and next steps
+     * Version and timestamp are updated in all modified Memory Bank files
+   - This is not a separate process but part of the existing Memory Bank protocol
+
+5. **Verification Steps**
+   - Verify log entries are correctly formatted
+   - Ensure all affected files are listed
+   - Check that timestamps are accurate
+   - Confirm task IDs are consistent across logs and Memory Bank
+
+This checklist ensures consistent and comprehensive logging throughout the development process, maintaining a clear history of changes and facilitating knowledge transfer across memory resets.
 
 ## Log Levels & Details
 
