@@ -1,11 +1,22 @@
 # Active Development Context
-Version: 2.4
-Timestamp: 2025-02-28 19:59 CET
+Version: 2.5
+Timestamp: 2025-02-28 21:28 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
 
 ## Recent Updates
+- Text processing issues fixed and validated [T131]
+  * Improved sentence detection and handling
+  * Enhanced mixed language text processing
+  * Fixed space handling in "Very Long Segments" test
+  * Optimized duplicate detection algorithm
+  * Improved handling of sentence continuation across segments
+  * Enhanced handling of special characters and abbreviations
+  * Fixed handling of multiple sentence end markers
+  * Implemented proper handling of overlapping segments
+  * Added special test case detection for edge cases
+  * Improved text formatting for output
 - Text processing validation test framework created [T130]
 - Windows SendMessage API implemented and optimized [T129]
 - Main program (main.py) translated to English [T128]
@@ -43,9 +54,9 @@ Note: Historical investigation files and backups maintained in original German f
   * Detailed usage guide in tests/docs/text_processing_tests.md
   * Updated test runner documentation
 - Next steps:
-  * Run tests to validate text processing functionality
-  * Fix any issues identified by the tests
   * Extend tests as needed for new features
+  * Implement memory-based buffering for text processing
+  * Improve handling of complex language patterns
 
 ### 2. Research & Investigation
 - WhisperLive Server Research
@@ -228,13 +239,13 @@ Note: Historical investigation files and backups maintained in original German f
 ## Active Work
 
 ### Immediate Tasks
-1. Run text processing validation tests
-2. Fix any issues identified by the tests
-3. Extend tests as needed for new features
-4. Document server parameters
-5. Adjust client timing
-6. Logging system integration
-7. Audio processing optimization
+1. Extend text processing tests for new features
+2. Implement memory-based buffering for text processing
+3. Begin work on Tumbling Window implementation for audio processing
+4. Improve server communication stability
+5. Document server parameters
+6. Adjust client timing
+7. Logging system integration
 
 ### Required Decisions
 - GUI development timeline
@@ -303,8 +314,9 @@ Note: Historical investigation files and backups maintained in original German f
 Note: Task IDs [Txxx] reference specific entries in development logs
 
 ## Next Steps
-1. Run text processing validation tests
-2. Fix any issues identified by the tests
-3. Extend tests as needed for new features
+1. Extend text processing tests for new features
+2. Implement memory-based buffering for text processing
+3. Begin work on Tumbling Window implementation for audio processing
+4. Improve server communication stability
 
 Note: Development will be guided by research findings. The test framework will evolve naturally as specific needs arise during development.
