@@ -1,0 +1,52 @@
+{
+  "timestamp": "2025-02-28T20:16:04.547109",
+  "tests": [
+    {
+      "name": "Clipboard Mode Integration",
+      "segments": [
+        "Test mit Clipboard-Modus."
+      ],
+      "actual_outputs": [],
+      "expected_outputs": [
+        "Test mit Clipboard-Modus."
+      ],
+      "passed": false,
+      "details": [
+        "Expected 1 outputs, got 0"
+      ]
+    },
+    {
+      "name": "SendMessage Mode Integration",
+      "segments": [
+        "Test mit SendMessage-Modus."
+      ],
+      "actual_outputs": [],
+      "expected_outputs": [
+        "Test mit SendMessage-Modus."
+      ],
+      "passed": false,
+      "details": [
+        "Expected 1 outputs, got 0"
+      ]
+    },
+    {
+      "name": "Both Modes Integration",
+      "segments": [
+        "Test mit beiden Modi."
+      ],
+      "actual_outputs": [],
+      "expected_outputs": [
+        "Test mit beiden Modi."
+      ],
+      "passed": false,
+      "details": [
+        "Expected 1 outputs, got 0"
+      ]
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "passed": 0,
+    "failed": 3
+  }
+}

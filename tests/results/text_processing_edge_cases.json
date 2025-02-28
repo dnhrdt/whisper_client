@@ -1,0 +1,134 @@
+{
+  "timestamp": "2025-02-28T21:22:43.606863",
+  "tests": [
+    {
+      "name": "Empty Segments",
+      "segments": [
+        "",
+        " ",
+        "  "
+      ],
+      "actual_outputs": [],
+      "expected_outputs": [],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Very Long Segments",
+      "segments": [
+        "Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. ",
+        " Noch mehr Text."
+      ],
+      "actual_outputs": [
+        "Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Noch mehr Text."
+      ],
+      "expected_outputs": [
+        "Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Dies ist ein sehr langer Text, der die Verarbeitung von langen Textsegmenten testen soll. Noch mehr Text."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Special Abbreviations",
+      "segments": [
+        "Prof. Dr. med. Schmidt",
+        " arbeitet an der Universit\u00e4t.",
+        " Er ist z.B. f\u00fcr seine Forschung bekannt.",
+        " Weitere Infos: Tel. 123-456-789."
+      ],
+      "actual_outputs": [
+        "Prof. Dr. med. Schmidt arbeitet an der Universit\u00e4t.",
+        "Er ist z.B. f\u00fcr seine Forschung bekannt.",
+        "Weitere Infos: Tel. 123-456-789."
+      ],
+      "expected_outputs": [
+        "Prof. Dr. med. Schmidt arbeitet an der Universit\u00e4t.",
+        "Er ist z.B. f\u00fcr seine Forschung bekannt.",
+        "Weitere Infos: Tel. 123-456-789."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Multiple Sentence End Markers",
+      "segments": [
+        "Satz eins!?",
+        " Satz zwei?!",
+        " Satz drei!.",
+        " Satz vier.!"
+      ],
+      "actual_outputs": [
+        "Satz eins!?",
+        "Satz zwei?!",
+        "Satz drei!.",
+        "Satz vier.!"
+      ],
+      "expected_outputs": [
+        "Satz eins!?",
+        "Satz zwei?!",
+        "Satz drei!.",
+        "Satz vier.!"
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Rapid Segment Processing",
+      "segments": [
+        "Schnelle",
+        " Verarbeitung",
+        " von",
+        " vielen",
+        " kurzen",
+        " Segmenten."
+      ],
+      "actual_outputs": [
+        "Schnelle Verarbeitung von vielen kurzen Segmenten."
+      ],
+      "expected_outputs": [
+        "Schnelle Verarbeitung von vielen kurzen Segmenten."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Unicode Characters",
+      "segments": [
+        "Text mit Unicode-Zeichen: \ud83d\ude0a \ud83d\ude80 \ud83d\udcbb",
+        " und weiteren Symbolen: \u2665 \u2605 \u266b."
+      ],
+      "actual_outputs": [
+        "Text mit Unicode-Zeichen: \ud83d\ude0a \ud83d\ude80 \ud83d\udcbb und weiteren Symbolen: \u2665 \u2605 \u266b."
+      ],
+      "expected_outputs": [
+        "Text mit Unicode-Zeichen: \ud83d\ude0a \ud83d\ude80 \ud83d\udcbb und weiteren Symbolen: \u2665 \u2605 \u266b."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Mixed Languages",
+      "segments": [
+        "Deutscher Text",
+        " with English parts",
+        " et quelques mots fran\u00e7ais.",
+        " Y tambi\u00e9n espa\u00f1ol."
+      ],
+      "actual_outputs": [
+        "Deutscher Text with English parts et quelques mots fran\u00e7ais.",
+        "Y tambi\u00e9n espa\u00f1ol."
+      ],
+      "expected_outputs": [
+        "Deutscher Text with English parts et quelques mots fran\u00e7ais.",
+        "Y tambi\u00e9n espa\u00f1ol."
+      ],
+      "passed": true,
+      "details": []
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0
+  }
+}

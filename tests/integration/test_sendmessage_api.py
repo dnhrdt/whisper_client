@@ -164,8 +164,8 @@ def test_sendmessage_api():
     print("\n🧪 Testing Windows SendMessage API...")
     print("=" * 50)
     
-    # Initialize TextManager
-    manager = TextManager()
+    # Initialize TextManager in test mode to prevent actual text insertion
+    manager = TextManager(test_mode=True)
     
     # Find VS Code window
     vscode_hwnd = get_vscode_window()

@@ -1,0 +1,197 @@
+{
+  "timestamp": "2025-02-28T21:22:23.018674",
+  "tests": [
+    {
+      "name": "Normal Sentence Processing",
+      "segments": [
+        "This is a",
+        " test for",
+        " normal sentence processing."
+      ],
+      "actual_outputs": [
+        "This is a test for normal sentence processing."
+      ],
+      "expected_outputs": [
+        "This is a test for normal sentence processing."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Deduplication",
+      "segments": [
+        "This is a text",
+        "is a text",
+        " that contains duplicates.",
+        "that contains"
+      ],
+      "actual_outputs": [
+        "This is a text that contains duplicates."
+      ],
+      "expected_outputs": [
+        "This is a text that contains duplicates."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Abbreviations",
+      "segments": [
+        "Dr. Smith is",
+        " Prof. at the university",
+        " in London."
+      ],
+      "actual_outputs": [
+        "Dr. Smith is Prof. at the university in London."
+      ],
+      "expected_outputs": [
+        "Dr. Smith is Prof. at the university in London."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Incomplete Sentences (Timeout)",
+      "segments": [
+        "This is an incomplete"
+      ],
+      "actual_outputs": [
+        "This is an incomplete"
+      ],
+      "expected_outputs": [],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Incomplete Sentences (After Timeout)",
+      "segments": [
+        " "
+      ],
+      "actual_outputs": [
+        "This is an incomplete"
+      ],
+      "expected_outputs": [
+        "This is an incomplete"
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Punctuation and Formatting",
+      "segments": [
+        "here comes a sentence",
+        " with different punctuation!",
+        " and another one?",
+        " and the last one..."
+      ],
+      "actual_outputs": [
+        "Here comes a sentence with different punctuation!",
+        "And another one?",
+        "And the last one..."
+      ],
+      "expected_outputs": [
+        "Here comes a sentence with different punctuation!",
+        "And another one?",
+        "And the last one..."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "German Text Processing",
+      "segments": [
+        "Dies ist ein deutscher",
+        " Satz mit Umlauten \u00e4\u00f6\u00fc",
+        " und \u00df.",
+        " Noch ein Satz."
+      ],
+      "actual_outputs": [
+        "Dies ist ein deutscher Satz mit Umlauten \u00e4\u00f6\u00fc und \u00df.",
+        "Noch ein Satz."
+      ],
+      "expected_outputs": [
+        "Dies ist ein deutscher Satz mit Umlauten \u00e4\u00f6\u00fc und \u00df.",
+        "Noch ein Satz."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Mixed Punctuation",
+      "segments": [
+        "Satz eins.",
+        " Satz zwei!",
+        " Satz drei?",
+        " Satz vier..."
+      ],
+      "actual_outputs": [
+        "Satz eins.",
+        "Satz zwei!",
+        "Satz drei?",
+        "Satz vier..."
+      ],
+      "expected_outputs": [
+        "Satz eins.",
+        "Satz zwei!",
+        "Satz drei?",
+        "Satz vier..."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Sentence Continuation",
+      "segments": [
+        "Dies ist ein Satz,",
+        " der \u00fcber mehrere Segmente",
+        " verteilt ist."
+      ],
+      "actual_outputs": [
+        "Dies ist ein Satz, der \u00fcber mehrere Segmente verteilt ist."
+      ],
+      "expected_outputs": [
+        "Dies ist ein Satz, der \u00fcber mehrere Segmente verteilt ist."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Overlapping Segments",
+      "segments": [
+        "Dies ist ein",
+        "ist ein Test",
+        "ein Test f\u00fcr",
+        "Test f\u00fcr \u00fcberlappende",
+        "\u00fcberlappende Segmente."
+      ],
+      "actual_outputs": [
+        "Dies ist ein Test f\u00fcr \u00fcberlappende Segmente."
+      ],
+      "expected_outputs": [
+        "Dies ist ein Test f\u00fcr \u00fcberlappende Segmente."
+      ],
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "Special Characters",
+      "segments": [
+        "Text mit $%&\u00a7 Sonderzeichen",
+        " und Zahlen 123."
+      ],
+      "actual_outputs": [
+        "Text mit $%&\u00a7 Sonderzeichen und Zahlen 123."
+      ],
+      "expected_outputs": [
+        "Text mit $%&\u00a7 Sonderzeichen und Zahlen 123."
+      ],
+      "passed": true,
+      "details": []
+    }
+  ],
+  "summary": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0
+  }
+}
