@@ -40,10 +40,14 @@ chat protocols/
 # Project specific
 client_debug.log
 practical_files.txt
-t*
+# Specific temporary files that start with t, but not the tests directory
+t*.tmp
+t*.log
+t*.bak
 
 # Keep in Git but ignore changes
 Backup/
 
 # Temporary files
 commit_msg.txt
+readme_commit_msg.txt
