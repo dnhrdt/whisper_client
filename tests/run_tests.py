@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Simplified Test Runner
-Version: 1.0
-Timestamp: 2025-02-27 13:25 CET
+Version: 1.1
+Timestamp: 2025-02-28 19:58 CET
 
 This script provides a minimal test runner that supports running tests by category
 while maintaining essential timing test functionality. It follows the project's
@@ -88,14 +88,23 @@ class TestRunner:
     
     def run_integration_tests(self) -> None:
         """Run integration tests."""
-        from tests.integration.test_text_processing import run_tests as run_text_tests
+        from tests.integration.test_text_processing import run_basic_tests, run_edge_case_tests, run_integration_tests
         from tests.integration.test_prompt_output import test_prompt_output
+        from tests.integration.test_sendmessage_api import test_sendmessage_api
         
         self.start_test_suite("integration")
         
         # Run integration tests
-        self.run_test("Text Processing", run_text_tests)
-        self.run_test("Prompt Output", test_prompt_output)
+        self.run_test("Text Processing - Basic Tests", run_basic_tests)
+        self.run_test("Text Processing - Edge Cases", run_edge_case_tests)
+        
+        # Skip UI tests if running in CI/CD environment
+        if "--no-ui" not in sys.argv:
+            self.run_test("Text Processing - Integration", run_integration_tests)
+            self.run_test("SendMessage API", test_sendmessage_api)
+            self.run_test("Prompt Output", test_prompt_output)
+        else:
+            print("Skipping UI tests (--no-ui flag detected)")
         
         self.end_test_suite()
     
@@ -117,6 +126,11 @@ def main() -> None:
         "--verbose", "-v",
         action="store_true",
         help="Enable verbose output"
+    )
+    parser.add_argument(
+        "--no-ui",
+        action="store_true",
+        help="Skip tests that require UI interaction (for CI/CD environments)"
     )
     
     args = parser.parse_args()

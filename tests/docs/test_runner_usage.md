@@ -1,6 +1,6 @@
 # Test Runner Usage Guide
-Version: 1.0
-Timestamp: 2025-02-27 13:29 CET
+Version: 1.1
+Timestamp: 2025-02-28 19:58 CET
 
 ## Overview
 The WhisperClient test runner provides a simplified way to execute tests by category while maintaining essential timing test functionality. It follows the project's core testing philosophy: "The test framework is a tool, not a deliverable".
@@ -28,6 +28,13 @@ Add the `-v` or `--verbose` flag for detailed logging:
 python run_tests.py timing -v
 ```
 
+### Skipping UI Tests
+For automated testing environments (CI/CD pipelines), use the `--no-ui` flag to skip tests that require user interaction:
+```bash
+python run_tests.py integration --no-ui
+```
+This will skip tests that require an active window, such as SendMessage API tests.
+
 ## Test Categories
 
 ### 1. Timing Tests (Priority 1)
@@ -39,8 +46,13 @@ Tests focused on timing and server communication:
 
 ### 2. Integration Tests (Priority 2)
 Tests for text processing and output:
-- Text Processing
+- Text Processing - Basic Tests
+- Text Processing - Edge Cases
+- Text Processing - Integration
+- SendMessage API
 - Prompt Output
+
+For detailed information about the text processing tests, see [text_processing_tests.md](text_processing_tests.md).
 
 ### 3. Speech Tests (Priority 3)
 Speech recognition tests (to be implemented)
@@ -53,8 +65,9 @@ Speech recognition tests (to be implemented)
 - Network connectivity required
 
 ### For Integration Tests
-- No external dependencies
-- Can run offline
+- Basic tests and edge cases: No external dependencies, can run offline
+- Integration tests: Require an active window for SendMessage API testing
+- Use `--no-ui` flag to skip tests requiring UI interaction
 
 ### For Speech Tests
 - To be determined during implementation
