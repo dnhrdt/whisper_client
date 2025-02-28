@@ -258,6 +258,17 @@ refactor(timing): timing parameters centralized
 4. Focus on relevant issues
 5. Better use of version control
 
+### Commit Message Guidelines
+1. **Prefer Direct Commit Messages**
+   - Use `git commit -m "message"` for simple commits
+   - For multi-line messages, use `git commit` (without -m) to open editor
+   - Avoid creating temporary files for commit messages
+
+2. **When Files Are Necessary**
+   - Only use files for complex commit messages when absolutely necessary
+   - ALWAYS clean up temporary message files immediately after use
+   - Add temporary message files to .gitignore (e.g., *commit_msg.txt)
+
 ## Audio Processing Patterns
 
 ### Proof-of-Concept Results
