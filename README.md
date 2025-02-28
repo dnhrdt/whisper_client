@@ -14,7 +14,7 @@ A Python-based client for real-time speech recognition using WhisperLive.
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/whisper_client.git
+git clone https://github.com/dnhrdt/whisper_client.git
 cd whisper_client
 
 # Create virtual environment
@@ -128,4 +128,3 @@ We welcome contributions! Current focus areas:
 
 - GitHub Issues for bugs and features
 - Discussions for questions and ideas
-- [Regression Investigation Log](docs/investigations/regression_20250214.md) for known issues
