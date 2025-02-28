@@ -1,6 +1,6 @@
 # Active Development Context
-Version: 2.7
-Timestamp: 2025-02-28 22:45 CET
+Version: 2.8
+Timestamp: 2025-02-28 23:17 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
@@ -49,8 +49,31 @@ Note: Historical investigation files and backups maintained in original German f
 
 ## Current Focus
 
-### 1. Text Processing Validation
-- Comprehensive test framework implemented
+### 1. Audio Processing with Tumbling Window
+- Tumbling Window implementation completed ✓
+  * Based on successful proof-of-concept (130ms average latency)
+  * Configurable window size and overlap
+  * Linear crossfading for smooth transitions
+  * Thread-safe implementation
+  * Comprehensive unit tests
+  * Integration with AudioProcessor class
+  * Configuration options in config.py
+- AudioProcessor class implemented ✓
+  * Thread-safe queue-based processing
+  * Integration with TumblingWindow
+  * Support for test mode
+  * Clean start/stop functionality
+- Documentation created
+  * Detailed implementation in src/audio.py
+  * Configuration options in config.py
+  * Integration tests in tests/integration/test_tumbling_window.py
+- Next steps:
+  * Integrate with WebSocket client
+  * Optimize performance for production use
+  * Add additional audio processing features
+
+### 2. Text Processing Validation
+- Comprehensive test framework implemented ✓
   * Basic tests for core functionality
   * Edge case tests for unusual scenarios
   * Integration tests with SendMessage API
@@ -65,14 +88,14 @@ Note: Historical investigation files and backups maintained in original German f
   * Integration with existing text processing
   * Fixed issues with segment ordering in get_recent_segments
   * Optimized duplicate detection for longer texts
-- Documentation created
+- Documentation created ✓
   * Detailed usage guide in tests/docs/text_processing_tests.md
   * Updated test runner documentation
 - Next steps:
   * Extend tests as needed for new features
   * Improve handling of complex language patterns
 
-### 2. Research & Investigation
+### 3. Research & Investigation
 - WhisperLive Server Research
   * Better understanding of output format
   * Parameter documentation needed
@@ -90,7 +113,7 @@ Note: Historical investigation files and backups maintained in original German f
   * Implementation patterns
   * Best practices extraction
 
-### 2. Test Framework Progress ✓
+### 4. Test Framework Progress ✓
 - Simplified Test Runner Complete
   * Basic category support implemented
   * Essential functionality preserved
@@ -107,7 +130,7 @@ Note: Historical investigation files and backups maintained in original German f
   * Focus on solving specific problems
   * Avoid premature optimization
 
-### 2. Test Structure Progress
+### 5. Test Structure Progress
 - Documentation Structure ✓
   * /docs/testing/ directory created
   * All test docs moved and updated
@@ -128,7 +151,7 @@ Note: Historical investigation files and backups maintained in original German f
   * speech_tests.md
   * migration_roadmap.md
 
-### 3. Completed Migration Tasks
+### 6. Completed Migration Tasks
 - Test inventory created and gaps identified
 - Files migrated to new structure
 - POC integration planned
@@ -138,7 +161,7 @@ Note: Historical investigation files and backups maintained in original German f
   * Test output messages in English
   * German speech test cases preserved
 
-### 4. Completed Migration Tasks
+### 7. Completed Migration Tasks
 - Test inventory created and gaps identified
 - Files migrated to new structure
 - POC integration planned
@@ -154,7 +177,7 @@ Note: Historical investigation files and backups maintained in original German f
 - Documented test runner usage ✓
 - Verified migrated tests ✓
 
-### 5. Core Stability
+### 8. Core Stability
 - Server Communication
   * Buffer size optimization needed
   * Processing triggers not documented
@@ -173,7 +196,7 @@ Note: Historical investigation files and backups maintained in original German f
   * Automatic fallback to clipboard if SendMessage fails
   * VS Code-specific optimizations added
 
-### 6. Phase 1 Implementation
+### 9. Phase 1 Implementation
 - END_OF_AUDIO Signal [planned]
   * Clean connection termination
   * Signal handling in cleanup
@@ -184,7 +207,7 @@ Note: Historical investigation files and backups maintained in original German f
   * TensorRT support groundwork
   * Flexible backend switching
 
-### 7. Performance Research
+### 10. Performance Research
 - Analyzing server parameters (see [T123] in log_001.json)
 - Understanding batch processing strategy
 - Buffer size optimization needed
@@ -193,7 +216,7 @@ Note: Historical investigation files and backups maintained in original German f
   * Processing triggers not documented
   * Batch processing strategy unclear
 
-### 8. Documentation & Structure
+### 11. Documentation & Structure
 - Memory Bank migration completed and committed
 - Documentation hierarchy established
 - Line ending consistency implemented via .gitattributes
@@ -207,7 +230,7 @@ Note: Historical investigation files and backups maintained in original German f
   * German speech test cases preserved
 - Current status: Test migration must complete before further development
 
-### 9. Test Framework
+### 12. Test Framework
 - Test documentation structure complete
 - Directory structure established:
   * /tests/timing/ (Priority 1)
@@ -218,6 +241,16 @@ Note: Historical investigation files and backups maintained in original German f
 - Latest changes: See [T125] in log_001.json
 
 ## Recent Changes
+
+### Audio Processing Updates
+- Tumbling Window implementation completed [T135]
+  * Based on successful proof-of-concept (130ms average latency)
+  * Configurable window size and overlap
+  * Linear crossfading for smooth transitions
+  * Thread-safe implementation
+  * Comprehensive unit tests
+  * Integration with AudioProcessor class
+  * Configuration options in config.py
 
 ### Test Framework Updates
 - Text processing validation framework implemented [T130]
@@ -253,12 +286,13 @@ Note: Historical investigation files and backups maintained in original German f
 ## Active Work
 
 ### Immediate Tasks
-1. Extend text processing tests for new features
-2. Begin work on Tumbling Window implementation for audio processing
-3. Improve server communication stability
-4. Document server parameters
-5. Adjust client timing
-6. Logging system integration
+1. Integrate Tumbling Window with WebSocket client
+2. Optimize Tumbling Window performance for production
+3. Extend text processing tests for new features
+4. Improve server communication stability
+5. Document server parameters
+6. Adjust client timing
+7. Logging system integration
 
 ### Required Decisions
 - GUI development timeline
@@ -314,6 +348,11 @@ Note: Historical investigation files and backups maintained in original German f
 - AI: Implementation and documentation
 - Shared: Problem analysis and solution design
 
+### Development Reminders
+- Always use `git commit -m "message"` for commits
+- NEVER create temporary files for commit messages
+- For complex messages, open editor with `git commit` (without -m)
+
 ## Development Log References
 - Current increment: logs/increments/log_004.json
 - Recent major changes: logs/main.json
@@ -327,9 +366,9 @@ Note: Historical investigation files and backups maintained in original German f
 Note: Task IDs [Txxx] reference specific entries in development logs
 
 ## Next Steps
-1. Commit and push memory-based buffering implementation
-2. Extend text processing tests for new features
-3. Begin work on Tumbling Window implementation for audio processing
+1. Integrate Tumbling Window with WebSocket client
+2. Optimize Tumbling Window performance for production
+3. Extend text processing tests for new features
 4. Improve server communication stability
 5. Document server parameters
 

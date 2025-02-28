@@ -91,12 +91,17 @@ class TestRunner:
         from tests.integration.test_text_processing import run_basic_tests, run_edge_case_tests, run_integration_tests
         from tests.integration.test_prompt_output import test_prompt_output
         from tests.integration.test_sendmessage_api import test_sendmessage_api
+        import tests.integration.test_text_buffer
+        import tests.integration.test_tumbling_window
+        import unittest
         
         self.start_test_suite("integration")
         
         # Run integration tests
         self.run_test("Text Processing - Basic Tests", run_basic_tests)
         self.run_test("Text Processing - Edge Cases", run_edge_case_tests)
+        self.run_test("Text Buffer", lambda: unittest.TextTestRunner().run(unittest.defaultTestLoader.loadTestsFromModule(tests.integration.test_text_buffer)))
+        self.run_test("Tumbling Window", lambda: unittest.TextTestRunner().run(unittest.defaultTestLoader.loadTestsFromModule(tests.integration.test_tumbling_window)))
         
         # Skip UI tests if running in CI/CD environment
         if "--no-ui" not in sys.argv:

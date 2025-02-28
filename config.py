@@ -49,6 +49,8 @@ HOTKEY_SHUTDOWN_WAIT = ERROR_DELAY     # Wait time for hotkey shutdown
 # Text Processing
 MIN_OUTPUT_INTERVAL = BASE_WAIT * 0.5  # Minimum interval between outputs
 MAX_SENTENCE_WAIT = BASE_TIMEOUT       # Maximum wait time for sentence end
+TEXT_BUFFER_SIZE = 1024                # Maximum number of text segments in buffer
+TEXT_BUFFER_MAX_AGE = 60.0             # Maximum age of text segments in buffer (seconds)
 
 # Terminal Management
 TERMINAL_INACTIVITY_TIMEOUT = 300      # Timeout for inactive terminals (5 minutes)
@@ -70,6 +72,10 @@ AUDIO_CHANNELS = 1
 AUDIO_RATE = 16000
 AUDIO_DEVICE_INDEX = 1  # Poly BT700 index
 AUDIO_BUFFER_SECONDS = 1.0  # Seconds of audio per buffer
+
+# Tumbling Window Settings
+TUMBLING_WINDOW_SIZE = 2048  # Window size in samples
+TUMBLING_WINDOW_OVERLAP = 0.25  # Overlap between windows (0.0 - 1.0)
 
 # Whisper Settings
 WHISPER_LANGUAGE = "de"
