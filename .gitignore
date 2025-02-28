@@ -45,6 +45,9 @@ t*.tmp
 t*.log
 t*.bak
 
+# Test results
+tests/results/*.json
+
 # Keep in Git but ignore changes
 Backup/
 
