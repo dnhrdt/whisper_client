@@ -1,11 +1,27 @@
 # Active Development Context
-Version: 3.0
-Timestamp: 2025-02-28 23:34 CET
+Version: 3.5
+Timestamp: 2025-03-01 19:52 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
 
 ## Recent Updates
+- WebSocket protocol documentation created [T141]
+  * Documented connection states and state transitions
+  * Described message formats for client-to-server and server-to-client communication
+  * Documented connection flow and reconnection strategy
+  * Described END_OF_AUDIO handling
+  * Documented thread safety considerations
+  * Listed known issues and next steps for protocol improvement
+- Connection state tracking system implemented [T140]
+  * Created ConnectionState enum with all possible connection states
+  * Added _set_state method for proper state transition tracking
+  * Implemented thread-safe state changes with connection_lock
+  * Added detailed logging for state transitions
+  * Updated all methods to use state-based checks instead of boolean flags
+  * Added support for END_OF_AUDIO_RECEIVED acknowledgment
+  * Improved error handling with specific error states
+  * Updated main.py to work with the new state-based approach
 - Integration test created for Tumbling Window with WebSocket client [T138]
   * Created test_tumbling_window_websocket.py in tests/integration
   * Implemented tests for audio flow from AudioProcessor to WebSocket
@@ -59,6 +75,46 @@ This file serves as the source of truth for current development state and recent
 Note: Historical investigation files and backups maintained in original German for reference purposes.
 
 ## Current Focus
+
+### 0. Revised Development Approach
+We have adopted a phased approach to development:
+
+#### Phase 1: Server Communication Stability & Documentation
+- Improve server communication stability
+  * Investigate internal buffer size uncertainties
+  * Address connection stability issues, including:
+    - Multiple parallel connections
+    - Connection closures during processing
+  * Implement handling of END_OF_AUDIO signal
+  * Add proper cleanup and resource management
+  * Implement more robust error handling and recovery mechanisms
+  * Add proper connection state tracking with detailed logging
+- Document server parameters
+  * Create comprehensive documentation of WhisperLive server parameters
+  * Document WebSocket message format and protocol details
+  * Clarify processing triggers and batch processing approach
+  * Document the server's internal buffer handling
+  * Investigate and address the issue of the server continuing to process after END_OF_AUDIO
+
+#### Phase 2: Real-Life Testing
+- Conduct tests with microphone to verify functionality in real-world conditions
+- Identify any issues or edge cases not caught in automated testing
+- Document any unexpected behaviors or performance issues
+- Address critical issues immediately
+
+#### Phase 3: Alpha Release
+- Create a versioned alpha release with proper documentation
+- Include setup instructions and known limitations
+- Document the current state of functionality and stability
+- Establish a baseline for future improvements
+
+#### Phase 4: Optimization
+- Focus on Tumbling Window performance optimization
+- Improve latency (currently 130ms average)
+- Optimize memory usage and processing efficiency
+- Refine thread synchronization and buffer management
+
+This approach ensures we have a solid, stable foundation before investing time in optimization. It also allows us to discover real-world issues through testing that might inform both our stability improvements and later optimization efforts.
 
 ### 1. Audio Processing with Tumbling Window
 - Tumbling Window implementation completed ✓
@@ -176,16 +232,6 @@ Note: Historical investigation files and backups maintained in original German f
   * German docstrings preserved
   * Test output messages in English
   * German speech test cases preserved
-
-### 7. Completed Migration Tasks
-- Test inventory created and gaps identified
-- Files migrated to new structure
-- POC integration planned
-- Language standardization complete:
-  * Documentation in English
-  * German docstrings preserved
-  * Test output messages in English
-  * German speech test cases preserved
 - Created simplified test runner ✓
   * Basic category support implemented
   * Essential timing test functionality preserved
@@ -193,18 +239,33 @@ Note: Historical investigation files and backups maintained in original German f
 - Documented test runner usage ✓
 - Verified migrated tests ✓
 
-### 8. Core Stability
-- Server Communication
+### 7. Core Stability & Phase 1 Implementation
+- Server Communication (Phase 1 focus)
   * Buffer size optimization needed
   * Processing triggers not documented
   * Batch processing unclear
   * Connection stability improvement
+  * Connection state tracking implemented ✓
+    - State machine with 11 distinct states
+    - Thread-safe state transitions
+    - Detailed logging of state changes
+    - Proper error state handling
+  * END_OF_AUDIO Signal implementation ✓
+    - Clean connection termination
+    - Signal handling in cleanup
+    - Support for server acknowledgment
+  * Server-Ready-Check implementation [planned]
+    - Connection stability improvement
+    - Pre-recording validation
+  * More robust error handling and recovery mechanisms ✓
+    - Specific error states for different failure modes
+    - Improved cleanup and resource management
 
 - Audio Processing
   * Tumbling Window validated (130ms latency)
   * Queue-based management planned
   * Audio segmentation in design
-  * Performance optimization pending
+  * Performance optimization pending (Phase 4)
 
 - Text Output
   * Windows SendMessage API implemented ✓
@@ -212,27 +273,12 @@ Note: Historical investigation files and backups maintained in original German f
   * Automatic fallback to clipboard if SendMessage fails
   * VS Code-specific optimizations added
 
-### 9. Phase 1 Implementation
-- END_OF_AUDIO Signal [planned]
-  * Clean connection termination
-  * Signal handling in cleanup
-- Server-Ready-Check [planned]
-  * Connection stability improvement
-  * Pre-recording validation
-- Backend configuration preparation
+- Backend Configuration (Phase 1 preparation)
   * TensorRT support groundwork
   * Flexible backend switching
+  * Documentation of server parameters [planned]
 
-### 10. Performance Research
-- Analyzing server parameters (see [T123] in log_001.json)
-- Understanding batch processing strategy
-- Buffer size optimization needed
-- Current blocker: Server communication uncertainties
-  * Internal server buffer size unknown
-  * Processing triggers not documented
-  * Batch processing strategy unclear
-
-### 11. Documentation & Structure
+### 8. Documentation & Structure
 - Memory Bank migration completed and committed
 - Documentation hierarchy established
 - Line ending consistency implemented via .gitattributes
@@ -244,9 +290,9 @@ Note: Historical investigation files and backups maintained in original German f
   * German docstrings preserved in code
   * Test output messages in English
   * German speech test cases preserved
-- Current status: Test migration must complete before further development
+- Current status: Test migration is completed
 
-### 12. Test Framework
+### 9. Test Framework
 - Test documentation structure complete
 - Directory structure established:
   * /tests/timing/ (Priority 1)
@@ -326,9 +372,7 @@ Note: Historical investigation files and backups maintained in original German f
 - Feature priority post-stability
 
 ### Blocking Issues
-- Test migration must complete before further development
-- See migration_roadmap.md for completion criteria
-- Server communication uncertainties
+- Server communication uncertainties (Phase 1 focus)
 - Audio timing problems [T120]
 - Text processing stability issues
 - Current investigation in docs/investigations/timing_202502.md
@@ -391,11 +435,21 @@ Note: Historical investigation files and backups maintained in original German f
 
 Note: Task IDs [Txxx] reference specific entries in development logs
 
-## Next Steps
-1. Run the integration tests to verify functionality
-2. Optimize Tumbling Window performance for production
-3. Extend text processing tests for new features
-4. Improve server communication stability
-5. Document server parameters
+## Next Steps (Aligned with Phase 1)
+1. Improve server communication stability
+   * Implement handling of END_OF_AUDIO signal
+   * Add proper cleanup and resource management
+   * Implement more robust error handling and recovery
+   * Add proper connection state tracking with detailed logging
+
+2. Document server parameters
+   * Create comprehensive documentation of WhisperLive server parameters
+   * Document WebSocket message format and protocol details
+   * Clarify processing triggers and batch processing approach
+   * Document the server's internal buffer handling
+
+3. Run integration tests to verify current functionality
+4. Extend text processing tests for new features
+5. Prepare for Phase 2 (Real-Life Testing)
 
 Note: Development will be guided by research findings. The test framework will evolve naturally as specific needs arise during development.

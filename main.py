@@ -1,7 +1,7 @@
 """
 Main Program for the Whisper Client
-Version: 1.1
-Timestamp: 2025-02-28 23:25 CET
+Version: 1.2
+Timestamp: 2025-03-01 19:46 CET
 
 This is the main entry point for the Whisper Client application.
 It initializes all components, manages the application lifecycle,
@@ -13,7 +13,7 @@ import websocket
 import config
 import uuid
 from src.audio import AudioManager, AudioProcessor
-from src.websocket import WhisperWebSocket
+from src.websocket import WhisperWebSocket, ConnectionState
 from src.text import TextManager
 from src.utils import check_server_status, show_startup_message, show_server_error, update_task_history
 from src.hotkeys import HotkeyManager
@@ -68,7 +68,7 @@ class WhisperClient:
         # Hauptschleife
         try:
             while self.running:
-                if not self.websocket.connected and self.running:
+                if self.websocket.state == ConnectionState.DISCONNECTED and self.running:
                     try:
                         self.websocket.connect()
                     except:
@@ -89,7 +89,7 @@ class WhisperClient:
     def toggle_recording(self):
         """Start/stop recording"""
         if not self.audio_manager.recording:
-            if not self.websocket.connected:
+            if self.websocket.state != ConnectionState.READY:
                 logger.error("⚠️ No connection to server")
                 return
             # Aktiviere Verarbeitung und starte Aufnahme

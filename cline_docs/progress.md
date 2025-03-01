@@ -1,11 +1,45 @@
 # Development Progress
-Version: 2.9
-Timestamp: 2025-02-28 23:34 CET
+Version: 3.2
+Timestamp: 2025-03-01 19:53 CET
 
 ## Current Focus: Audio Processing with Tumbling Window
 
 ### Recently Completed
-1. **Integration Test for Tumbling Window with WebSocket Client** ✓
+1. **WebSocket Protocol Documentation** ✓
+   - Documentation Content
+     * Documented connection states and state transitions
+     * Described message formats for client-to-server and server-to-client communication
+     * Documented connection flow and reconnection strategy
+     * Described END_OF_AUDIO handling
+     * Documented thread safety considerations
+   - Known Issues and Improvements
+     * Listed known issues with server communication
+     * Documented next steps for protocol improvement
+     * Provided guidance for future development
+   - Task History
+     * Created log entry with documentation details [T141]
+     * Updated Memory Bank documentation
+
+2. **Connection State Tracking System** ✓
+   - Core Implementation
+     * Created ConnectionState enum with 11 distinct states
+     * Added _set_state method for proper state transition tracking
+     * Implemented thread-safe state changes with connection_lock
+     * Added detailed logging for state transitions
+   - WebSocket Integration
+     * Updated all methods to use state-based checks
+     * Added support for END_OF_AUDIO_RECEIVED acknowledgment
+     * Improved error handling with specific error states
+     * Enhanced cleanup and resource management
+   - Main Program Integration
+     * Updated main.py to work with the new state-based approach
+     * Fixed reconnection logic to use state machine
+     * Improved error handling and recovery
+   - Task History
+     * Created log entry with implementation details [T140]
+     * Updated Memory Bank documentation
+
+2. **Integration Test for Tumbling Window with WebSocket Client** ✓
    - Test Implementation
      * Created test_tumbling_window_websocket.py in tests/integration
      * Implemented tests for audio flow from AudioProcessor to WebSocket
@@ -137,11 +171,46 @@ Timestamp: 2025-02-28 23:34 CET
    - Error handling patterns
 
 ### Current Tasks
+
+0. **Revised Development Approach**
+   - Phase 1: Server Communication Stability & Documentation
+     * Improve server communication stability
+       - Investigate internal buffer size uncertainties
+       - Address connection stability issues, including:
+         - Multiple parallel connections
+         - Connection closures during processing
+       - [x] Implement handling of END_OF_AUDIO signal [T140]
+       - [x] Add proper cleanup and resource management [T140]
+       - [x] Implement more robust error handling and recovery mechanisms [T140]
+       - [x] Add proper connection state tracking with detailed logging [T140]
+     * Document server parameters
+       - Create comprehensive documentation of WhisperLive server parameters
+       - [x] Document WebSocket message format and protocol details [T141]
+       - Clarify processing triggers and batch processing approach
+       - Document the server's internal buffer handling
+       - Investigate and address the issue of the server continuing to process after END_OF_AUDIO
+   - Phase 2: Real-Life Testing
+     * Conduct tests with microphone to verify functionality in real-world conditions
+     * Identify any issues or edge cases not caught in automated testing
+     * Document any unexpected behaviors or performance issues
+     * Address critical issues immediately
+   - Phase 3: Alpha Release
+     * Create a versioned alpha release with proper documentation
+     * Include setup instructions and known limitations
+     * Document the current state of functionality and stability
+     * Establish a baseline for future improvements
+   - Phase 4: Optimization
+     * Focus on Tumbling Window performance optimization
+     * Improve latency (currently 130ms average)
+     * Optimize memory usage and processing efficiency
+     * Refine thread synchronization and buffer management
+
 1. **Audio Processing with Tumbling Window**
    - [x] Implement Tumbling Window for audio processing [T135]
      * Based on successful proof-of-concept (130ms average latency)
      * Configurable window size and overlap
      * Linear crossfading for smooth transitions
+     * Efficient buffer management
      * Thread-safe implementation
      * Comprehensive unit tests
    - [x] Create AudioProcessor class for integration
@@ -245,11 +314,21 @@ Timestamp: 2025-02-28 23:34 CET
 - Major: logs/main.json
 - History: logs/archive/2025_Q1.json
 
-## Next Steps
-1. Run the integration tests to verify functionality
-2. Optimize Tumbling Window performance for production
-3. Extend text processing tests for new features
-4. Improve server communication stability
-5. Document server parameters
+## Next Steps (Aligned with Phase 1)
+1. Continue improving server communication stability
+   * Address multiple parallel connections issue
+   * Investigate and fix connection closures during processing
+   * Test the improved connection state tracking system
+   * Investigate the issue of server continuing to process after END_OF_AUDIO
+
+2. Continue documenting server parameters
+   * Create comprehensive documentation of WhisperLive server parameters
+   * ✓ Document WebSocket message format and protocol details
+   * Clarify processing triggers and batch processing approach
+   * Document the server's internal buffer handling
+
+3. Run integration tests to verify current functionality
+4. Extend text processing tests for new features
+5. Prepare for Phase 2 (Real-Life Testing)
 
 Note: Development will be guided by research findings. The test framework will evolve naturally as specific needs arise during development.

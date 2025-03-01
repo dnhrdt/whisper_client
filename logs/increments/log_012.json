@@ -1,0 +1,37 @@
+{
+  "timestamp": "2025-03-01T19:47:00+01:00",
+  "version": "0.9.3",
+  "author": "Cline",
+  "title": "Improved Connection State Tracking",
+  "description": "Implemented proper connection state tracking to address server communication issues",
+  "changes": [
+    {
+      "id": "T140",
+      "type": "feat",
+      "component": "websocket",
+      "title": "Connection state tracking system",
+      "description": "Implemented a robust connection state tracking system to improve server communication stability",
+      "details": [
+        "Created ConnectionState enum with all possible connection states",
+        "Added _set_state method for proper state transition tracking",
+        "Implemented thread-safe state changes with connection_lock",
+        "Added detailed logging for state transitions",
+        "Updated all methods to use state-based checks instead of boolean flags",
+        "Added support for END_OF_AUDIO_RECEIVED acknowledgment",
+        "Improved error handling with specific error states",
+        "Updated main.py to work with the new state-based approach"
+      ],
+      "files": [
+        "src/websocket.py",
+        "main.py"
+      ],
+      "status": "completed"
+    }
+  ],
+  "next_steps": [
+    "Test the improved connection state tracking system",
+    "Document the server parameters based on observed behavior",
+    "Implement handling of multiple parallel connections",
+    "Add proper cleanup and resource management"
+  ]
+}

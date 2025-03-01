@@ -1,7 +1,7 @@
 """
 WebSocket Communication Module for the Whisper Client (Simplified Version)
-Version: 1.0
-Timestamp: 2025-02-27 17:12 CET
+Version: 1.1
+Timestamp: 2025-03-01 19:45 CET
 
 This module handles WebSocket communication with the WhisperLive server.
 It provides functionality for establishing connections, sending audio data,
@@ -12,25 +12,48 @@ import threading
 import time
 import uuid
 import websocket
+import enum
 import win32clipboard
 import config
 from src import logger
 from src.logging import log_connection, log_audio, log_text, log_error
+
+class ConnectionState(enum.Enum):
+    """Enum for WebSocket connection states"""
+    DISCONNECTED = 0
+    CONNECTING = 1
+    CONNECTED = 2
+    READY = 3
+    PROCESSING = 4
+    FINALIZING = 5
+    CLOSING = 6
+    CLOSED = 7
+    CONNECT_ERROR = 8
+    PROCESSING_ERROR = 9
+    TIMEOUT_ERROR = 10
 
 class WhisperWebSocket:
     def __init__(self):
         self.uid = str(uuid.uuid4())
         self.ws = None
         self.ws_thread = None
-        self.connected = False
+        self.state = ConnectionState.DISCONNECTED
         self.server_ready = False
         self.on_text_callback = None
         self.processing_enabled = True
         self.current_text = ""  # Stores the current text
+        self.connection_lock = threading.Lock()  # Lock for thread-safe state changes
+    
+    def _set_state(self, new_state):
+        """Sets the connection state and logs the transition"""
+        with self.connection_lock:
+            old_state = self.state
+            self.state = new_state
+            log_connection(logger, f"State changed: {old_state.name} -> {new_state.name}")
     
     def connect(self, max_retries=3):
         """Establish WebSocket connection"""
-        if self.connected and self.ws and self.ws.sock and self.ws.sock.connected:
+        if self.state in [ConnectionState.CONNECTED, ConnectionState.READY, ConnectionState.PROCESSING] and self.ws and self.ws.sock and self.ws.sock.connected:
             log_connection(logger, "Already connected")
             return True
             
@@ -47,6 +70,7 @@ class WhisperWebSocket:
                     self.ws = None
                     self.ws_thread = None
                 
+                self._set_state(ConnectionState.CONNECTING)
                 log_connection(logger, f"Connecting to server: {config.WS_URL}")
                 self.ws = websocket.WebSocketApp(
                     config.WS_URL,
@@ -65,7 +89,7 @@ class WhisperWebSocket:
                         raise TimeoutError("Connection timeout")
                     time.sleep(config.WS_POLL_INTERVAL)
                 
-                self.connected = True
+                self._set_state(ConnectionState.CONNECTED)
                 self.processing_enabled = True
                 
                 log_connection(logger, "Waiting for server ready signal...")
@@ -79,7 +103,7 @@ class WhisperWebSocket:
                     
             except Exception as e:
                 retry_count += 1
-                self.connected = False
+                self._set_state(ConnectionState.CONNECT_ERROR)
                 self.server_ready = False
                 
                 if retry_count < max_retries:
@@ -94,7 +118,7 @@ class WhisperWebSocket:
     
     def _on_open(self, ws):
         """Callback when WebSocket connection is opened"""
-        log_connection(logger, "Connected to server")
+        self._set_state(ConnectionState.CONNECTED)
         try:
             ws_config = {
                 "uid": self.uid,
@@ -108,6 +132,7 @@ class WhisperWebSocket:
             ws.send(json_str, websocket.ABNF.OPCODE_TEXT)
         except Exception as e:
             log_error(logger, f"Error sending config: {str(e)}")
+            self._set_state(ConnectionState.CONNECT_ERROR)
     
     def _on_message(self, ws, message):
         """Callback for incoming server messages"""
@@ -124,7 +149,11 @@ class WhisperWebSocket:
             if "message" in data:
                 if data["message"] == "SERVER_READY":
                     self.server_ready = True
-                    log_connection(logger, "Server ready")
+                    self._set_state(ConnectionState.READY)
+                    return
+                elif data["message"] == "END_OF_AUDIO_RECEIVED":
+                    # Server acknowledges END_OF_AUDIO signal
+                    self._set_state(ConnectionState.FINALIZING)
                     return
             
             if "segments" in data:
@@ -140,20 +169,22 @@ class WhisperWebSocket:
                     
         except Exception as e:
             log_error(logger, f"Error processing message: {str(e)}")
+            self._set_state(ConnectionState.PROCESSING_ERROR)
     
     def _on_error(self, ws, error):
         """Callback for WebSocket errors"""
         log_error(logger, f"Connection error: {str(error)}")
+        self._set_state(ConnectionState.CONNECT_ERROR)
     
     def _on_close(self, ws, close_status_code, close_msg):
         """Callback when WebSocket connection is closed"""
         log_connection(logger, f"Connection closed (Status: {close_status_code}, Message: {close_msg})")
-        self.connected = False
+        self._set_state(ConnectionState.CLOSED)
         self.server_ready = False
     
     def is_ready(self):
         """Checks if the server is ready"""
-        return self.connected and self.server_ready
+        return self.state == ConnectionState.READY
     
     def send_audio(self, audio_data):
         """Sends audio data to the server"""
@@ -166,7 +197,7 @@ class WhisperWebSocket:
             return True
         except Exception as e:
             log_error(logger, f"Error sending audio: {str(e)}")
-            self.connected = False
+            self._set_state(ConnectionState.CONNECT_ERROR)
             return False
     
     def set_text_callback(self, callback):
@@ -175,14 +206,23 @@ class WhisperWebSocket:
     
     def send_end_of_audio(self):
         """Sends END_OF_AUDIO signal to the server"""
-        if not self.is_ready():
+        if not self.is_ready() and self.state != ConnectionState.PROCESSING:
             return False
             
         try:
+            self._set_state(ConnectionState.FINALIZING)
             self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
             log_audio(logger, "Sent END_OF_AUDIO signal")
             log_connection(logger, f"Waiting for final segments ({config.WS_FINAL_WAIT}s)...")
-            time.sleep(config.WS_FINAL_WAIT)
+            
+            # Wait for server to acknowledge END_OF_AUDIO
+            wait_start = time.time()
+            while self.state == ConnectionState.FINALIZING:
+                if time.time() - wait_start > config.WS_FINAL_WAIT:
+                    log_connection(logger, "Final wait timeout reached")
+                    break
+                time.sleep(config.WS_POLL_INTERVAL)
+                
             return True
         except Exception as e:
             log_error(logger, f"Error sending END_OF_AUDIO: {str(e)}")
@@ -192,8 +232,9 @@ class WhisperWebSocket:
         """Stops processing server messages"""
         if self.processing_enabled:
             try:
-                if self.is_ready():
+                if self.is_ready() or self.state == ConnectionState.PROCESSING:
                     # Send END_OF_AUDIO and wait for processing
+                    self._set_state(ConnectionState.FINALIZING)
                     self.ws.send(b"END_OF_AUDIO", websocket.ABNF.OPCODE_BINARY)
                     log_audio(logger, "Sent END_OF_AUDIO signal")
                     
@@ -221,6 +262,7 @@ class WhisperWebSocket:
                     self.current_text = ""
                     
                     # Close connection cleanly
+                    self._set_state(ConnectionState.CLOSING)
                     log_connection(logger, "Closing connection...")
                     self.ws.close()
                     
@@ -232,7 +274,7 @@ class WhisperWebSocket:
                 log_error(logger, f"Error stopping processing: {str(e)}")
             finally:
                 self.processing_enabled = False
-                self.connected = False
+                self._set_state(ConnectionState.CLOSED)
                 self.server_ready = False
     
     def start_processing(self):
@@ -252,6 +294,7 @@ class WhisperWebSocket:
         except Exception as e:
             log_error(logger, f"Could not clear clipboard: {str(e)}")
         
+        self._set_state(ConnectionState.PROCESSING)
         log_connection(logger, "Server message processing enabled")
         return True
     
@@ -264,6 +307,7 @@ class WhisperWebSocket:
             log_connection(logger, "Starting cleanup...")
             self.processing_enabled = False
             if self.ws and self.ws.sock:
+                self._set_state(ConnectionState.CLOSING)
                 self.ws.close()
             if self.ws_thread and self.ws_thread.is_alive():
                 self.ws_thread.join(timeout=config.WS_THREAD_TIMEOUT)
@@ -271,5 +315,5 @@ class WhisperWebSocket:
             log_error(logger, f"Error during cleanup: {str(e)}")
         finally:
             self.ws = None
-            self.connected = False
+            self._set_state(ConnectionState.DISCONNECTED)
             self.server_ready = False

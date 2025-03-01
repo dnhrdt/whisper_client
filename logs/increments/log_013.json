@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-03-01T19:51:00+01:00",
+  "version": "0.9.4",
+  "author": "Cline",
+  "title": "WebSocket Protocol Documentation",
+  "description": "Created comprehensive documentation of the WebSocket protocol used for communication with the WhisperLive server",
+  "changes": [
+    {
+      "id": "T141",
+      "type": "documentation",
+      "component": "websocket",
+      "title": "WebSocket protocol documentation",
+      "description": "Created comprehensive documentation of the WebSocket protocol",
+      "details": [
+        "Documented connection states and state transitions",
+        "Described message formats for client-to-server and server-to-client communication",
+        "Documented connection flow and reconnection strategy",
+        "Described END_OF_AUDIO handling",
+        "Documented thread safety considerations",
+        "Listed known issues and next steps for protocol improvement"
+      ],
+      "files": [
+        "docs/websocket_protocol.md"
+      ],
+      "status": "completed"
+    }
+  ],
+  "next_steps": [
+    "Update the WebSocket message format documentation to include the new protocol details",
+    "Create documentation for server parameters",
+    "Test the improved connection state tracking system",
+    "Address the multiple parallel connections issue"
+  ]
+}
