@@ -1,6 +1,6 @@
 # Active Development Context
-Version: 3.5
-Timestamp: 2025-03-01 19:52 CET
+Version: 3.6
+Timestamp: 2025-03-01 20:56 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
@@ -303,6 +303,13 @@ This approach ensures we have a solid, stable foundation before investing time i
 - Latest changes: See [T125] in log_001.json
 
 ## Recent Changes
+
+### Memory Bank Updates
+- Memory Bank workflow enhanced with tab closing step [T142]
+  * Added 'Memory Bank Update Completion' section to systemPatterns.md
+  * Documented the process of closing all tabs after Memory Bank update
+  * Added step to request user to use 'Auto Close Tabs: Close as many tabs as possible'
+  * Emphasized the importance of a clean slate for the next session
 
 ### Audio Processing Updates
 - Integration test created for Tumbling Window with WebSocket client [T138]

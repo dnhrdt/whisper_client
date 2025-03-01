@@ -1,6 +1,6 @@
 # System Architecture & Patterns
-Version: 1.8
-Timestamp: 2025-02-28 19:19 CET
+Version: 1.9
+Timestamp: 2025-03-01 20:53 CET
 
 ## Document Purpose
 This document outlines how the system is built, key technical decisions, architectural patterns, and development philosophies used throughout the WhisperClient project.
@@ -75,7 +75,15 @@ This axiom guides our testing approach:
    - Skipping Memory Bank leads to errors
    - Example: Task exploration before Memory Bank check can lead to misaligned solutions
 
-4. **Memory Bank First Pattern**
+4. **Memory Bank Update Completion**
+   - After updating all Memory Bank files
+   - Before finalizing the session
+   - Request user to close all tabs using "Auto Close Tabs: Close as many tabs as possible"
+   - Wait for confirmation that tabs are closed
+   - This ensures a clean slate for the next session
+   - Prevents distraction from open tabs in the next session
+
+5. **Memory Bank First Pattern**
    ```mermaid
    flowchart TD
        A[New Task] --> B[Check Memory Bank]
