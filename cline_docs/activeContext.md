@@ -1,11 +1,20 @@
 # Active Development Context
-Version: 3.6
-Timestamp: 2025-03-01 20:56 CET
+Version: 3.7
+Timestamp: 2025-03-01 21:24 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
 
 ## Recent Updates
+- WebSocket connection state tracking tests created [T143]
+  * Created test_websocket_state_tracking.py in tests/integration
+  * Implemented tests for state transitions during connection, processing, and errors
+  * Added tests for END_OF_AUDIO acknowledgment handling
+  * Added tests for reconnection behavior
+  * Added tests for thread safety of state transitions
+  * Added tests for handling multiple parallel connections
+  * Updated test runner to include WebSocket state tracking tests
+  * Verified all tests pass successfully
 - WebSocket protocol documentation created [T141]
   * Documented connection states and state transitions
   * Described message formats for client-to-server and server-to-client communication
