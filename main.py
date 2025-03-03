@@ -1,7 +1,7 @@
 """
 Main Program for the Whisper Client
-Version: 1.2
-Timestamp: 2025-03-01 19:46 CET
+Version: 1.3
+Timestamp: 2025-03-01 21:42 CET
 
 This is the main entry point for the Whisper Client application.
 It initializes all components, manages the application lifecycle,
@@ -144,6 +144,11 @@ class WhisperClient:
         # Komponenten beenden
         self.audio_manager.cleanup()
         self.websocket.cleanup()
+        
+        # Cleanup all WebSocket instances to prevent multiple parallel connections
+        logger.info("Cleaning up all WebSocket instances...")
+        WhisperWebSocket.cleanup_all_instances()
+        
         self.hotkey_manager.stop()
         self.terminal_manager.cleanup()
         
@@ -154,6 +159,12 @@ class WhisperClient:
 def main():
     # Startmeldung anzeigen
     show_startup_message()
+    
+    # Check for existing WebSocket instances and clean them up
+    instance_count = WhisperWebSocket.get_instance_count()
+    if instance_count > 0:
+        logger.warning(f"Found {instance_count} existing WebSocket instances. Cleaning up...")
+        WhisperWebSocket.cleanup_all_instances()
     
     # Prüfe Server-Status
     if not check_server_status():
@@ -175,20 +186,29 @@ if __name__ == "__main__":
     try:
         # Task-Historie aktualisieren
         update_task_history(
-            description="Tumbling Window Integration",
+            description="Multiple Parallel Connections Fix",
             changes=[
                 {
+                    "type": "fix",
+                    "description": "Addressed multiple parallel connections issue"
+                },
+                {
                     "type": "feat",
-                    "description": "Integrated Tumbling Window with WebSocket client"
+                    "description": "Added client and session tracking for WebSocket connections"
+                },
+                {
+                    "type": "improvement",
+                    "description": "Enhanced cleanup process to prevent orphaned connections"
                 },
                 {
                     "type": "refactor",
-                    "description": "Updated audio processing flow to use Tumbling Window"
+                    "description": "Improved connection management with throttling"
                 }
             ],
             status="in_development",
             files=[
-                "main.py"
+                "main.py",
+                "src/websocket.py"
             ]
         )
     except Exception as e:

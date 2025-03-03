@@ -238,9 +238,9 @@ class WebSocketMultipleConnectionsTest(unittest.TestCase):
         self.assertEqual(ws_client2.state, ConnectionState.READY,
                         "Second client should be ready")
         
-        # Verify UIDs are different
-        self.assertNotEqual(ws_client1.uid, ws_client2.uid,
-                           "Each client should have a unique UID")
+        # Verify client IDs are different
+        self.assertNotEqual(ws_client1.client_id, ws_client2.client_id,
+                           "Each client should have a unique client ID")
         
         # Clean up
         ws_client1.cleanup()

@@ -1,11 +1,22 @@
 # System Architecture & Patterns
-Version: 1.9
-Timestamp: 2025-03-01 20:53 CET
+Version: 2.1
+Timestamp: 2025-03-03 21:24 CET
 
 ## Document Purpose
 This document outlines how the system is built, key technical decisions, architectural patterns, and development philosophies used throughout the WhisperClient project.
 
 ## Testing Philosophy
+
+### Strategic Testing Decision
+> "Prioritize application progress over test perfection"
+
+We've made a strategic decision to prioritize application progress over test perfection, especially for components with different usage patterns in tests versus real-world scenarios. This decision is based on several key factors:
+
+1. **Different Usage Patterns**: Tests rapidly create and destroy connections in sequence, while real usage typically maintains longer-lived connections.
+2. **Different Load Profiles**: Tests stress specific components in isolation, while real usage exercises the system holistically.
+3. **Different Error Tolerance**: Tests require perfect execution, while real users can tolerate occasional reconnects if they're handled gracefully.
+
+For components like WebSocket connections, we implement minimal safeguards (like timeout mechanisms) and then focus on core functionality improvements that directly impact the user experience.
 
 ### Core Testing Axiom
 > "The test framework is a tool, not a deliverable"
@@ -16,6 +27,30 @@ This axiom guides our testing approach:
 3. Prefer manual verification for straightforward features
 4. Keep test framework minimal and maintainable
 5. Add complexity only when truly needed
+
+### Test Isolation Patterns
+> "Tests should be isolated from each other to ensure reliable results"
+
+1. **Current WebSocket Test Approach**
+   - Run tests individually using: `python -m unittest tests/integration/test_websocket_multiple_connections.py::WebSocketMultipleConnectionsTest::test_name`
+   - Document behavior of each test when run in isolation
+   - Compare with behavior when run as part of the test suite
+   - Focus on identifying issues, not implementing fixes yet
+   - Document findings in websocket_timing_dependencies.md
+
+2. **Basic Test Isolation Techniques**
+   - Use setUp/tearDown to create clean state for each test
+   - Ensure proper cleanup of resources after each test
+   - Verify cleanup success before proceeding to next test
+   - Use unique identifiers for test instances
+   - Add debug logging to track test execution flow
+
+3. **Practical Test Execution**
+   - Run individual tests first to verify basic functionality
+   - Document any issues found during isolated execution
+   - Only after all tests pass individually, attempt to run as suite
+   - If suite fails, focus on documenting the specific failure points
+   - Prioritize analysis over immediate fixes
 
 ### Testing Strategy
 1. **Essential Testing**

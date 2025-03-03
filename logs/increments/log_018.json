@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-03-03T17:55:00+01:00",
+  "task_id": "T146",
+  "type": "analysis",
+  "component": "tests",
+  "description": "WebSocket Timing Dependencies Analysis",
+  "details": [
+    "Created comprehensive analysis of potential timing dependencies in WebSocket tests",
+    "Identified critical timing dependencies that could affect real-world tests",
+    "Analyzed connection establishment timing, message processing timing, cleanup and reconnection timing",
+    "Documented thread synchronization issues and server response timing concerns",
+    "Provided specific recommendations for each test case with timing dependencies",
+    "Created general recommendations for real-world testing"
+  ],
+  "files_changed": [
+    "docs/investigations/websocket_timing_dependencies.md"
+  ],
+  "test_impact": {
+    "tests_affected": [
+      "test_connection_throttling",
+      "test_cleanup_all_instances",
+      "test_reconnection_with_new_session"
+    ],
+    "tests_added": []
+  },
+  "changes": [
+    {
+      "type": "documentation",
+      "description": "Created comprehensive analysis document for WebSocket timing dependencies"
+    },
+    {
+      "type": "analysis",
+      "description": "Identified critical timing dependencies in WebSocket tests"
+    },
+    {
+      "type": "improvement",
+      "description": "Provided recommendations for improving test reliability in real-world scenarios"
+    }
+  ],
+  "status": "completed"
+}

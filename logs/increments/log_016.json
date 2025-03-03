@@ -1,0 +1,60 @@
+{
+  "timestamp": "2025-03-01T22:25:00+01:00",
+  "version": "0.9.8",
+  "author": "Cline",
+  "title": "Multiple Parallel Connections Fix and Test Improvements",
+  "description": "Implemented solution to address the issue of multiple parallel WebSocket connections and improved test stability",
+  "changes": [
+    {
+      "id": "T144",
+      "type": "fix",
+      "component": "websocket",
+      "title": "Multiple parallel connections fix",
+      "description": "Implemented solution to prevent multiple parallel WebSocket connections",
+      "details": [
+        "Added client and session ID tracking to distinguish between reconnections and parallel connections",
+        "Implemented class-level instance tracking with _active_instances dictionary",
+        "Added connection throttling to prevent rapid reconnection attempts",
+        "Enhanced cleanup process to prevent orphaned connections",
+        "Added cleanup_all_instances class method to clean up all active instances",
+        "Updated main.py to check for and clean up existing instances on startup",
+        "Created comprehensive tests for the new connection management features",
+        "Updated test runner to include the new tests"
+      ],
+      "files": [
+        "src/websocket.py",
+        "main.py",
+        "tests/integration/test_websocket_multiple_connections.py",
+        "tests/run_tests.py"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T145",
+      "type": "test",
+      "component": "websocket",
+      "title": "WebSocket multiple connections test improvements",
+      "description": "Improved test stability for WebSocket multiple connections tests",
+      "details": [
+        "Modified test approach to avoid actual server connections",
+        "Implemented direct patching of connect method for more reliable testing",
+        "Added detailed debug output for test troubleshooting",
+        "Improved cleanup in tests to prevent hanging",
+        "Added proper session ID generation for reconnection tests",
+        "Enhanced test documentation with clear descriptions",
+        "Added proper cleanup in tearDown method"
+      ],
+      "files": [
+        "tests/integration/test_websocket_multiple_connections.py"
+      ],
+      "status": "in_progress"
+    }
+  ],
+  "next_steps": [
+    "Complete the WebSocket multiple connections test improvements",
+    "Test the improved connection management in real-world scenarios",
+    "Investigate and fix connection closures during processing",
+    "Document server parameters",
+    "Prepare for Phase 2 (Real-Life Testing)"
+  ]
+}

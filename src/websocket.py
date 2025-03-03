@@ -1,7 +1,7 @@
 """
 WebSocket Communication Module for the Whisper Client (Simplified Version)
-Version: 1.1
-Timestamp: 2025-03-01 19:45 CET
+Version: 1.2
+Timestamp: 2025-03-01 21:40 CET
 
 This module handles WebSocket communication with the WhisperLive server.
 It provides functionality for establishing connections, sending audio data,
@@ -33,8 +33,15 @@ class ConnectionState(enum.Enum):
     TIMEOUT_ERROR = 10
 
 class WhisperWebSocket:
+    # Class-level variable to track active instances
+    _active_instances = {}
+    _instances_lock = threading.Lock()
+    
     def __init__(self):
-        self.uid = str(uuid.uuid4())
+        # Generate a persistent client ID that remains the same across reconnections
+        self.client_id = str(uuid.uuid4())
+        # Session ID changes with each new connection attempt
+        self.session_id = str(uuid.uuid4())
         self.ws = None
         self.ws_thread = None
         self.state = ConnectionState.DISCONNECTED
@@ -43,6 +50,13 @@ class WhisperWebSocket:
         self.processing_enabled = True
         self.current_text = ""  # Stores the current text
         self.connection_lock = threading.Lock()  # Lock for thread-safe state changes
+        self.last_connection_attempt = 0  # Timestamp of last connection attempt
+        
+        # Register this instance
+        with WhisperWebSocket._instances_lock:
+            WhisperWebSocket._active_instances[self.client_id] = self
+        
+        log_connection(logger, f"Created WebSocket client with ID: {self.client_id}")
     
     def _set_state(self, new_state):
         """Sets the connection state and logs the transition"""
@@ -51,27 +65,70 @@ class WhisperWebSocket:
             self.state = new_state
             log_connection(logger, f"State changed: {old_state.name} -> {new_state.name}")
     
+    @classmethod
+    def get_instance_count(cls):
+        """Returns the number of active WebSocket instances"""
+        with cls._instances_lock:
+            return len(cls._active_instances)
+    
+    @classmethod
+    def cleanup_all_instances(cls):
+        """Cleanup all active WebSocket instances"""
+        with cls._instances_lock:
+            instances = list(cls._active_instances.values())
+        
+        for instance in instances:
+            try:
+                instance.cleanup()
+            except Exception as e:
+                log_error(logger, f"Error cleaning up instance {instance.client_id}: {str(e)}")
+    
+    def __del__(self):
+        """Remove this instance when garbage collected"""
+        try:
+            with WhisperWebSocket._instances_lock:
+                if self.client_id in WhisperWebSocket._active_instances:
+                    del WhisperWebSocket._active_instances[self.client_id]
+        except:
+            pass  # Ignore errors during shutdown
+    
     def connect(self, max_retries=3):
         """Establish WebSocket connection"""
+        # Check if already connected
         if self.state in [ConnectionState.CONNECTED, ConnectionState.READY, ConnectionState.PROCESSING] and self.ws and self.ws.sock and self.ws.sock.connected:
             log_connection(logger, "Already connected")
             return True
-            
+        
+        # Check for connection throttling
+        current_time = time.time()
+        if current_time - self.last_connection_attempt < config.WS_RECONNECT_DELAY:
+            wait_time = config.WS_RECONNECT_DELAY - (current_time - self.last_connection_attempt)
+            log_connection(logger, f"Connection attempt throttled, waiting {wait_time:.2f}s")
+            time.sleep(wait_time)
+        
+        # Update connection attempt timestamp
+        self.last_connection_attempt = time.time()
+        
+        # Generate new session ID for this connection attempt
+        self.session_id = str(uuid.uuid4())
+        log_connection(logger, f"Starting connection attempt with session ID: {self.session_id}")
+        
         retry_count = 0
         retry_delay = config.WS_RETRY_DELAY
         
         while retry_count < max_retries:
             try:
+                # Ensure proper cleanup before reconnection
                 if self.ws:
                     try:
                         self.cleanup()
-                    except:
-                        pass
+                    except Exception as e:
+                        log_error(logger, f"Error during cleanup before reconnection: {str(e)}")
                     self.ws = None
                     self.ws_thread = None
                 
                 self._set_state(ConnectionState.CONNECTING)
-                log_connection(logger, f"Connecting to server: {config.WS_URL}")
+                log_connection(logger, f"Connecting to server: {config.WS_URL} (Client: {self.client_id}, Session: {self.session_id})")
                 self.ws = websocket.WebSocketApp(
                     config.WS_URL,
                     on_open=self._on_open,
@@ -121,7 +178,8 @@ class WhisperWebSocket:
         self._set_state(ConnectionState.CONNECTED)
         try:
             ws_config = {
-                "uid": self.uid,
+                "uid": self.client_id,
+                "session_id": self.session_id,
                 "language": config.WHISPER_LANGUAGE,
                 "task": config.WHISPER_TASK,
                 "use_vad": config.WHISPER_USE_VAD,
@@ -304,7 +362,7 @@ class WhisperWebSocket:
             return
             
         try:
-            log_connection(logger, "Starting cleanup...")
+            log_connection(logger, f"Starting cleanup for session {self.session_id}...")
             self.processing_enabled = False
             if self.ws and self.ws.sock:
                 self._set_state(ConnectionState.CLOSING)
@@ -317,3 +375,4 @@ class WhisperWebSocket:
             self.ws = None
             self._set_state(ConnectionState.DISCONNECTED)
             self.server_ready = False
+            log_connection(logger, f"Cleanup completed for session {self.session_id}")

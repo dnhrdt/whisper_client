@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Simplified Test Runner
-Version: 1.2
-Timestamp: 2025-03-01 21:13 CET
+Version: 1.3
+Timestamp: 2025-03-01 21:47 CET
 
 This script provides a minimal test runner that supports running tests by category
 while maintaining essential timing test functionality. It follows the project's
@@ -95,6 +95,7 @@ class TestRunner:
         import tests.integration.test_tumbling_window
         import tests.integration.test_tumbling_window_websocket
         import tests.integration.test_websocket_state_tracking
+        import tests.integration.test_websocket_multiple_connections
         import unittest
         
         self.start_test_suite("integration")
@@ -106,6 +107,7 @@ class TestRunner:
         self.run_test("Tumbling Window", lambda: unittest.TextTestRunner().run(unittest.defaultTestLoader.loadTestsFromModule(tests.integration.test_tumbling_window)))
         self.run_test("Tumbling Window WebSocket Integration", lambda: unittest.TextTestRunner().run(unittest.defaultTestLoader.loadTestsFromModule(tests.integration.test_tumbling_window_websocket)))
         self.run_test("WebSocket State Tracking", lambda: unittest.TextTestRunner().run(unittest.defaultTestLoader.loadTestsFromModule(tests.integration.test_websocket_state_tracking)))
+        self.run_test("WebSocket Multiple Connections", lambda: unittest.TextTestRunner().run(unittest.defaultTestLoader.loadTestsFromModule(tests.integration.test_websocket_multiple_connections)))
         
         # Skip UI tests if running in CI/CD environment
         if "--no-ui" not in sys.argv:

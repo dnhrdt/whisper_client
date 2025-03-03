@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-03-03T17:20:00+01:00",
+  "task_id": "T145",
+  "type": "normal",
+  "component": "tests",
+  "description": "WebSocket Multiple Connections Test Improvements",
+  "details": [
+    "Fixed mock_connect implementation to properly support cleanup",
+    "Added verification steps for client state after cleanup",
+    "Enhanced test_parallel_connections with proper state verification",
+    "Enhanced test_reconnection_with_new_session with proper state verification"
+  ],
+  "files_changed": [
+    "tests/integration/test_websocket_multiple_connections.py"
+  ],
+  "test_impact": {
+    "tests_affected": [
+      "test_cleanup_all_instances",
+      "test_parallel_connections",
+      "test_reconnection_with_new_session"
+    ],
+    "tests_added": []
+  },
+  "changes": [
+    {
+      "type": "fix",
+      "description": "Modified mock_connect to create a proper mock WebSocket object"
+    },
+    {
+      "type": "improvement",
+      "description": "Added state verification after cleanup in test_parallel_connections"
+    },
+    {
+      "type": "improvement",
+      "description": "Added state verification after cleanup in test_reconnection_with_new_session"
+    }
+  ],
+  "status": "completed"
+}
