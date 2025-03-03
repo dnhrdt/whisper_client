@@ -1,6 +1,6 @@
 # Product Context
-Version: 1.2
-Timestamp: 2025-02-26 20:42 CET
+Version: 1.3
+Timestamp: 2025-03-03 21:40 CET
 
 ## Core Purpose
 - Real-time German speech recognition via WhisperLive
@@ -66,22 +66,27 @@ in German to ensure accurate validation of the core functionality.
 ### Main Components
 
 1. **WebSocket Client**
-   - Server connection management
-   - Automatic reconnects
-   - JSON message handling
-   - Response processing
+   - Connection state tracking system with 11 distinct states
+   - Multiple parallel connections prevention
+   - Automatic reconnects with throttling
+   - Thread-safe state transitions
+   - Detailed logging for state changes
+   - END_OF_AUDIO signal handling
 
 2. **Text Insertion**
-   - Current: Clipboard + Ctrl+V
-   - Planned: Windows SendMessage API
-   - WM_CHAR/WM_SETTEXT methods
-   - Memory-based buffering
+   - Windows SendMessage API implemented
+   - Automatic fallback to clipboard if SendMessage fails
+   - Memory-based buffering with TextBuffer class
+   - Thread-safe text processing
 
-3. **Audio Recording**
-   - PyAudio implementation
-   - Threaded recording
+3. **Audio Processing**
+   - PyAudio implementation for recording
+   - Tumbling Window with configurable size and overlap
+   - Linear crossfading for smooth transitions
+   - Thread-safe queue-based processing
+   - AudioProcessor class for integration
    - Float32 normalization
-   - Buffer management
+   - Efficient buffer management
 
 4. **Logging System**
    - File and console output
@@ -92,22 +97,41 @@ in German to ensure accurate validation of the core functionality.
 ## Repository Structure
 ```
 .
+├── cline_docs/                  # Memory Bank documentation
+│   ├── activeContext.md         # Current development state
+│   ├── productContext.md        # Product overview and purpose
+│   ├── progress.md              # Development progress tracking
+│   ├── systemPatterns.md        # Development patterns and workflows
+│   └── techContext.md           # Technical implementation details
 ├── docs/
-│   ├── project.md       # Main documentation
-│   ├── roadmap.md      # Development roadmap
-│   └── development.md  # Developer documentation
+│   ├── diagrams/               # System architecture diagrams
+│   ├── investigations/         # Analysis of specific issues
+│   ├── research/               # Research on related technologies
+│   ├── testing/                # Test documentation
+│   ├── roadmap.md              # Development roadmap
+│   ├── websocket_protocol.md   # WebSocket protocol documentation
+│   └── windows_sendmessage_api.md # SendMessage API documentation
+├── logs/
+│   ├── increments/             # Incremental development logs
+│   ├── main.json               # Critical changes log
+│   └── archive/                # Archived logs
 ├── src/
-│   ├── audio.py        # Audio recording
-│   ├── websocket.py    # Server communication
-│   ├── text.py         # Text processing
-│   ├── logging.py      # Logging system
-│   └── utils.py        # Helper functions
-├── tests/              
-│   ├── speech_test_cases.md     
-│   ├── speech_test_progress.json
-│   └── test_*.py       # Test modules
+│   ├── audio.py                # Audio recording and processing
+│   ├── websocket.py            # Server communication
+│   ├── text.py                 # Text processing
+│   ├── logging.py              # Logging system
+│   ├── terminal.py             # Terminal management
+│   ├── hotkeys.py              # Keyboard input handling
+│   └── utils.py                # Helper functions
+├── tests/
+│   ├── integration/            # Integration tests
+│   ├── timing/                 # Timing tests
+│   ├── speech/                 # Speech recognition tests
+│   ├── poc/                    # Proof of concept tests
+│   ├── docs/                   # Test documentation
+│   └── run_tests.py            # Test runner
 └── tools/
-    └── list_devices.py  # Audio device listing
+    └── list_devices.py         # Audio device listing
 ```
 
 ## System Requirements
@@ -127,18 +151,24 @@ in German to ensure accurate validation of the core functionality.
 
 ### Audio Processing Flow
 1. Microphone input capture
-2. Buffer management
-3. Data normalization
-4. Stream to server
+2. Tumbling Window processing with overlap
+3. Linear crossfading between windows
+4. Queue-based buffer management
+5. Float32 normalization
+6. Stream to server via WebSocket
 
 ### Text Processing Flow
 1. Server response handling
-2. Text formatting
-3. Window targeting
-4. Output delivery
+2. Text segmentation and buffering
+3. Duplicate detection with temporal context
+4. Sentence boundary detection
+5. Window targeting with SendMessage API
+6. Automatic fallback to clipboard if needed
 
 ### Error Recovery Flow
-1. Error detection
-2. Automatic reconnection
-3. Buffer clearing
-4. State restoration
+1. Error detection with specific error states
+2. Automatic reconnection with throttling
+3. Buffer clearing and resource management
+4. State restoration with proper state transitions
+5. Detailed logging for troubleshooting
+6. Graceful degradation with fallback mechanisms
