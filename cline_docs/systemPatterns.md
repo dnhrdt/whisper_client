@@ -1,6 +1,6 @@
 # System Architecture & Patterns
-Version: 2.1
-Timestamp: 2025-03-03 21:24 CET
+Version: 2.2
+Timestamp: 2025-03-07 22:26 CET
 
 ## Document Purpose
 This document outlines how the system is built, key technical decisions, architectural patterns, and development philosophies used throughout the WhisperClient project.
@@ -127,6 +127,77 @@ This axiom guides our testing approach:
        D --> B
        C -->|Yes| E[Proceed with Task]
    ```
+
+### Memory Bank Archive Guidelines
+
+#### Archive Purpose
+- Archive files store historical information that is no longer immediately relevant
+- They reduce context load while preserving complete project history
+- They should be accessed only when specifically needed
+
+#### Memory Bank Structure
+```mermaid
+flowchart TD
+    Original[Memory Bank Core] --> PC[productContext.md]
+    Original --> SP[systemPatterns.md]
+    Original --> TC[techContext.md]
+    
+    PC --> AC[activeContext.md]
+    SP --> AC
+    TC --> AC
+    
+    AC --> P[progress.md]
+    
+    subgraph Archive Files
+        AC -.-> AH[archiveContext.md]
+        P -.-> PH[progressHistory.md]
+    end
+```
+
+#### When NOT to Access Archives
+- During routine development tasks
+- For current sprint/phase planning
+- For understanding active features or components
+- During normal bug fixing of current functionality
+
+#### When to Access Archives
+- When investigating regression bugs with historical roots
+- When researching the rationale behind past architectural decisions
+- When specifically requested by the user
+- When current documentation explicitly references archived information
+- When working on components that haven't been modified in multiple phases
+
+#### Archive Access Protocol
+1. Always check active Memory Bank files first
+2. If information is missing, check development logs
+3. Only if critical context is still missing, explicitly state:
+   "I need to check the archive files for [specific information]"
+4. Get user confirmation before accessing archives
+5. After accessing, document the relevant information in current context
+6. Return to using only active files
+
+#### Archiving Policy
+1. **When to Archive**:
+   - After completing a development phase
+   - When a task has been completed for more than 2 weeks
+   - When strategic focus shifts to a new area
+   - Monthly review of active files
+
+2. **How to Archive**:
+   - Move completed tasks from `progress.md` to `progressHistory.md`
+   - Move outdated context from `activeContext.md` to `archiveContext.md`
+   - Update version and timestamp in all modified files
+   - Organize archived content chronologically or by phase
+
+3. **Retention Policy**:
+   - Keep only the 3-5 most recent completed tasks in `progress.md`
+   - Keep only current phase information in `activeContext.md`
+   - Maintain comprehensive history in archive files
+
+#### Archive Maintenance
+- Review archive files quarterly to ensure they remain well-organized
+- Never add new development information directly to archive files
+- Archive files should be append-only after initial creation
 
 ## How The System Is Built
 
