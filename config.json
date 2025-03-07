@@ -6,7 +6,7 @@
     "format": "paInt16",
     "channels": 1,
     "rate": 16000,
-    "chunk_size": 1024,
+    "chunk_size": 4096,
     "silence_threshold": 300
   },
   "server": {
@@ -18,7 +18,7 @@
     }
   },
   "text": {
-    "output_mode": "prompt",
+    "output_mode": "sendmessage",
     "prompt_settings": {
       "delay_between_chars_ms": 5,
       "delay_between_words_ms": 10,
@@ -57,7 +57,7 @@
     }
   },
   "meta": {
-    "last_updated": "2025-02-14T00:20:00+01:00",
+    "last_updated": "2025-03-07T21:33:00+01:00",
     "format_version": "1.0"
   }
 }

@@ -1,7 +1,7 @@
 """
 Audio Processing Module for the Whisper Client
-Version: 1.1
-Timestamp: 2025-02-28 23:12 CET
+Version: 1.2
+Timestamp: 2025-03-07 21:45 CET
 
 This module handles audio recording, processing, and resampling for the Whisper Client.
 It provides functionality for microphone access, audio capture, and conversion to the
@@ -14,7 +14,7 @@ import pyaudio
 import numpy as np
 import threading
 import time
-from queue import Queue
+from queue import Queue, Empty
 from collections import deque
 import config
 import librosa
@@ -208,7 +208,7 @@ class AudioProcessor:
                         audio_data = self.processing_queue.get(timeout=0.1)
                         self._process_audio_data(audio_data)
                         self.processing_queue.task_done()
-                    except Queue.Empty:
+                    except Empty:
                         continue
                         
                 except Exception as e:
