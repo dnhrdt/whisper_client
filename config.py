@@ -36,6 +36,7 @@ WS_FINAL_WAIT = BASE_WAIT * 30        # Wait time for final texts
 # Connection Timeouts
 WS_CONNECT_TIMEOUT = BASE_TIMEOUT * 2.5  # Timeout for connection establishment
 WS_READY_TIMEOUT = BASE_TIMEOUT * 5      # Timeout for server-ready signal
+WS_CLEANUP_TIMEOUT = BASE_TIMEOUT * 3    # Timeout for cleanup operations
 
 # Keyboard and Clipboard
 KEY_PRESS_DELAY = BASE_DELAY * 0.5     # Delay between key presses

@@ -48,8 +48,8 @@ t*.bak
 # Test results
 tests/results/*.json
 
-# Keep in Git but ignore changes
-Backup/
+# Project specific directories to ignore
+/backup/
 
 # Temporary files
 commit_msg.txt

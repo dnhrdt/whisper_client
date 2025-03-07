@@ -1,0 +1,11 @@
+{
+  "server_check": true,
+  "websocket_connection": true,
+  "audio_device": true,
+  "recording": true,
+  "processing": false,
+  "text_output": false,
+  "cleanup": true,
+  "output_text": [],
+  "errors": []
+}

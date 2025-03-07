@@ -1,31 +1,50 @@
-# WhisperClient
+# WhisperClient (Alpha)
 
-A Python-based client for real-time speech recognition using WhisperLive.
+A Python-based client for real-time German speech recognition using [WhisperLive](https://github.com/collabora/WhisperLive). This project is currently in **Alpha** stage.
 
 ## 🎯 Features
 
 - Real-time audio recording and streaming
 - WebSocket-based communication with WhisperLive
-- Automatic text output to active applications
+- Automatic text output to active applications via Windows SendMessage API
 - Configurable hotkey control (F13/F14)
 - Robust error handling and reconnect logic
+- Optimized for German speech recognition
+- Tumbling Window approach for audio processing
+
+## ⚠️ Alpha Status Notice
+
+This project is currently in **Alpha** stage. While the core functionality is implemented and working, you may encounter issues or limitations:
+
+- Some error handling may be incomplete
+- Documentation is still being improved
+- Performance optimizations are ongoing
+- Test coverage is not yet comprehensive
+
+We welcome feedback and contributions to help improve the project!
 
 ## 🚀 Quick Start
 
 ```bash
-# Clone repository
+# 1. Set up WhisperLive server first
+# Follow instructions at: https://github.com/collabora/WhisperLive
+
+# 2. Clone this repository
 git clone https://github.com/dnhrdt/whisper_client.git
 cd whisper_client
 
-# Create virtual environment
+# 3. Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 .\venv\Scripts\activate   # Windows
 
-# Install dependencies
+# 4. Install dependencies
 pip install -r requirements.txt
 
-# Start client
+# 5. Configure audio device in config.json if needed
+# Default is "Poly BT700" - use list_devices.py to find your device
+
+# 6. Start client
 python main.py
 ```
 
@@ -120,9 +139,14 @@ We welcome contributions! Current focus areas:
 
 ## 🙏 Acknowledgments
 
-- [WhisperLive](https://github.com/whisperlive) for the server
-- [OpenAI Whisper](https://github.com/openai/whisper) for the speech model
-- All contributors and testers
+This project builds upon the excellent work of:
+
+- [WhisperLive by Collabora](https://github.com/collabora/WhisperLive) - The server component that powers our speech recognition
+- [OpenAI Whisper](https://github.com/openai/whisper) - The underlying speech recognition model
+- [faster-whisper](https://github.com/guillaumekln/faster-whisper) - Optimized Whisper implementation
+- All contributors and testers who have provided valuable feedback
+
+WhisperClient is an independent project that integrates with WhisperLive but is not officially affiliated with Collabora or OpenAI.
 
 ## 📞 Support
 
