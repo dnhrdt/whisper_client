@@ -51,64 +51,102 @@ python main.py
 ## 📋 Prerequisites
 
 - Python 3.12+
-- WhisperLive Server
+- [WhisperLive Server](https://github.com/collabora/WhisperLive)
 - Windows (for keyboard simulation)
 - Microphone
 
 ## 🔧 Configuration
 
 Configuration is managed through `config.json`:
-- Audio settings (format, rate, buffer)
-- WebSocket parameters (host, port, timeouts)
-- Hotkey definitions
-- Logging options
-
-## 🎛️ Timing System
-
-The project uses a sophisticated timing system for optimal performance:
-
-```mermaid
-flowchart TD
-    A[Audio Recording] -->|1.0s Buffer| B[WebSocket]
-    B -->|5.0s Timeout| C[Server]
-    C -->|30.0s Final Wait| D[Text Output]
+```json
+{
+  "audio": {
+    "device": "Poly BT700",
+    "format": "paInt16",
+    "channels": 1,
+    "rate": 16000,
+    "chunk_size": 4096,
+    "silence_threshold": 300
+  },
+  "server": {
+    "url": "ws://localhost:9090",
+    "reconnect": {
+      "attempts": -1,
+      "delay_ms": 3000,
+      "timeout_ms": 5000
+    }
+  },
+  "text": {
+    "output_mode": "sendmessage",
+    "prompt_settings": {
+      "delay_between_chars_ms": 5,
+      "delay_between_words_ms": 10,
+      "use_win32_api": true
+    }
+  },
+  "hotkeys": {
+    "start_stop": "F13",
+    "exit": "F14"
+  }
+}
 ```
 
-Detailed diagrams and documentation:
+## 🎛️ Audio Processing
+
+The project uses a Tumbling Window approach for audio processing:
+
+- Configurable window size (default: 2048 samples) and overlap (default: 25%)
+- Linear crossfading for smooth transitions between windows
+- Thread-safe queue-based processing
+- Average latency of 130ms
+- Float32 normalization for optimal audio quality
+
+Detailed technical documentation:
 - [System Architecture](docs/diagrams/architecture/system_modules.md)
-- [Sequence Flow](docs/diagrams/sequence/audio_processing.md)
-- [Timing Overview](docs/diagrams/timing/system_timings.md)
+- [Audio Processing Flow](docs/diagrams/sequence/audio_processing.md)
+- [System Timing Parameters](docs/diagrams/timing/system_timings.md)
 
 ## 🧪 Tests
 
+The project includes several test categories:
+
 ```bash
-# Run timing tests
+# Run all tests
 python run_tests.py
+
+# Run specific test categories
+python run_tests.py --category timing
+python run_tests.py --category integration
+python run_tests.py --category speech
 ```
 
-The tests analyze:
-- Audio streaming performance
-- WebSocket communication
-- Text processing times
-- Error scenarios
+Current test coverage includes:
+- WebSocket connection state tracking
+- Audio processing with Tumbling Window
+- Text processing and buffering
+- SendMessage API performance
+- Error handling and recovery
 
 ## 📚 Documentation
 
 Our documentation follows the Memory Bank structure for comprehensive project understanding:
 
-- **Product Context** - Core purpose and system architecture
-- **System Patterns** - Development standards and architectural patterns
-- **Technical Context** - Core technologies and configuration
-- **Active Context** - Current development focus and recent changes
-- **Progress** - Task tracking and development status
+- **[Product Context](cline_docs/productContext.md)** - Core purpose and system architecture
+- **[System Patterns](cline_docs/systemPatterns.md)** - Development standards and architectural patterns
+- **[Technical Context](cline_docs/techContext.md)** - Core technologies and configuration
+- **[Active Context](cline_docs/activeContext.md)** - Current development focus and recent changes
+- **[Progress](cline_docs/progress.md)** - Task tracking and development status
 
 Additional documentation:
-- [Roadmap](docs/roadmap.md)
-- [Test Specifications](tests/speech_test_cases.md)
+- [Alpha Release Notes](docs/alpha_release_notes.md)
+- [WebSocket Protocol](docs/websocket_protocol.md)
+- [WebSocket Message Format](docs/websocket_message_format.md)
 
 ## 🤝 Contributing
 
-We welcome contributions! Current focus areas:
+We welcome contributions! See our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+Current focus areas:
 
 1. **Server Integration**
    - Understanding WhisperLive server parameters
@@ -124,14 +162,6 @@ We welcome contributions! Current focus areas:
    - GUI development
    - Configuration interface
    - Installation wizard
-
-### Development Workflow
-
-1. Create/select an issue
-2. Create branch: `feature/name` or `fix/name`
-3. Make changes following project standards
-4. Create pull request
-5. Await code review
 
 ## 📝 License
 
