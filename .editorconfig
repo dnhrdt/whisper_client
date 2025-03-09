@@ -1,0 +1,21 @@
+# EditorConfig für WhisperClient
+# Version: 1.0
+# Timestamp: 2025-03-09 01:31 CET
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*.py]
+indent_style = space
+indent_size = 4
+
+[*.{json,md}]
+indent_style = space
+indent_size = 2
+
+[*.{bat,ps1}]
+end_of_line = crlf

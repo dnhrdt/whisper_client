@@ -1,6 +1,6 @@
 # System Architecture & Patterns
-Version: 2.2
-Timestamp: 2025-03-07 22:26 CET
+Version: 2.3
+Timestamp: 2025-03-09 02:24 CET
 
 ## Document Purpose
 This document outlines how the system is built, key technical decisions, architectural patterns, and development philosophies used throughout the WhisperClient project.
@@ -141,13 +141,13 @@ flowchart TD
     Original[Memory Bank Core] --> PC[productContext.md]
     Original --> SP[systemPatterns.md]
     Original --> TC[techContext.md]
-    
+
     PC --> AC[activeContext.md]
     SP --> AC
     TC --> AC
-    
+
     AC --> P[progress.md]
-    
+
     subgraph Archive Files
         AC -.-> AH[archiveContext.md]
         P -.-> PH[progressHistory.md]
@@ -222,11 +222,58 @@ flowchart TD
    - Windows scripts use CRLF (*.bat, *.cmd, *.ps1)
    - Auto-detection for other files
 
-3. **Error Handling Patterns**
+4. **Error Handling Patterns**
    - Connection errors: 5s timeout, 3s reconnect
    - Audio errors: overflow ignoring, stream reset
    - Thread-safe recording control
    - Structured error logging
+
+5. **Code Quality Standards**
+   - Linting tools configured with project-specific settings
+   - Centralized linting script for consistent execution
+   - Pre-commit hooks for automated checks
+   - EditorConfig for consistent formatting across editors
+   - Standardized line length (100 characters)
+   - Consistent import sorting with isort
+   - Code formatting with black
+   - Type checking with mypy
+   - Comprehensive analysis with pylint
+
+### Linting Workflow
+1. **Linting Tools Setup**
+   - Configuration files in project root:
+     * `.editorconfig`: Basic editor settings
+     * `.flake8`: Flake8 configuration
+     * `.pylintrc`: Pylint configuration
+     * `.pre-commit-config.yaml`: Git hooks
+     * `pyproject.toml`: Tool-specific configurations
+
+2. **Linting Execution**
+   - Use the centralized PowerShell script:
+     ```powershell
+     # Run all linters
+     ./.linting/lint.ps1
+
+     # Run specific linters
+     ./.linting/lint.ps1 -isort -black
+
+     # Run on specific files
+     ./.linting/lint.ps1 -files "src/audio.py src/websocket.py"
+
+     # Apply automatic fixes
+     ./.linting/lint.ps1 -fix
+     ```
+
+3. **Linting Integration**
+   - Pre-commit hooks for automated checks
+   - VSCode integration for real-time feedback
+   - CI/CD pipeline integration (future)
+   - Regular manual execution during development
+
+4. **Linting Priorities**
+   - Critical: Syntax errors, unused imports, bare except clauses
+   - Important: Line length, trailing whitespace, consistent formatting
+   - Nice-to-have: Docstrings, type annotations, naming conventions
 
 ### Development Logging Strategy
 Note: This describes the development change tracking system.
@@ -330,7 +377,7 @@ Log Format:
 logs/
 ├── main.json         # Critical changes only (max 1MB)
 ├── increments/       # All changes, auto-generated Task-IDs
-│   ├── log_001.json 
+│   ├── log_001.json
 │   └── log_002.json
 └── archive/          # Quarterly consolidated logs
     ├── 2025_Q1.json
