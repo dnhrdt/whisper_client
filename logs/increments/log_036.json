@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-04-18T11:48:00+02:00",
+  "description": "Fixed logging format issues in websocket.py",
+  "changes": [
+    {
+      "type": "fix",
+      "description": "Corrected logging format in websocket.py to resolve E1205 (Too many arguments for logging format string) errors"
+    },
+    {
+      "type": "refactor",
+      "description": "Changed string formatting to use % operator instead of passing format arguments to logging functions"
+    },
+    {
+      "type": "update",
+      "description": "Updated version and timestamp in websocket.py header"
+    }
+  ],
+  "status": "completed",
+  "files": ["src/websocket.py"]
+}

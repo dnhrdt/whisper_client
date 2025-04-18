@@ -1,0 +1,101 @@
+{
+  "timestamp": "2025-04-15T01:29:00+02:00",
+  "task_id": "T156",
+  "log_id": "log_035",
+  "type": "normal",
+  "component": "linting",
+  "description": "Addressed pylint warnings (W1203, I1101, R1702, C0201, W0612) and updated file headers.",
+  "details": [
+    {
+      "type": "fix",
+      "description": "Corrected W1203 (logging-fstring-interpolation) in direct logger.* calls across multiple files using %-formatting.",
+      "files": [
+        "src/audio.py",
+        "src/hotkeys.py",
+        "src/logging.py",
+        "src/terminal.py",
+        "src/text.py",
+        "src/utils.py",
+        "src/websocket.py",
+        "main.py"
+      ]
+    },
+    {
+      "type": "fix",
+      "description": "Suppressed I1101 (c-extension-no-member) for win32 modules by adding them to extension-pkg-allow-list in .pylintrc.",
+      "files": [
+        ".pylintrc"
+      ]
+    },
+    {
+      "type": "refactor",
+      "description": "Resolved R1702 (too-many-nested-blocks) in src/hotkeys.py (_check_hotkeys) by extracting _execute_callback helper method.",
+      "files": [
+        "src/hotkeys.py"
+      ]
+    },
+    {
+      "type": "refactor",
+      "description": "Resolved R1702 (too-many-nested-blocks) in src/websocket.py (connect) by extracting helper methods (_cleanup_previous_connection, _initialize_and_start_websocket, _wait_for_socket_connection, _wait_for_server_ready).",
+      "files": [
+        "src/websocket.py"
+      ]
+    },
+    {
+      "type": "fix",
+      "description": "Corrected C0201 (consider-iterating-dictionary) in src/hotkeys.py.",
+      "files": [
+        "src/hotkeys.py"
+      ]
+    },
+    {
+      "type": "fix",
+      "description": "Addressed W0612 (unused-variable) for 'mods' in src/hotkeys.py by using '_'.",
+      "files": [
+        "src/hotkeys.py"
+      ]
+    },
+    {
+      "type": "chore",
+      "description": "Updated Version and Timestamp headers in all modified Python files.",
+      "files": [
+        "src/audio.py",
+        "src/hotkeys.py",
+        "src/logging.py",
+        "src/terminal.py",
+        "src/text.py",
+        "src/utils.py",
+        "src/websocket.py",
+        "main.py"
+      ]
+    },
+    {
+      "type": "issue",
+      "description": "New mypy/pylint errors (E1205/E1121 - Too many arguments) appeared after black reformatted src/audio.py and src/websocket.py. Likely due to incorrect application of %-formatting to custom logging helper functions.",
+      "files": [
+        "src/audio.py",
+        "src/websocket.py"
+      ]
+    },
+    {
+      "type": "chore",
+      "description": "Used write_to_file as fallback for src/hotkeys.py, src/text.py, and src/websocket.py after multiple replace_in_file failures."
+    }
+  ],
+  "status": "in_development",
+  "files_changed": [
+    "src/audio.py",
+    "src/hotkeys.py",
+    "src/logging.py",
+    "src/terminal.py",
+    "src/text.py",
+    "src/utils.py",
+    "src/websocket.py",
+    "main.py",
+    ".pylintrc",
+    "cline_docs/activeContext.md",
+    "cline_docs/progress.md"
+  ],
+  "regression_potential": "low",
+  "notes": "New linting errors need to be addressed in the next session before T156 can be considered complete. User requested splitting large modules (text.py, websocket.py) in a future task."
+}
