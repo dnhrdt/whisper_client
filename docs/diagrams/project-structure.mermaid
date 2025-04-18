@@ -1,56 +1,56 @@
 graph TD
     root[whisper_client/]
-    
+
     %% Main directories
     root --> docs[docs/]
     root --> src[src/]
     root --> tests[tests/]
     root --> logs[logs/]
     root --> cline[cline_docs/]
-    
+
     %% Source files
     src --> audio[audio.py]
     src --> ws[websocket.py]
     src --> text[text.py]
     src --> log[logging.py]
     src --> utils[utils.py]
-    
+
     %% Tests structure
     tests --> test_arch[test_architecture.md]
     tests --> test_docs[docs/]
     tests --> test_res[resources/]
     tests --> test_run[test_runners/]
-    
+
     test_docs --> timing[timing_tests.md]
     test_docs --> integ[integration_tests.md]
     test_docs --> speech[speech_tests.md]
-    
+
     test_res --> wav[test_2sec.wav]
-    
+
     %% Logs structure
     logs --> log_main[main.json]
     logs --> log_inc[increments/]
     logs --> log_arch[archive/]
-    
+
     log_inc --> log1[log_001.json]
     log_inc --> log2[log_002.json]
-    
+
     log_arch --> q1[2025_Q1.json]
     log_arch --> q4[2024_Q4.json]
-    
+
     %% Memory Bank
     cline --> active[active_context.md]
     cline --> product[product_context.md]
     cline --> system[system_patterns.md]
     cline --> tech[tech_context.md]
     cline --> prog[progress.md]
-    
+
     %% Config files
     root --> conf_py[config.py]
     root --> conf_json[config.json]
     root --> req[requirements.txt]
     root --> readme[README.md]
-    
+
     %% Special files
     root --> list[list_devices.py]
     root --> clineignore[.clineignore]

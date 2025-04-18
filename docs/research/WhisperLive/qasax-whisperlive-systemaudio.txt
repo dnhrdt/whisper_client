@@ -5632,5 +5632,3 @@ class VoiceActivityDetector:
         """
         speech_prob = self.model(torch.from_numpy(audio_frame), self.frame_rate).item()
         return speech_prob > self.threshold
-
-

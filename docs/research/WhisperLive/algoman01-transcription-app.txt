@@ -188,7 +188,7 @@ File: src/styles.css
 
 }
 
-:root{ 
+:root{
     --font-fam: 'UntitledSans-Regular', monospace;
 }
 
@@ -246,7 +246,7 @@ File: src/routes/+page.svelte
 	});
 
   $: filteredTranscript = transcript ? transcript.segments.filter(segment => segment.text.toLowerCase().includes(searchQuery.toLowerCase())): [];
-	
+
   /**
 	 * Resamples the audio data to a target sample rate of 16kHz.
 	 * @param {Array|ArrayBuffer|TypedArray} audioData - The input audio data.
@@ -375,7 +375,7 @@ File: src/routes/+page.svelte
 
       // Clear any audio data cache or other cleanup actions
       audioDataCache = [];
-      
+
     }
   }
 
@@ -424,7 +424,7 @@ File: src/routes/+page.svelte
     const formattedTimestamp = newTimestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     return formattedTimestamp;
   }
-  
+
 
 </script>
 
@@ -501,7 +501,7 @@ File: src/routes/+page.svelte
     width: 100%;
     box-sizing: border-box;
   }
-  
+
 	.timestamps {
 		display: flex;
 		flex-direction: row;
@@ -521,5 +521,3 @@ File: src/routes/+page.svelte
 	}
 
 </style>
-
-

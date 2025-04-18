@@ -39,10 +39,10 @@ def mock_connect(self, *args, **kwargs):
     class MockWebSocket:
         def __init__(self):
             self.sock = None
-            
+
         def close(self):
             pass
-    
+
     self.ws = MockWebSocket()
     # ...
 ```
@@ -151,7 +151,7 @@ def get_active_instances(cls):
 def cleanup_all_instances(cls):
     """Cleanup all active WebSocket instances"""
     instances = cls.get_active_instances()
-    
+
     for instance in instances:
         try:
             instance.cleanup()

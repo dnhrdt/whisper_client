@@ -61,7 +61,7 @@ flowchart TD
     A[Timing Tests] --> B[Integration Tests]
     B --> C[Speech Tests]
     B --> D[GUI Development]
-    
+
     subgraph "Priority 1"
     A
     end

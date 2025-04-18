@@ -139,7 +139,7 @@ tasks:
   build:
     dir: whisper-autohotkey
     cmds:
-      - go build ./cmd/whisper-autohotkey/. 
+      - go build ./cmd/whisper-autohotkey/.
   package:
     deps: [build]
     cmds:
@@ -174,7 +174,7 @@ F8::
     Run %A_WorkingDir%\bin\fmedia-1.31-windows-x64\fmedia\fmedia.exe --record --overwrite --mpeg-quality=16 --rate=12000 --out=rec.mp3 --globcmd=listen,, Hide
   }
   Else
-  {  
+  {
     Run %A_WorkingDir%\bin\fmedia-1.31-windows-x64\fmedia\fmedia.exe --globcmd=stop,, Hide
     Sleep, 100
     Run %A_WorkingDir%\bin\whisper-autohotkey\whisper-autohotkey.exe,, Hide
@@ -192,9 +192,9 @@ return
 ================================================
 File: prompt.txt
 ================================================
-You are a Windows automation engineer that is very familiar with AutoHotKey. 
-You create AutoHotKey V1 scripts. I ask you to conduct a certain ACTION. 
-You then write a script to perform this action. 
+You are a Windows automation engineer that is very familiar with AutoHotKey.
+You create AutoHotKey V1 scripts. I ask you to conduct a certain ACTION.
+You then write a script to perform this action.
 
 Unless otherwise specified, assume:
 - the default browser is Firefox
@@ -205,13 +205,13 @@ Unless otherwise specified, assume:
 - Your answer must ALWAYS ONLY be a correct AutoHotKey Script, nothing else
 
 Avoid all logical and syntactical errors. To help you avoid making errors, ALWAYS keep in mind ALL of the following rules:
-1. The action should be executed when the AHK script is run, not define a keyboard shortcut to trigger the action. 
-2. You only respond with the script, don't include any comments, keep it as short as possible but ensure there are no syntax errors in the script and it is a correct AutoHotKey V1 script. 
+1. The action should be executed when the AHK script is run, not define a keyboard shortcut to trigger the action.
+2. You only respond with the script, don't include any comments, keep it as short as possible but ensure there are no syntax errors in the script and it is a correct AutoHotKey V1 script.
 3. Tray tips are provided as follows 'TrayTip , Title, Text, Timeout, Options'.
-4. When constructing URLs, ensure to escape the escape sequence for space (%20) as '`%20'. 
+4. When constructing URLs, ensure to escape the escape sequence for space (%20) as '`%20'.
 5. Apply all AutoHotKey Escape sequences as required.
 6. Replace all '%' characters in URLs with the correct escape sequence '`%'. E.g. '%20' with '`%20`
-7. NEVER provide any other output than the script. Always complete the action with a 'return'. 
+7. NEVER provide any other output than the script. Always complete the action with a 'return'.
 8. If you are not sure what action needs to be taken or how to create a script to perform the action,
 create a script with the following content:
 > MsgBox, 32,,[Your comment]
@@ -235,14 +235,14 @@ File: watch.ahk
     Run %A_WorkingDir%\bin\fmedia-1.31-windows-x64\fmedia\fmedia.exe --record --overwrite --mpeg-quality=16 --rate=12000 --out=rec.mp3 --globcmd=listen,, Hide
   }
   Else
-  {  
+  {
     Run %A_WorkingDir%\bin\fmedia-1.31-windows-x64\fmedia\fmedia.exe --globcmd=stop,, Hide
     Sleep, 200
     Run %A_WorkingDir%\bin\whisper-autohotkey\whisper-autohotkey.exe en transtriptionPrompt.txt,, Hide
   }
   return
 
-  
+
 
 
 ================================================
@@ -4001,10 +4001,10 @@ on:
 
 jobs:
   publish:
-    name: Publish 
+    name: Publish
     permissions:
       contents: write
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -4019,8 +4019,7 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: autohotkey-chatgpt.zip 
+        file: autohotkey-chatgpt.zip
         overwrite: true
-        asset_name: Autohotkey-ChatGPT.zip 
+        asset_name: Autohotkey-ChatGPT.zip
         tag: ${{ github.ref }}
-

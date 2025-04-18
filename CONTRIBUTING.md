@@ -1,6 +1,6 @@
 # Contributing to WhisperClient
-Version: 1.0
-Timestamp: 2025-03-08 00:12 CET
+Version: 1.1
+Timestamp: 2025-03-08 22:08 CET
 
 Thank you for your interest in contributing to WhisperClient! This document provides guidelines and instructions for contributing to the project.
 
@@ -81,6 +81,105 @@ We follow PEP 8 conventions with a few project-specific guidelines:
    - Keep descriptions clear and concise
    - Reference issue numbers when applicable
 
+## Code Quality Tools
+
+We use several tools to ensure code quality. These tools are specified in `requirements-dev.txt`.
+
+1. **Installing Development Dependencies**
+   ```bash
+   # Activate your virtual environment first
+   .\venv\Scripts\activate   # Windows
+   source venv/bin/activate  # Linux/Mac
+
+   # Install development dependencies
+   pip install -r requirements-dev.txt
+   ```
+
+2. **Linting with Pylint**
+   ```bash
+   # Lint a specific file
+   pylint src/file.py
+
+   # Lint the entire src directory
+   pylint src/
+
+   # Lint with a specific configuration
+   pylint --rcfile=.pylintrc src/
+   ```
+
+   Common pylint options:
+   - `--disable=C0111,C0103` to disable specific checks
+   - `--generate-rcfile > .pylintrc` to generate a configuration file
+   - `--errors-only` to show only errors
+
+3. **Code Formatting with Black**
+   ```bash
+   # Format a specific file
+   black src/file.py
+
+   # Format the entire src directory
+   black src/
+
+   # Check formatting without making changes
+   black --check src/
+   ```
+
+4. **Import Sorting with isort**
+   ```bash
+   # Sort imports in a specific file
+   isort src/file.py
+
+   # Sort imports in the entire src directory
+   isort src/
+
+   # Check import sorting without making changes
+   isort --check src/
+   ```
+
+5. **Static Type Checking with mypy**
+   ```bash
+   # Type check a specific file
+   mypy src/file.py
+
+   # Type check the entire src directory
+   mypy src/
+   ```
+
+6. **Running All Quality Checks**
+   ```bash
+   # Run all checks on a specific file
+   pylint src/file.py && black --check src/file.py && isort --check src/file.py && mypy src/file.py
+
+   # Run all checks on the entire src directory
+   pylint src/ && black --check src/ && isort --check src/ && mypy src/
+   ```
+
+7. **Pre-commit Hooks**
+   ```bash
+   # Install pre-commit hooks
+   pre-commit install
+
+   # Run pre-commit hooks manually
+   pre-commit run --all-files
+   ```
+
+8. **VS Code Integration**
+
+   Our project includes recommended VS Code settings for code quality tools:
+
+   ```json
+   {
+     "python.linting.enabled": true,
+     "python.linting.pylintEnabled": true,
+     "python.formatting.provider": "black",
+     "editor.formatOnSave": true
+   }
+   ```
+
+   With these settings, VS Code will automatically:
+   - Run pylint when you save a file
+   - Format code with black when you save a file
+
 ## Pull Request Process
 
 1. **Create a Branch**
@@ -150,7 +249,7 @@ When reporting issues, please include:
    ```bash
    # Run all tests
    python run_tests.py
-   
+
    # Run specific test categories
    python run_tests.py --category timing
    python run_tests.py --category integration

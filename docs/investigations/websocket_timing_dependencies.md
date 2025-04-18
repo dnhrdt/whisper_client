@@ -14,7 +14,7 @@ This document analyzes potential timing dependencies in the WebSocket tests that
 
 **Mock Test Behavior**: Our mock tests simulate an immediate connection by directly changing the state from `DISCONNECTED` to `CONNECTING` to `CONNECTED` to `READY` without any actual network operations.
 
-**Real-World Impact**: 
+**Real-World Impact**:
 - Tests that expect immediate connection establishment may fail or produce inconsistent results.
 - Race conditions may occur if code assumes the connection is established before it actually is.
 - Timeouts may be too short for real-world network conditions.

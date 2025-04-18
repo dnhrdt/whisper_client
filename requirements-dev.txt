@@ -1,0 +1,23 @@
+# Development Dependencies for WhisperClient
+# Version: 1.0
+# Timestamp: 2025-03-08 22:08 CET
+
+# Linting and Code Quality
+pylint==3.0.3         # Python linter for code quality checks
+black==24.1.1         # Code formatter for consistent style
+isort==5.13.2         # Import sorter for organized imports
+flake8==7.0.0         # Code style enforcement
+mypy==1.8.0           # Static type checking
+
+# Testing
+pytest==7.4.4         # Testing framework
+pytest-cov==4.1.0     # Coverage reporting for tests
+pytest-mock==3.12.0   # Mocking utilities for tests
+
+# Documentation
+sphinx==7.2.6         # Documentation generator
+sphinx-rtd-theme==2.0.0  # Read the Docs theme for Sphinx
+
+# Development Tools
+pre-commit==3.6.0     # Git hooks for code quality checks
+ipython==8.21.0       # Enhanced interactive Python shell for debugging

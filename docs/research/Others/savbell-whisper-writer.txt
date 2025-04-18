@@ -3168,10 +3168,10 @@ class SettingsWindow(BaseWindow):
         widget_name = f"{category}_{sub_category}_{key}_input" if sub_category else f"{category}_{key}_input"
         label_name = f"{category}_{sub_category}_{key}_label" if sub_category else f"{category}_{key}_label"
         help_name = f"{category}_{sub_category}_{key}_help" if sub_category else f"{category}_{key}_help"
-        
+
         label.setObjectName(label_name)
         help_button.setObjectName(help_name)
-        
+
         if isinstance(widget, QWidget):
             widget.setObjectName(widget_name)
         else:
@@ -3333,11 +3333,11 @@ class SettingsWindow(BaseWindow):
     def toggle_widget_visibility(self, widget, category, sub_category, key, use_api):
         if sub_category in ['api', 'local']:
             widget.setVisible(use_api if sub_category == 'api' else not use_api)
-            
+
             # Also toggle visibility of the corresponding label and help button
             label = self.findChild(QLabel, f"{category}_{sub_category}_{key}_label")
             help_button = self.findChild(QToolButton, f"{category}_{sub_category}_{key}_help")
-            
+
             if label:
                 label.setVisible(use_api if sub_category == 'api' else not use_api)
             if help_button:
@@ -3406,7 +3406,7 @@ class StatusWindow(BaseWindow):
         Initialize the status user interface.
         """
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
-        
+
         status_layout = QHBoxLayout()
         status_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -3428,7 +3428,7 @@ class StatusWindow(BaseWindow):
         status_layout.addStretch(1)
 
         self.main_layout.addLayout(status_layout)
-        
+
     def show(self):
         """
         Position the window in the bottom center of the screen and show it.
@@ -3445,7 +3445,7 @@ class StatusWindow(BaseWindow):
 
         self.move(x, y)
         super().show()
-        
+
     def closeEvent(self, event):
         """
         Emit the close signal when the window is closed.
@@ -3472,14 +3472,12 @@ class StatusWindow(BaseWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    
+
     status_window = StatusWindow()
     status_window.show()
 
     # Simulate status updates
     QTimer.singleShot(3000, lambda: status_window.statusSignal.emit('transcribing'))
     QTimer.singleShot(6000, lambda: status_window.statusSignal.emit('idle'))
-    
+
     sys.exit(app.exec_())
-
-

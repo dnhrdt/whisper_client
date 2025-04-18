@@ -7,7 +7,7 @@ This document analyzes the client-side text processing in WhisperLive and Whispe
 
 ## Data Flow
 
-1. **Server sends JSON:** 
+1. **Server sends JSON:**
    - The server sends a JSON object containing a list of transcription segments to the client.
    - Each segment contains timing information and transcribed text.
 

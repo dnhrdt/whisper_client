@@ -18,6 +18,10 @@ persistent=yes
 # List of plugins
 load-plugins=
 
+# List of C extensions allowed to be loaded
+# Used to silence C extension related warnings
+extension-pkg-allow-list=win32api,win32gui,win32clipboard
+
 # Use multiple processes to speed up Pylint
 jobs=4
 

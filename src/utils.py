@@ -1,18 +1,21 @@
 """
 Utility Functions for the Whisper Client
-Version: 1.0
-Timestamp: 2025-02-27 17:12 CET
+Version: 1.2
+Timestamp: 2025-04-15 01:09 CET
 
 This module provides utility functions for the Whisper Client.
 It includes functions for server status checking, project status updates,
 task history tracking, and displaying messages to the user.
 """
-import socket
+
 import json
 import os
+import socket
 from datetime import datetime
+
 import config
 from src import logger
+
 
 def check_server_status(host=config.WS_HOST, port=config.WS_PORT):
     """Checks if the WhisperLive Server is running"""
@@ -22,8 +25,10 @@ def check_server_status(host=config.WS_HOST, port=config.WS_PORT):
         result = sock.connect_ex((host, port))
         sock.close()
         return result == 0
-    except:
+    except Exception as e:
+        logger.debug("Error checking server status: %s", e)
         return False
+
 
 def update_project_status(description=None, changes=None, status=None, files=None):
     """Updates the project status and task history"""
@@ -31,73 +36,75 @@ def update_project_status(description=None, changes=None, status=None, files=Non
         # Update projects file
         projects_file = "projects.json"
         if os.path.exists(projects_file):
-            with open(projects_file, 'r', encoding='utf-8') as f:
+            with open(projects_file, "r", encoding="utf-8") as f:
                 projects = json.load(f)
-            
+
             # Find current project
-            project_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+            project_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
             for project in projects["projects"]:
                 if project["path"] == project_path:
                     # Update status
                     if status:
                         project["status"] = status
-                    
+
                     # Add task
                     if description and changes:
                         task = {
                             "description": description,
                             "status": "completed",
-                            "details": changes[0]["description"] if changes else None
+                            "details": changes[0]["description"] if changes else None,
                         }
                         project["current_tasks"].insert(0, task)  # Newest task first
-                    
+
                     # Update timestamp
                     current_time = datetime.now().isoformat()
                     project["last_updated"] = current_time
                     projects["meta"]["last_updated"] = current_time
                     break
-            
+
             # Save
-            with open(projects_file, 'w', encoding='utf-8') as f:
+            with open(projects_file, "w", encoding="utf-8") as f:
                 json.dump(projects, f, indent=2, ensure_ascii=False)
-    
+
     except Exception as e:
-        logger.error(f"⚠️ Error updating project status: {e}")
-    
+        logger.error("⚠️ Error updating project status: %s", e)
+
     # Update task history
     if description and changes:
         update_task_history(description, changes, "completed", files)
 
+
 def update_task_history(description, changes, status="completed", files=None):
     """Updates the task history"""
     history_file = "task_history.json"
-    
+
     try:
         # Load existing history
         if os.path.exists(history_file):
-            with open(history_file, 'r', encoding='utf-8') as f:
+            with open(history_file, "r", encoding="utf-8") as f:
                 history = json.load(f)
         else:
             history = {"tasks": []}
-        
+
         # Add new task
         task = {
             "timestamp": datetime.now().isoformat(),
             "description": description,
             "changes": changes,
-            "status": status
+            "status": status,
         }
         if files:
             task["files"] = files
-        
+
         history["tasks"].insert(0, task)  # Newest task first
-        
+
         # Save
-        with open(history_file, 'w', encoding='utf-8') as f:
+        with open(history_file, "w", encoding="utf-8") as f:
             json.dump(history, f, indent=2, ensure_ascii=False)
-            
+
     except Exception as e:
-        logger.error(f"⚠️ Error updating task history: {e}")
+        logger.error("⚠️ Error updating task history: %s", e)
+
 
 def show_startup_message():
     """Shows the startup message"""
@@ -107,11 +114,12 @@ def show_startup_message():
 ⌨️  Press {config.HOTKEY_TOGGLE_RECORDING} to start/stop recording
 ⚡ Press {config.HOTKEY_EXIT} to exit
 --------------------------------------------------"""
-    
+
     # Only send to logger
-    for line in startup_msg.split('\n'):
+    for line in startup_msg.split("\n"):
         if line.strip():
             logger.info(line)
+
 
 def show_server_error():
     """Shows error message when server is not reachable"""
@@ -128,8 +136,8 @@ Please start the server with one of the following commands:
    docker run -p 9090:9090 whisperlive
 
 Then restart this client."""
-    
+
     # Only send to logger
-    for line in error_msg.split('\n'):
+    for line in error_msg.split("\n"):
         if line.strip():
             logger.error(line)

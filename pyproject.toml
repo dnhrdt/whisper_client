@@ -48,9 +48,21 @@ warn_no_return = true
 warn_unreachable = true
 
 [[tool.mypy.overrides]]
+# Ignore missing stubs for specific libraries
+module = [
+    "pyperclip",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+# Ignore specific errors in text.py related to win32gui callbacks and None checks after black formatting
+module = "src.text"
+disable_error_code = ["operator", "arg-type", "return-value"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

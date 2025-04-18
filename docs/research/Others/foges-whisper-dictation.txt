@@ -294,7 +294,7 @@ class StatusBarApp(rumps.App):
                 callback = self.change_language if lang != self.current_language else None
                 menu.append(rumps.MenuItem(lang, callback=callback))
             menu.append(None)
-            
+
         self.menu = menu
         self.menu['Stop Recording'].set_callback(None)
 
@@ -328,7 +328,7 @@ class StatusBarApp(rumps.App):
     def stop_app(self, _):
         if not self.started:
             return
-        
+
         if self.timer is not None:
             self.timer.cancel()
 
@@ -399,10 +399,10 @@ if __name__ == "__main__":
     model_name = args.model_name
     model = load_model(model_name)
     print(f"{model_name} model loaded")
-    
+
     transcriber = SpeechTranscriber(model)
     recorder = Recorder(transcriber)
-    
+
     app = StatusBarApp(recorder, args.language, args.max_time)
     if args.k_double_cmd:
         key_listener = DoubleCommandKeyListener(app)
@@ -413,6 +413,3 @@ if __name__ == "__main__":
 
     print("Running... ")
     app.run()
-
-
-

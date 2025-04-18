@@ -118,7 +118,7 @@ The server supports two backends `faster_whisper` and `tensorrt`. If running `te
 ```bash
 python3 run_server.py --port 9090 \
                       --backend faster_whisper
-  
+
 # running with custom model
 python3 run_server.py --port 9090 \
                       --backend faster_whisper \
@@ -160,7 +160,7 @@ If you don't want this, set `--no_single_model`.
   - `translate`: If set to `True` then translate from any language to `en`.
   - `model`: Whisper model size.
   - `use_vad`: Whether to use `Voice Activity Detection` on the server.
-  - `save_output_recording`: Set to True to save the microphone input as a `.wav` file during live transcription. This option is helpful for recording sessions for later playback or analysis. Defaults to `False`. 
+  - `save_output_recording`: Set to True to save the microphone input as a `.wav` file during live transcription. This option is helpful for recording sessions for later playback or analysis. Defaults to `False`.
   - `output_recording_filename`: Specifies the `.wav` file path where the microphone input will be saved if `save_output_recording` is set to `True`.
   - `max_clients`: Specifies the maximum number of clients the server should allow. Defaults to 4.
   - `max_connection_time`: Maximum connection time for each client in seconds. Defaults to 600.
@@ -215,7 +215,7 @@ client(hls_url="http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_1xtra/b
   docker run -it --gpus all -p 9090:9090 ghcr.io/collabora/whisperlive-gpu:latest
   ```
 
-  - TensorRT. 
+  - TensorRT.
   ```bash
   docker run -p 9090:9090 --runtime=nvidia --gpus all --entrypoint /bin/bash -it ghcr.io/collabora/whisperlive-tensorrt
 
@@ -662,10 +662,10 @@ async function startCapture(options) {
 
       await sendMessageToTab(optionTab.id, {
         type: "start_capture",
-        data: { 
-          currentTabId: currentTab.id, 
-          host: options.host, 
-          port: options.port, 
+        data: {
+          currentTabId: currentTab.id,
+          host: options.host,
+          port: options.port,
           multilingual: options.useMultilingual,
           language: options.language,
           task: options.task,
@@ -897,7 +897,7 @@ function remove_element() {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const { type, data } = request;
-    
+
     if (type === "STOP") {
         remove_element();
         sendResponse({data: "STOPPED"});
@@ -920,7 +920,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         text += message[i].text + ' ';
     }
     text = text.replace(/(\r\n|\n|\r)/gm, "");
-    
+
     var elem = document.getElementById('t3');
     elem.innerHTML = text;
 
@@ -931,7 +931,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     text_segments = [];
     text_segments = get_lines(elem, line_height);
-    
+
     elem.innerHTML = '';
 
     if (text_segments.length > 2) {
@@ -975,7 +975,7 @@ File: Audio-Transcription-Chrome/manifest.json
     "name": "Audio Transcription",
     "version": "1.0.0",
     "description": "This extension captures the audio on the current tab, sends it to a server for transcription and shows the transcription in Real-time.",
-    
+
     "options_page": "options.html",
     "background": {
         "service_worker": "background.js"
@@ -1114,7 +1114,7 @@ async function startRecord(option) {
     const socket = new WebSocket(`ws://${option.host}:${option.port}/`);
     let isServerReady = false;
     let language = option.language;
-    socket.onopen = function(e) { 
+    socket.onopen = function(e) {
       socket.send(
         JSON.stringify({
           uid: uuid,
@@ -1130,25 +1130,25 @@ async function startRecord(option) {
       const data = JSON.parse(event.data);
       if (data["uid"] !== uuid)
         return;
-      
+
       if (data["status"] === "WAIT"){
         await sendMessageToTab(option.currentTabId, {
           type: "showWaitPopup",
           data: data["message"],
         });
-        chrome.runtime.sendMessage({ action: "toggleCaptureButtons", data: false }) 
+        chrome.runtime.sendMessage({ action: "toggleCaptureButtons", data: false })
         chrome.runtime.sendMessage({ action: "stopCapture" })
         return;
       }
-        
+
       if (isServerReady === false){
         isServerReady = true;
         return;
       }
-      
+
       if (language === null) {
         language = data["language"];
-        
+
         // send message to popup.js to update dropdown
         // console.log(language);
         chrome.runtime.sendMessage({
@@ -1160,7 +1160,7 @@ async function startRecord(option) {
       }
 
       if (data["message"] === "DISCONNECT"){
-        chrome.runtime.sendMessage({ action: "toggleCaptureButtons", data: false })        
+        chrome.runtime.sendMessage({ action: "toggleCaptureButtons", data: false })
         return;
       }
 
@@ -1170,7 +1170,7 @@ async function startRecord(option) {
       });
     };
 
-    
+
     const audioDataCache = [];
     const context = new AudioContext();
     const mediaStream = context.createMediaStreamSource(stream);
@@ -1460,8 +1460,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     chrome.runtime.sendMessage(
-      { 
-        action: "startCapture", 
+      {
+        action: "startCapture",
         tabId: currentTab.id,
         host: host,
         port: port,
@@ -1511,7 +1511,7 @@ document.addEventListener("DOMContentLoaded", function () {
     useVadCheckbox.disabled = isCapturing;
     modelSizeDropdown.disabled = isCapturing;
     languageDropdown.disabled = isCapturing;
-    taskDropdown.disabled = isCapturing; 
+    taskDropdown.disabled = isCapturing;
     startButton.classList.toggle("disabled", isCapturing);
     stopButton.classList.toggle("disabled", !isCapturing);
   }
@@ -1549,7 +1549,7 @@ document.addEventListener("DOMContentLoaded", function () {
   chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.action === "updateSelectedLanguage") {
       const detectedLanguage = request.detectedLanguage;
-  
+
       if (detectedLanguage) {
         languageDropdown.value = detectedLanguage;
         chrome.storage.local.set({ selectedLanguage: detectedLanguage });
@@ -1563,7 +1563,7 @@ document.addEventListener("DOMContentLoaded", function () {
       chrome.storage.local.set({ capturingState: { isCapturing: false } })
     }
   });
-  
+
 });
 
 
@@ -1675,11 +1675,11 @@ label {
 }
 
 .checkbox-container {
-  padding: 10px; 
+  padding: 10px;
 }
 
 .dropdown-container {
-  padding: 10px; 
+  padding: 10px;
 }
 
 
@@ -1702,7 +1702,7 @@ We use OpenAI-whisper model to process the audio continuously and send the trans
 
 
 ## Real time transcription with OpenAI-whisper
-This Firefox extension allows you to send audio from your browser to a server for transcribing the audio in real time. 
+This Firefox extension allows you to send audio from your browser to a server for transcribing the audio in real time.
 
 ## Implementation Details
 
@@ -1757,7 +1757,7 @@ browser.runtime.onMessage.addListener(async function(request, sender, sendRespon
       console.error("Error updateSelectedLanguage:", error);
     }
   }
-  if (action === "toggleCaptureButtons") {    
+  if (action === "toggleCaptureButtons") {
     try {
       await browser.storage.local.set({ capturingState: { isCapturing: false } });
       browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
@@ -1776,12 +1776,12 @@ browser.runtime.onMessage.addListener(async function(request, sender, sendRespon
         })
         .catch((error) => {
           console.error("Error retrieving active tab:", error);
-        }); 
+        });
     } catch (error) {
       console.error(error);
     }
   }
-  
+
   if (action === "showPopup") {
     try{
       await browser.tabs.query({ active: true, currentWindow: true })
@@ -1873,7 +1873,7 @@ function startRecording(data) {
     language = data.language;
 
     const uuid = generateUUID();
-    socket.onopen = function(e) { 
+    socket.onopen = function(e) {
       socket.send(
         JSON.stringify({
             uid: uuid,
@@ -1890,12 +1890,12 @@ function startRecording(data) {
       const data = JSON.parse(event.data);
       if (data["uid"] !== uuid)
         return;
-      
+
       if (data["status"] === "WAIT"){
         await browser.runtime.sendMessage({ action: "showPopup", data: data["message"] })
         return;
       }
-      
+
       if (!isServerReady && data["message"] === "SERVER_READY"){
         isServerReady = true;
         return;
@@ -1903,12 +1903,12 @@ function startRecording(data) {
 
       if (language === null ){
         language = data["language"];
-        await browser.runtime.sendMessage({ action: "updateSelectedLanguage", data: language })      
+        await browser.runtime.sendMessage({ action: "updateSelectedLanguage", data: language })
         return
       }
 
       if (data["message"] === "DISCONNECT"){
-        await browser.runtime.sendMessage({ action: "toggleCaptureButtons", data: false })        
+        await browser.runtime.sendMessage({ action: "toggleCaptureButtons", data: false })
         return
       }
 
@@ -1934,7 +1934,7 @@ function startRecording(data) {
         const audioData16kHz = resampleTo16kHZ(inputData, audioContext.sampleRate);
 
         audioDataCache.push(inputData);
-        
+
         socket.send(audioData16kHz);
       };
 
@@ -2117,13 +2117,13 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       isCapturing = true;
       startRecording(data);
   } else if (action === "stopCapture") {
-    
+
     isCapturing = false;
     if (socket) {
         socket.close();
         socket = null;
     }
-    
+
     if (audioContext) {
         audioContext.close();
         audioContext = null;
@@ -2134,36 +2134,36 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     remove_element();
 
   } else if (action === "showWaitPopup") {
-    
+
     initPopupElement();
 
     showPopup(`Estimated wait time ~ ${Math.round(data)} minutes`);
 
   } else if (action === "show_transcript"){
     if (!isCapturing) return;
-    init_element();    
+    init_element();
     message = JSON.parse(data);
     message = message["segments"];
-    
+
     var text = '';
     for (var i = 0; i < message.length; i++) {
         text += message[i].text + ' ';
     }
     text = text.replace(/(\r\n|\n|\r)/gm, "");
-    
+
     var elem = document.getElementById('t3');
     elem.innerHTML = text;
-  
+
     var line_height_style = getStyle('t3', 'line-height');
     var line_height = parseInt(line_height_style.substring(0, line_height_style.length - 2));
     var divHeight = elem.offsetHeight;
     var lines = divHeight / line_height;
-  
+
     text_segments = [];
     text_segments = get_lines(elem, line_height);
-    
+
     elem.innerHTML = '';
-  
+
     if (text_segments.length > 2) {
         for (var i = 0; i < 3; i++) {
             document.getElementById('t' + i).innerHTML = text_segments[text_segments.length - 3 + i];
@@ -2173,7 +2173,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             document.getElementById('t' + i).innerHTML = '';
         }
     }
-  
+
     if (text_segments.length <= 2) {
         for (var i = 0; i < text_segments.length; i++) {
             document.getElementById('t' + i).innerHTML = text_segments[i];
@@ -2183,7 +2183,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             document.getElementById('t' + i).innerHTML = text_segments[text_segments.length - 3 + i];
         }
     }
-  
+
     for (var i = 1; i < 3; i++)
     {
         var parent_elem = document.getElementById('t' + (i - 1));
@@ -2400,7 +2400,7 @@ document.addEventListener("DOMContentLoaded", function() {
   let selectedLanguage = null;
   let selectedTask = taskDropdown.value;
   let selectedModelSize = modelSizeDropdown.value;
-  
+
 
   browser.storage.local.get("capturingState")
     .then(function(result) {
@@ -2418,7 +2418,7 @@ document.addEventListener("DOMContentLoaded", function() {
       // Enable the startButton
       startButton.disabled = false;
     });
-  
+
   browser.storage.local.get("useServerState", ({ useServerState }) => {
     if (useServerState !== undefined) {
       useServerCheckbox.checked = useServerState;
@@ -2465,9 +2465,9 @@ document.addEventListener("DOMContentLoaded", function() {
     browser.tabs.query({ active: true, currentWindow: true })
       .then(function(tabs) {
         browser.tabs.sendMessage(
-          tabs[0].id, 
-          { 
-            action: "startCapture", 
+          tabs[0].id,
+          {
+            action: "startCapture",
             data: {
               host: host,
               port: port,
@@ -2475,7 +2475,7 @@ document.addEventListener("DOMContentLoaded", function() {
               task: selectedTask,
               modelSize: selectedModelSize,
               useVad: useVadCheckbox.checked,
-            } 
+            }
           });
         toggleCaptureButtons(true);
         browser.storage.local.set({ capturingState: { isCapturing: true } })
@@ -2516,7 +2516,7 @@ document.addEventListener("DOMContentLoaded", function() {
     useVadCheckbox.disabled = isCapturing;
     modelSizeDropdown.disabled = isCapturing;
     languageDropdown.disabled = isCapturing;
-    taskDropdown.disabled = isCapturing; 
+    taskDropdown.disabled = isCapturing;
     startButton.classList.toggle("disabled", isCapturing);
     stopButton.classList.toggle("disabled", !isCapturing);
   }
@@ -2554,7 +2554,7 @@ document.addEventListener("DOMContentLoaded", function() {
   browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "updateSelectedLanguage") {
       const detectedLanguage = request.data;
-  
+
       if (detectedLanguage) {
         languageDropdown.value = detectedLanguage;
         selectedLanguage = detectedLanguage;
@@ -2683,11 +2683,11 @@ label {
 }
 
 .checkbox-container {
-  padding: 10px; 
+  padding: 10px;
 }
 
 .dropdown-container {
-  padding: 10px; 
+  padding: 10px;
 }
 
 
@@ -2809,22 +2809,22 @@ File: docs/html/genindex.html
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
-   
+
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
+
+
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head><body>
-  
+
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          
+
 
           <div class="body" role="main">
-            
+
 
 <h1 id="index">Index</h1>
 
@@ -2843,7 +2843,7 @@ File: docs/html/genindex.html
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#W"><strong>W</strong></a>
- 
+
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
@@ -3017,7 +3017,7 @@ File: docs/html/genindex.html
 
 
           </div>
-          
+
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -3064,16 +3064,16 @@ File: docs/html/genindex.html
     </div>
     <div class="footer">
       &copy;2023, Collabora.
-      
+
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
+
     </div>
 
-    
 
-    
+
+
   </body>
 </html>
 
@@ -3095,22 +3095,22 @@ File: docs/html/index.html
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-   
+
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
+
+
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head><body>
-  
+
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          
+
 
           <div class="body" role="main">
-            
+
   <section id="welcome-to-whisper-live-documentation">
 <h1>Welcome to Whisper Live documentation!<a class="headerlink" href="#welcome-to-whisper-live-documentation" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
@@ -3206,8 +3206,8 @@ as a single string.</p>
 transcribed segments to the client via a WebSocket connection.</p>
 <p>If the client’s language is not detected, it waits for 30 seconds of audio input to make a language prediction.
 It utilizes the Whisper ASR model to transcribe the audio, continuously processing and streaming results. Segments
-are sent to the client in real-time, and a history of segments is maintained to provide context.Pauses in speech 
-(no output from Whisper) are handled by showing the previous output for a set duration. A blank segment is added if 
+are sent to the client in real-time, and a history of segments is maintained to provide context.Pauses in speech
+(no output from Whisper) are handled by showing the previous output for a set duration. A blank segment is added if
 there is no speech for a specified duration to indicate a pause.</p>
 <dl class="simple">
 <dt>Raises:</dt><dd><p>Exception: If there is an issue with audio processing or WebSocket communication.</p>
@@ -3221,11 +3221,11 @@ there is no speech for a specified duration to indicate a pause.</p>
 <dd><p>Processes the segments from whisper. Appends all the segments to the list
 except for the last segment assuming that it is incomplete.</p>
 <p>Updates the ongoing transcript with transcribed segments, including their start and end times.
-Complete segments are appended to the transcript in chronological order. Incomplete segments 
-(assumed to be the last one) are processed to identify repeated content. If the same incomplete 
+Complete segments are appended to the transcript in chronological order. Incomplete segments
+(assumed to be the last one) are processed to identify repeated content. If the same incomplete
 segment is seen multiple times, it updates the offset and appends the segment to the transcript.
 A threshold is used to detect repeated content and ensure it is only included once in the transcript.
-The timestamp offset is updated based on the duration of processed segments. The method returns the 
+The timestamp offset is updated based on the duration of processed segments. The method returns the
 last processed segment, allowing it to be sent to the client for real-time updates.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>segments(dict) : dictionary of segments as returned by whisper
@@ -3309,7 +3309,7 @@ port (int): The port number to bind the server.</p>
 <dt class="sig sig-object py" id="whisper_live.client.Client.bytes_to_float_array">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bytes_to_float_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">audio_bytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#whisper_live.client.Client.bytes_to_float_array" title="Link to this definition">¶</a></dt>
 <dd><p>Convert audio data from bytes to a NumPy float array.</p>
-<p>It assumes that the audio data is in 16-bit PCM format. The audio data is normalized to 
+<p>It assumes that the audio data is in 16-bit PCM format. The audio data is normalized to
 have values between -1 and 1.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>audio_bytes (bytes): Audio data in bytes.</p>
@@ -3323,7 +3323,7 @@ have values between -1 and 1.</p>
 <dt class="sig sig-object py" id="whisper_live.client.Client.close_websocket">
 <span class="sig-name descname"><span class="pre">close_websocket</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#whisper_live.client.Client.close_websocket" title="Link to this definition">¶</a></dt>
 <dd><p>Close the WebSocket connection and join the WebSocket thread.</p>
-<p>First attempts to close the WebSocket connection using <cite>self.client_socket.close()</cite>. After 
+<p>First attempts to close the WebSocket connection using <cite>self.client_socket.close()</cite>. After
 closing the connection, it joins the WebSocket thread to ensure proper termination.</p>
 </dd></dl>
 
@@ -3368,8 +3368,8 @@ language selection, and task type.</p>
 <span class="sig-name descname"><span class="pre">play_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#whisper_live.client.Client.play_file" title="Link to this definition">¶</a></dt>
 <dd><p>Play an audio file and send it to the server for processing.</p>
 <p>Reads an audio file, plays it through the audio output, and simultaneously sends
-the audio data to the server for processing. It uses PyAudio to create an audio 
-stream for playback. The audio data is read from the file in chunks, converted to 
+the audio data to the server for processing. It uses PyAudio to create an audio
+stream for playback. The audio data is read from the file in chunks, converted to
 floating-point format, and sent to the server using WebSocket communication.
 This method is typically used when you want to process pre-recorded audio and send it
 to the server in real-time.</p>
@@ -3388,7 +3388,7 @@ connection, and simultaneously saves it to multiple WAV files in chunks. It stop
 the <cite>RECORD_SECONDS</cite> duration is reached or when the <cite>RECORDING</cite> flag is set to <cite>False</cite>.</p>
 <p>Audio data is saved in chunks to the “chunks” directory. Each chunk is saved as a separate WAV file.
 The recording will continue until the specified duration is reached or until the <cite>RECORDING</cite> flag is set to <cite>False</cite>.
-The recording process can be interrupted by sending a KeyboardInterrupt (e.g., pressing Ctrl+C). After recording, 
+The recording process can be interrupted by sending a KeyboardInterrupt (e.g., pressing Ctrl+C). After recording,
 the method combines all the saved audio chunks into the specified <cite>out_file</cite>.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>out_file (str, optional): The name of the output WAV file to save the entire recording. Default is “output_recording.wav”.</p>
@@ -3410,7 +3410,7 @@ the method combines all the saved audio chunks into the specified <cite>out_file
 <dt class="sig sig-object py" id="whisper_live.client.Client.write_audio_frames_to_file">
 <span class="sig-name descname"><span class="pre">write_audio_frames_to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#whisper_live.client.Client.write_audio_frames_to_file" title="Link to this definition">¶</a></dt>
 <dd><p>Write audio frames to a WAV file.</p>
-<p>The WAV file is created or overwritten with the specified name. The audio frames should be 
+<p>The WAV file is created or overwritten with the specified name. The audio frames should be
 in the correct format and match the specified channel, sample width, and sample rate.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>frames (bytes): The audio frames to be written to the file.
@@ -3423,7 +3423,7 @@ file_name (str): The name of the WAV file to which the frames will be written.</
 <dt class="sig sig-object py" id="whisper_live.client.Client.write_output_recording">
 <span class="sig-name descname"><span class="pre">write_output_recording</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_audio_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#whisper_live.client.Client.write_output_recording" title="Link to this definition">¶</a></dt>
 <dd><p>Combine and save recorded audio chunks into a single WAV file.</p>
-<p>The individual audio chunk files are expected to be located in the “chunks” directory. Reads each chunk 
+<p>The individual audio chunk files are expected to be located in the “chunks” directory. Reads each chunk
 file, appends its audio data to the final recording, and then deletes the chunk file. After combining
 and saving, the final recording is stored in the specified <cite>out_file</cite>.</p>
 <dl class="simple">
@@ -3486,7 +3486,7 @@ sr (int): The sample rate to resample the audio if necessary</p>
 
 
           </div>
-          
+
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -3533,19 +3533,19 @@ sr (int): The sample rate to resample the audio if necessary</p>
     </div>
     <div class="footer">
       &copy;2023, Collabora.
-      
+
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
+
       |
       <a href="_sources/index.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 
-    
 
-    
+
+
   </body>
 </html>
 
@@ -3567,24 +3567,24 @@ File: docs/html/py-modindex.html
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 
-   
+
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
+
+
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
 
 
   </head><body>
-  
+
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          
+
 
           <div class="body" role="main">
-            
+
 
    <h1>Python Module Index</h1>
 
@@ -3616,7 +3616,7 @@ File: docs/html/py-modindex.html
 
 
           </div>
-          
+
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -3663,16 +3663,16 @@ File: docs/html/py-modindex.html
     </div>
     <div class="footer">
       &copy;2023, Collabora.
-      
+
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
+
     </div>
 
-    
 
-    
+
+
   </body>
 </html>
 
@@ -3688,7 +3688,7 @@ File: docs/html/search.html
     <title>Search &#8212; whisper_live  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
-    
+
     <script src="_static/documentation_options.js?v=5929fcd5"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -3697,26 +3697,26 @@ File: docs/html/search.html
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="#" />
   <script src="searchindex.js" defer></script>
-  
-   
+
+
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
+
+
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
 
   </head><body>
-  
+
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          
+
 
           <div class="body" role="main">
-            
+
   <h1 id="search-documentation">Search</h1>
-  
+
   <noscript>
   <div class="admonition warning">
   <p>
@@ -3725,29 +3725,29 @@ File: docs/html/search.html
   </p>
   </div>
   </noscript>
-  
-  
+
+
   <p>
     Searching for multiple words only shows matches that contain
     all words.
   </p>
-  
-  
+
+
   <form action="" method="get">
     <input type="text" name="q" aria-labelledby="search-documentation" value="" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
     <input type="submit" value="search" />
     <span id="search-progress" style="padding-left: 10px"></span>
   </form>
-  
-  
-  
+
+
+
   <div id="search-results">
-  
+
   </div>
-  
+
 
           </div>
-          
+
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -3784,16 +3784,16 @@ File: docs/html/search.html
     </div>
     <div class="footer">
       &copy;2023, Collabora.
-      
+
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
+
     </div>
 
-    
 
-    
+
+
   </body>
 </html>
 
@@ -6796,7 +6796,7 @@ download_and_build_model() {
     python3 convert_checkpoint.py \
         $( [[ "$weight_only_precision" == "int8" || "$weight_only_precision" == "int4" ]] && echo "--use_weight_only --weight_only_precision $weight_only_precision" ) \
         --output_dir "$checkpoint_dir" --model_name "$model_name"
-    
+
     echo "Building encoder for $model_name..."
     trtllm-build \
         --checkpoint_dir "${checkpoint_dir}/encoder" \
@@ -6808,7 +6808,7 @@ download_and_build_model() {
         --bert_attention_plugin "$inference_precision" \
         --max_input_len 3000 \
         --max_seq_len 3000
-    
+
     echo "Building decoder for $model_name..."
     trtllm-build \
         --checkpoint_dir "${checkpoint_dir}/decoder" \
@@ -7094,7 +7094,7 @@ class TestServerInferenceAccuracy(unittest.TestCase):
         cls.mock_pyaudio_patch = mock.patch('pyaudio.PyAudio')
         cls.mock_pyaudio = cls.mock_pyaudio_patch.start()
         cls.mock_pyaudio.return_value.open.return_value = mock.MagicMock()
-        
+
         cls.server_process = subprocess.Popen(["python", "run_server.py"])
         time.sleep(2)
 
@@ -7621,7 +7621,7 @@ class TranscriptionTeeClient:
                         time.sleep(chunk_duration)
                     else:
                         self.stream.write(data)
-    
+
                 wavfile.close()
 
                 for client in self.clients:
@@ -8660,7 +8660,7 @@ class ServeClientTensorRT(ServeClientBase):
             self.transcript.append({"text": last_segment + " "})
         elif self.transcript[-1]["text"].strip() != last_segment:
             self.transcript.append({"text": last_segment + " "})
-        
+
         with self.lock:
             self.timestamp_offset += duration
 
@@ -8755,7 +8755,7 @@ class ServeClientFasterWhisper(ServeClientBase):
         if self.model_size_or_path is None:
             return
         logging.info(f"Using Device={device} with precision {self.compute_type}")
-    
+
         try:
             if single_model:
                 if ServeClientFasterWhisper.SINGLE_MODEL is None:
@@ -9040,7 +9040,7 @@ class ServeClientFasterWhisper(ServeClientBase):
         if self.current_out.strip() == self.prev_out.strip() and self.current_out != '':
             self.same_output_count += 1
 
-            # if we remove the audio because of same output on the nth reptition we might remove the 
+            # if we remove the audio because of same output on the nth reptition we might remove the
             # audio thats not yet transcribed so, capturing the time when it was repeated for the first time
             if self.end_time_for_same_output is None:
                 self.end_time_for_same_output = segments[-1].end
@@ -10144,7 +10144,7 @@ jobs:
         python-version: [3.8, 3.9, '3.10', 3.11, 3.12]
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -10159,21 +10159,21 @@ jobs:
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements/server.txt', 'requirements/client.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-${{ matrix.python-version }}-
-      
+
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y portaudio19-dev
-      
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements/server.txt --extra-index-url https://download.pytorch.org/whl/cpu
           pip install -r requirements/client.txt
-      
+
       - name: Run tests
         run: |
           echo "Running tests with Python ${{ matrix.python-version }}"
           python -m unittest discover -s tests
-  
+
   check-code-format:
     runs-on: ubuntu-22.04
     strategy:
@@ -10206,7 +10206,7 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v1
         with:
@@ -10224,7 +10224,7 @@ jobs:
           file: docker/Dockerfile.cpu
           push: true
           tags: ghcr.io/collabora/whisperlive-cpu:latest
-  
+
   build-and-push-docker-tensorrt:
     needs: [run-tests, check-code-format]
     timeout-minutes: 60
@@ -10322,5 +10322,3 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-
-

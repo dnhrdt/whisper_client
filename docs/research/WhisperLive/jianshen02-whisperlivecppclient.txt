@@ -80,7 +80,7 @@ target_link_libraries(microphone_live
     ${SAMPLERATE_LIBRARIES}
     "/usr/lib/x86_64-linux-gnu/libportaudio.so"  # 直接指定 PortAudio 库的位置
     "/usr/lib/x86_64-linux-gnu/librtaudio.so"  # 直接指定 RtAudio 库的位置
-    "/usr/lib/x86_64-linux-gnu/libncursesw.so"  # 直接指定 ncursesw 库的位置 
+    "/usr/lib/x86_64-linux-gnu/libncursesw.so"  # 直接指定 ncursesw 库的位置
     Boost::log
 )
 
@@ -938,14 +938,14 @@ void handle_receive(websocket::stream<tcp::socket>& ws, boost::beast::multi_buff
             try {
                 auto json_message = json::parse(message);
                 // BOOST_LOG_TRIVIAL(info) << "Parsed JSON successfully.";
-                
+
                 if (json_message.contains("segments") && json_message["segments"].is_array()) {
                     for (auto& segment : json_message["segments"]) {
                         // BOOST_LOG_TRIVIAL(debug) << "Debug: Entered process_segment function";
                         process_segment(segment);  // 处理每个段落
                     }
                 }
-                
+
             } catch (const json::exception& e) {
                 BOOST_LOG_TRIVIAL(error) << "JSON parsing error: " << e.what();
             }
@@ -1025,6 +1025,3 @@ int main() {
 
     return 0;
 }
-
-
-

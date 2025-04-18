@@ -50,22 +50,22 @@ Directory structure:
 File: README.md
 ================================================
 <div align="center">
-<h1 align="center"> Whisper Flow </h1> 
+<h1 align="center"> Whisper Flow </h1>
 <h3>Real-Time Transcription Using OpenAI Whisper</br></h3>
 <img src="https://img.shields.io/badge/Progress-100%25-red"> <img src="https://img.shields.io/badge/Feedback-Welcome-green">
 </br>
 </br>
 <kbd>
-<img src="https://github.com/dimastatz/whisper-flow/blob/da8b67c6180566b987854b2fb94670fee92e6682/docs/imgs/whisper-flow.png?raw=true" width="256px"> 
+<img src="https://github.com/dimastatz/whisper-flow/blob/da8b67c6180566b987854b2fb94670fee92e6682/docs/imgs/whisper-flow.png?raw=true" width="256px">
 </kbd>
 </div>
 
 ## About The Project
 
-### OpenAI Whisper 
+### OpenAI Whisper
 OpenAI [Whisper](https://github.com/openai/whisper) is a versatile speech recognition model designed for general use. Trained on a vast and varied audio dataset, Whisper can handle tasks such as multilingual speech recognition, speech translation, and language identification. It is commonly used for batch transcription, where you provide the entire audio or video file to Whisper, which then converts the speech into text. This process is not done in real-time; instead, Whisper processes the files and returns the text afterward, similar to handing over a recording and receiving the transcript later.
 
-### Whisper Flow 
+### Whisper Flow
 Using Whisper Flow, you can generate real-time transcriptions for your media content. Unlike batch transcriptions, where media files are uploaded and processed, streaming media is delivered to Whisper Flow in real time, and the service returns a transcript immediately.
 
 ### What is Streaming
@@ -75,7 +75,7 @@ Streaming content is sent as a series of sequential data packets, or 'chunks,' w
 In scenarios involving time-streaming, it's typical to perform operations on data within specific time frames known as temporal windows. One common approach is using the [tumbling window](https://learn.microsoft.com/en-us/azure/stream-analytics/stream-analytics-window-functions#tumbling-window) technique, which involves gathering events into segments until a certain condition is met.
 
 <div align="center">
-<img src="https://github.com/dimastatz/whisper-flow/blob/main/docs/imgs/streaming.png?raw=true"> 
+<img src="https://github.com/dimastatz/whisper-flow/blob/main/docs/imgs/streaming.png?raw=true">
 <div>Tumbling Window</div>
 </div><br/>
 
@@ -225,7 +225,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 RUN rm -rf .venv & python3 -m venv .venv & source .venv/bin/activate \
-    & pip install --upgrade pip & pip install -r ./requirements.txt \ 
+    & pip install --upgrade pip & pip install -r ./requirements.txt \
     & black whisperflow tests & pylint --fail-under=9.9 whisperflow tests \
     & pytest --ignore=tests/benchmark --ignore=tests/audio --cov-fail-under=95 --cov whisperflow -v tests
 
@@ -290,7 +290,7 @@ abort()
 }
 
 if [ "$#" -eq 0 ]; then
-    echo "No arguments provided. Usage: 
+    echo "No arguments provided. Usage:
     1. '-local' to build local environment
     2. '-docker' to build and run docker container
     3. '-test' to run linter, formatter and tests
@@ -313,7 +313,7 @@ elif [ $1 = "-local" ]; then
 elif [ $1 = "-test" ]; then
     trap 'abort' 0
     set -e
-    
+
     echo "Running format, linter and tests"
     source .venv/bin/activate
     black whisperflow tests
@@ -329,7 +329,7 @@ elif [ $1 = "-docker" ]; then
     docker run --name whisperflow-container -p 8888:8888 -d whisperflow-image
 elif [ $1 = "-benchmark" ]; then
     echo "Running WhisperFlow Server"
-    kill $(lsof -t -i:8181) 
+    kill $(lsof -t -i:8181)
     nohup uvicorn whisperflow.fast_server:app --host 0.0.0.0 --port 8181 &
     sleep 2s
     echo "Running WhisperFlow benchmark tests"
@@ -337,7 +337,7 @@ elif [ $1 = "-benchmark" ]; then
     kill $(lsof -t -i:8181)
 elif [ $1 = "-run-server" ]; then
     echo "Running WhisperFlow server"
-    kill $(lsof -t -i:8181) 
+    kill $(lsof -t -i:8181)
     uvicorn whisperflow.fast_server:app --host 0.0.0.0 --port 8181
 elif [ $1 = "-test-package" ]; then
     echo "Running WhisperFlow package setup"
@@ -412,7 +412,7 @@ File: docs/demo1.md
 "First, let’s start by cloning the Whisper-Flow repository from GitHub. This is a simple step, and here’s the command I’ll use:"
 
 ```bash
-git clone https://github.com/dimastatz/whisper-flow.git 
+git clone https://github.com/dimastatz/whisper-flow.git
 ```
 "This gives us access to all the necessary files to run Whisper-Flow locally."
 
@@ -420,9 +420,9 @@ git clone https://github.com/dimastatz/whisper-flow.git
 "Now that we have the repository, I’m going to set up the local environment. Here’s what I’ll do:"
 ```bash
 Copy code
-cd whisper-flow  
-./run.sh -local  
-source .venv/bin/activate  
+cd whisper-flow
+./run.sh -local
+source .venv/bin/activate
 ```
 
 "This creates a virtual environment and installs all dependencies. We’re almost ready to run the server."
@@ -449,7 +449,7 @@ uvicorn whisperflow.fast_server:app --host 0.0.0.0 --port 8181
 ### Slide 6: Conclusion
 "So, in this demo, we’ve seen how Whisper-Flow transcribes audio in real-time, showcasing both partial and non-partial results with minimal latency. This capability is key for use cases where immediate feedback and accuracy are critical, such as live captioning or voice-assisted applications."
 "Thank you for your attention, and I’m happy to answer any questions!"
- 
+
 
 ================================================
 File: docs/metavox.md
@@ -1078,8 +1078,8 @@ if __name__ == "__main__":
 ================================================
 File: tests/examples/mic_transcribe.py
 ================================================
-""" 
-a test app that streams 
+"""
+a test app that streams
 audio  from the mic to whisper flow
 requires pip install PyAudio
 """
@@ -1202,9 +1202,9 @@ __version__ = "1.0.0"
 ================================================
 File: whisperflow/chat_room.py
 ================================================
-""" 
-Implements conversation loop: capture 
-audio -> speech to text -> custom action -> text to speech -> play audio 
+"""
+Implements conversation loop: capture
+audio -> speech to text -> custom action -> text to speech -> play audio
 """
 
 import queue
@@ -1539,6 +1539,3 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file Dockerfile.test --tag whisperflow-docker:$(date +%s)
-
-      
-

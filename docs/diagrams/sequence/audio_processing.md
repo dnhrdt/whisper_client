@@ -17,17 +17,17 @@ sequenceDiagram
     Note right of AM: ✓ AUDIO_CHUNK: 4096<br/>✓ AUDIO_RATE: 16000<br/>✓ FORMAT: paInt16<br/>✓ BUFFER: 1.0s
 
     WS->>S: stream_audio
-    
+
     Note over S,W: ❓ Unbekannte Server-Verarbeitung
     Note over S,W: • Wie groß ist der interne Buffer?<br/>• Wann startet die Verarbeitung?<br/>• Gibt es Batch-Processing?
 
     S->>W: process_audio
-    
+
     Note over W: ❓ Whisper-Parameter
     Note over W: • Modell-Konfiguration?<br/>• Segmentierungslogik?<br/>• VAD-Einstellungen?
 
     W-->>S: text_segments
-    
+
     Note over S: ❓ Server-Antwortformat
     Note over S: • JSON-Struktur?<br/>• Timestamps?<br/>• Confidence-Scores?<br/>• Satzgrenzen?
 

@@ -1,11 +1,19 @@
 # Active Development Context
-Version: 6.0
-Timestamp: 2025-03-09 02:19 CET
+Version: 7.1
+Timestamp: 2025-04-15 01:20 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
 
 ## Most Recent Update
+- **Addressed Pylint Warnings & Updated Headers [T156] (Current Session):**
+  * Addressed specific `pylint` warnings (`W1203`, `I1101`, `R1702`, `C0201`, `W0612`) across multiple Python files.
+  * Updated `.pylintrc` to ignore `I1101` for `win32` modules.
+  * Refactored code in `src/hotkeys.py` and `src/websocket.py` to resolve `R1702`.
+  * Updated `Version` and `Timestamp` headers in all modified Python files.
+  * **New Issues:** Final linting run after `black` reformatting revealed new `mypy`/`pylint` errors (`E1205`/`E1121`), likely due to incorrect logging format changes applied to custom helper functions. These need correction in the next session.
+  * **Future Task:** Noted user feedback to plan splitting large modules (`text.py`, `websocket.py`).
+
 - Implemented Streamlined Linting System [T156]
   * Created a centralized PowerShell linting script (.linting/lint.ps1)
   * Added configuration files for all linting tools:
@@ -79,100 +87,63 @@ After thorough analysis of the WebSocket test suite integration issues, we've ma
 
 5. **Documented Issues**: We've thoroughly documented the core issues in websocket_test_isolation_results.md.
 
-Before moving on to more productive development tasks, we'll implement minimal safeguards (like timeout mechanisms) to prevent similar issues in real-world usage.
+Before moving on to more productive development tasks, we'll implement minimal safeguards (like timeout mechanisms) to prevent similar issues in real-world usage. ✓
 
-### Current Development Approach
-We have adopted a phased approach to development:
+### Strategic Re-evaluation (Post-'Whispering' Analysis)
+After analyzing the "Whispering" application (see `research/comparison_whisper_client_vs_whispering.md`), we confirmed that its HTTP POST approach for entire audio files is less suitable for long, continuous dictation compared to our WebSocket streaming approach. However, "Whispering" offers a mature UI, cross-platform support, and backend flexibility.
 
-#### Phase 1: Server Communication Stability & Documentation (Current Phase)
-- Improve server communication stability
-  * Implement minimal safeguards to prevent hanging and resource leaks ⚠️ [NEW]
-  * Investigate internal buffer size uncertainties
-  * Address connection stability issues, including:
-    - Multiple parallel connections ✓
-    - Connection closures during processing
-  * Implement handling of END_OF_AUDIO signal ✓
-  * Add proper cleanup and resource management ✓
-  * Implement more robust error handling and recovery mechanisms ✓
-  * Add proper connection state tracking with detailed logging ✓
-  * Address test suite integration issues ✓
-- Document server parameters
-  * Create comprehensive documentation of WhisperLive server parameters
-  * Document WebSocket message format and protocol details ✓
-  * Clarify processing triggers and batch processing approach
-  * Document the server's internal buffer handling
-  * Investigate and address the issue of the server continuing to process after END_OF_AUDIO
+Given the user's priority for low-latency continuous dictation and the desire for a robust, potentially community-extendable core, we have decided to adopt a **"CLI-First" strategy**:
 
-#### Phase 2: Real-Life Testing (Next Phase)
-- Conduct tests with microphone to verify functionality in real-world conditions
-- Identify any issues or edge cases not caught in automated testing
-- Document any unexpected behaviors or performance issues
-- Address critical issues immediately
+1.  **Focus on Core:** Prioritize building an extremely stable and robust core library/CLI tool based on our existing Python WebSocket streaming approach.
+2.  **Decouple UI:** Separate the core logic cleanly from any UI concerns.
+3.  **Attract Developers:** Aim for a well-documented, easy-to-use core that encourages community contributions, potentially including GUIs.
+4.  **User Need:** Address the primary need for a reliable dictation tool first, deferring extensive UI development.
 
-#### Phase 3: Alpha Release
-- Create a versioned alpha release with proper documentation
-- Include setup instructions and known limitations
-- Document the current state of functionality and stability
-- Establish a baseline for future improvements
+### Current Development Approach (Revised: CLI-First)
+We adopt a revised phased approach focusing on core stability:
 
-#### Phase 4: Optimization
-- Focus on Tumbling Window performance optimization
-- Improve latency (currently 130ms average)
-- Optimize memory usage and processing efficiency
-- Refine thread synchronization and buffer management
+#### Phase 1: Core Stabilization & Refinement (Current Phase)
+- **Code Quality:** Complete remaining checks from T156 (Fix new `mypy`/`pylint` errors, verify headers again after fixes).
+- **Stability:** Systematically analyze and fix known stability issues (e.g., T120 Audio Timing, WebSocket robustness, error handling, resource management). Ensure reliable long-running operation.
+- **Configuration:** Improve configuration handling (e.g., pure JSON/TOML/YAML) for easier CLI/library usage.
+- **API/Interface:** Ensure core functions (start, stop, configure) are clearly exposed.
+- **Refactoring (Future Task):** Plan to split large modules like `src/text.py` and `src/websocket.py` into smaller, more manageable units.
+
+#### Phase 2: Documentation & Alpha Release (CLI/Library)
+- **Documentation:** Create excellent documentation for the core logic, configuration, and API/CLI usage.
+- **Release:** Prepare and release a stable alpha/beta version of the core tool.
+
+#### Phase 3: GUI Development (Optional / Community)
+- **Decision:** Evaluate the need for a dedicated GUI.
+- **Implementation:** Either develop a minimal Python GUI or encourage community contributions based on the stable core.
+
+#### Phase 4: Feature Expansion & Optimization
+- **Features:** Iteratively add features inspired by "Whispering" or user requests.
+- **Backend Flexibility:** Consider supporting alternative backends (optional, later stage).
+- **Optimization:** Continue performance tuning (e.g., TensorRT integration).
 
 ## Active Work
 
-### Immediate Tasks
-1. ✓ Implement minimal safeguards in WebSocket implementation [T152]
-   * ✓ Add global timeout mechanism to all blocking operations
-   * ✓ Implement timeout for cleanup process to prevent hanging
-   * ✓ Add timeout handling for connection establishment and message processing
-   * ✓ Enhance error logging around resource acquisition and release
-   * ✓ Implement periodic state logging during long-running operations
-   * ✓ Ensure graceful degradation with automatic reconnection
-   * ✓ Add basic resource usage logging
-
-2. Complete Alpha Release Checklist [T156]
-   * Repository cleanup ✓
-   * Documentation updates ✓
-   * Configuration consistency fixes ✓
-   * Code quality checks
-     * Set up code quality tools and documentation ✓
-     * Run flake8 linting tool and fix identified issues ✓
-     * Implement streamlined linting system ✓
-     * Run remaining linting tools using the new system
-     * Verify all files have proper headers
-   * Testing verification
-   * Community preparation
-   * WhisperLive attribution and communication
-
-3. Improve server communication stability
-   * Investigate and fix connection closures during processing
-   * Document server parameters and communication protocols
-   * Clarify processing triggers and batch processing approach
-   * Document the server's internal buffer handling
-
-4. Optimize Tumbling Window performance for production
-   * Improve latency (currently 130ms average)
-   * Optimize memory usage and processing efficiency
-   * Refine thread synchronization and buffer management
-
-5. Extend text processing tests for new features
-   * Add tests for complex language patterns
-   * Improve handling of mixed language text
-   * Enhance sentence boundary detection
+### Immediate Tasks (Focus on Core Stability)
+1.  **Fix New Linting Errors [T156] (Next Session):**
+    *   Run `./.linting/lint.ps1` to confirm the current error state.
+    *   Correct the `mypy` (`Too many arguments`) and `pylint` (`E1205`, `E1121`) errors, likely by reverting the logging format changes for custom helper functions (e.g., `log_connection`, `log_audio`) back to f-strings or simple strings.
+    *   Address any other remaining `pylint` issues identified in the last run (e.g., `C0209`, `R1702` in `websocket.py`).
+    *   Run `./.linting/lint.ps1` again until all tools pass without errors.
+    *   Re-verify headers after fixes.
+2.  **Plan Module Splitting (Future Task):** Create a new task to address the user feedback regarding splitting `src/text.py` and `src/websocket.py`.
+3.  **Core Stability Analysis & Improvement:** (After T156 is fully complete)
+    *   Review and address known stability concerns (T120, WebSocket connection handling, error recovery, resource leaks).
+    *   Conduct tests focused on long-running stability.
 
 ### Required Decisions
-- GUI development timeline
-- Community engagement approach
-- Feature priority post-stability
+- Prioritization of stability issues after linting is complete.
+- Strategy and specific breakdown for splitting `text.py` and `websocket.py`.
+- Best format for configuration files (evaluation deferred).
 
 ### Blocking Issues
-- Server communication uncertainties (Phase 1 focus)
-- Audio timing problems [T120]
-- Text processing stability issues
-- Current investigation in docs/investigations/timing_202502.md
+- Newly introduced linting errors prevent a clean state.
+- Underlying stability concerns (T120, WebSocket, Text Processing) need addressing after linting.
 
 ## Development Context
 
@@ -192,10 +163,8 @@ We have adopted a phased approach to development:
     ```
 
 ### Active Test Cases
-- Audio processing validation
-- Server communication tests
-- Text output verification
-- Performance benchmarks
+- Linting checks via script.
+- (Manual testing paused pending linting completion)
 
 ## Development Principles
 
@@ -206,9 +175,8 @@ We have adopted a phased approach to development:
 - Environment checks and feedback cycles
 
 ### Current Workflow
-- Step-by-step improvements
-- Test-driven development
-- Documentation-first approach
+- Step-by-step improvements (currently focused on linting)
+- Documentation-first approach (Memory Bank updates)
 - Regular validation points
 
 ### Team Structure
@@ -217,29 +185,15 @@ We have adopted a phased approach to development:
 - Shared: Problem analysis and solution design
 
 ## Reference Points
-- Current increment: logs/increments/log_034.json
+- Current increment: (Will be created after this update)
 - Recent major changes: logs/main.json
 - Historical context: archiveContext.md
 - Task history: progressHistory.md
 
-## Next Steps (Aligned with Phase 2 Preparation)
-1. Complete Alpha Release Checklist [T156]
-   * Run the simplified linting script on the codebase
-   * Address any remaining issues found by the linters
-   * Testing verification
-   * Community preparation
-   * WhisperLive communication
+## Next Steps (Immediate for New Session)
+1.  **Fix New Linting Errors [T156]:** Execute `./.linting/lint.ps1`, analyze errors (likely related to logging arguments), fix them in the affected files (esp. `src/websocket.py`), and re-run the script until clean.
+2.  **Verify Headers:** Briefly re-check headers in files modified during the fix process.
+3.  **Proceed with Stability Analysis:** Once T156 is truly complete, move to the next core stabilization tasks.
+4.  **Prioritize Stability:** Begin systematic review and improvement of core component stability (Audio, WebSocket, Text Processing, Error Handling).
 
-2. Engage with WhisperLive Team
-   * Address previous issue with more specific information
-   * Share our implementation approach
-   * Submit targeted questions about server behavior
-   * Position ourselves as contributors
-
-3. Begin Alpha Testing
-   * Run integration tests to verify current functionality
-   * Test with real microphone input
-   * Document any issues encountered
-   * Address critical issues immediately
-
-Note: Development will be guided by research findings. The test framework will evolve naturally as specific needs arise during development.
+*(Community engagement, WhisperLive communication, and broader Alpha testing are deferred until the core CLI/library is stable and documented.)*

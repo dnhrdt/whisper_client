@@ -73,7 +73,7 @@ SILENCE_THRESHOLD = 300
 ### Timing Constants
 ```python
 # Base timing constants
-BASE_DELAY = 0.1        # Basic delay for polling/checks  
+BASE_DELAY = 0.1        # Basic delay for polling/checks
 BASE_TIMEOUT = 2.0      # Basic timeout for threads/operations
 BASE_RETRY = 2.0        # Basic wait time for retries
 BASE_WAIT = 1.0         # Basic wait time for message processing

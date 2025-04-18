@@ -30,11 +30,11 @@ class TimingTest:
         self.audio_file = "tests/timing/resources/test_2sec.wav"
         self.markers = load_markers()
         self.results = []
-        
+
     def run_timing_matrix(self):
         """Run tests with different delay configurations"""
         pass
-        
+
     def analyze_results(self):
         """Analyze and visualize timing results"""
         pass

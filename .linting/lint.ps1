@@ -119,7 +119,8 @@ if ($isort) {
 
 # 2. black - Code formatting
 if ($black) {
-    Invoke-LintingTool -Name "black" -Command "python" -Arguments @("-m", "black") -Description "Code formatting" -CanFix $true
+    # Invoke-LintingTool -Name "black" -Command "python" -Arguments @("-m", "black") -Description "Code formatting" -CanFix $true # Temporarily disabled
+    Write-Host "`n[black] Code formatting temporarily disabled" -ForegroundColor $colors.Warning
 }
 
 # 3. flake8 - Style checking

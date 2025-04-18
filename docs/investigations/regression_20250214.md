@@ -4,7 +4,7 @@ Timestamp: 2025-02-26 19:44 CET
 
 ## Initial Situation
 - **Problem**: No texts being returned/processed from server
-- **Recent Changes**: 
+- **Recent Changes**:
   1. Float32 normalization disabled (2025-02-13 23:26)
   2. Code restructuring (2025-02-13 22:40)
 
@@ -63,7 +63,7 @@ Timestamp: 2025-02-26 19:44 CET
 ## Tests
 
 ### Test 1: Logging Setup
-- **Initial State**: 
+- **Initial State**:
   - Outdated reference to _whisperlive_logs.txt
   - Regression logger not fully configured
 
@@ -90,7 +90,7 @@ Timestamp: 2025-02-26 19:44 CET
      - Faulty: Flag deactivated too early, blocking incoming messages
 
   2. Cleanup process:
-     - Working: 
+     - Working:
        * stop_processing() → send_end_of_audio() → wait → disable processing
        * Complete wait time for server responses
      - Faulty:

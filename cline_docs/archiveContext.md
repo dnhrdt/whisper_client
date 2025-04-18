@@ -1,6 +1,6 @@
 # Archive of Development Context
-Version: 1.0
-Timestamp: 2025-03-07 22:21 CET
+Version: 1.1
+Timestamp: 2025-04-14 23:35 CET
 
 ## Document Purpose
 This file archives historical development contexts that are no longer active but may be referenced for context. It reduces context load in activeContext.md while preserving complete project history.
@@ -136,6 +136,67 @@ This archive should only be accessed when:
   * Documented the process of closing all tabs after Memory Bank update
   * Added step to request user to use 'Auto Close Tabs: Close as many tabs as possible'
   * Emphasized the importance of a clean slate for the next session
+
+## Deferred Tasks & Plans (as of 2025-04-14)
+*Archived due to strategic shift to "CLI-First" approach after 'Whispering' analysis.*
+
+### Previously Immediate Tasks (from activeContext v6.0)
+*(These tasks were planned before the CLI-First decision and are now postponed or deprioritized)*
+
+1.  ✓ Implement minimal safeguards in WebSocket implementation [T152]
+    *   ✓ Add global timeout mechanism to all blocking operations
+    *   ✓ Implement timeout for cleanup process to prevent hanging
+    *   ✓ Add timeout handling for connection establishment and message processing
+    *   ✓ Enhance error logging around resource acquisition and release
+    *   ✓ Implement periodic state logging during long-running operations
+    *   ✓ Ensure graceful degradation with automatic reconnection
+    *   ✓ Add basic resource usage logging
+2.  Complete Alpha Release Checklist [T156]
+    *   Repository cleanup ✓
+    *   Documentation updates ✓
+    *   Configuration consistency fixes ✓
+    *   Code quality checks
+        *   Set up code quality tools and documentation ✓
+        *   Run flake8 linting tool and fix identified issues ✓
+        *   Implement streamlined linting system ✓
+        *   Run remaining linting tools using the new system *(Now part of active Core Stability focus)*
+        *   Verify all files have proper headers *(Now part of active Core Stability focus)*
+    *   Testing verification *(Deferred until core is stable)*
+    *   Community preparation *(Deferred)*
+    *   WhisperLive attribution and communication *(Deferred)*
+3.  Improve server communication stability
+    *   Investigate and fix connection closures during processing *(Part of active Core Stability focus)*
+    *   Document server parameters and communication protocols *(Part of active Documentation focus)*
+    *   Clarify processing triggers and batch processing approach *(Part of active Documentation focus)*
+    *   Document the server's internal buffer handling *(Part of active Documentation focus)*
+4.  Optimize Tumbling Window performance for production *(Deferred to Phase 4)*
+    *   Improve latency (currently 130ms average)
+    *   Optimize memory usage and processing efficiency
+    *   Refine thread synchronization and buffer management
+5.  Extend text processing tests for new features *(Deferred)*
+    *   Add tests for complex language patterns
+    *   Improve handling of mixed language text
+    *   Enhance sentence boundary detection
+
+### Previously Planned Next Steps (from activeContext v6.0)
+*(These steps were aligned with the broader Alpha Release plan and are now superseded by the CLI-First focus)*
+
+1.  Complete Alpha Release Checklist [T156]
+    *   Run the simplified linting script on the codebase *(Active)*
+    *   Address any remaining issues found by the linters *(Active)*
+    *   Testing verification *(Deferred)*
+    *   Community preparation *(Deferred)*
+    *   WhisperLive communication *(Deferred)*
+2.  Engage with WhisperLive Team *(Deferred)*
+    *   Address previous issue with more specific information
+    *   Share our implementation approach
+    *   Submit targeted questions about server behavior
+    *   Position ourselves as contributors
+3.  Begin Alpha Testing *(Deferred until core CLI/Library release)*
+    *   Run integration tests to verify current functionality
+    *   Test with real microphone input
+    *   Document any issues encountered
+    *   Address critical issues immediately
 
 ## Historical Notes
 Note: Historical investigation files and backups maintained in original German for reference purposes.

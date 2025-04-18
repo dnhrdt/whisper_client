@@ -5674,5 +5674,3 @@ class UIManager:
     def run_event_loop(self):
         """Start and run the Qt event loop, returning the exit code when finished."""
         return QApplication.instance().exec()
-
-

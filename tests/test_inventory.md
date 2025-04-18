@@ -19,7 +19,7 @@ This document provides a comprehensive inventory of all existing tests, their pu
 - **Current Location**: tests/test_server_flow.py
 - **Migration Target**: tests/timing/test_server_flow.py
 - **Purpose**: Tests data flow from server to text processing
-- **Dependencies**: 
+- **Dependencies**:
   * src.text.TextManager
   * src.websocket.WhisperWebSocket
   * src.logging
