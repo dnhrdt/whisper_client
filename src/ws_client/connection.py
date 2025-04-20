@@ -1,7 +1,7 @@
 """
 WebSocket Connection Module for the Whisper Client
-Version: 1.1
-Timestamp: 2025-04-20 16:18 CET
+Version: 1.3
+Timestamp: 2025-04-20 18:13 CET
 
 This module handles the core connection functionality for the WebSocket client,
 including connection establishment, reconnection logic, and instance tracking.
@@ -10,21 +10,20 @@ including connection establishment, reconnection logic, and instance tracking.
 import threading
 import time
 import uuid
-from typing import Dict
+from typing import Any, Dict
 
 import config
 import websocket
 from src import logger
 from src.logging import log_connection, log_error
 
-from .state import ConnectionState
-
 
 class ConnectionManager:
     """Manages WebSocket connections and instance tracking"""
 
     # Class-level variable to track active instances
-    _active_instances: Dict[str, "WhisperWebSocket"] = {}
+    # Verwende eine Vorwärtsreferenz für den Typ, um zirkuläre Importe zu vermeiden
+    _active_instances: Dict[str, Any] = {}
     _instances_lock = threading.Lock()
 
     @classmethod

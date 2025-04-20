@@ -1,7 +1,7 @@
 """
 Audio Processing Module for the Whisper Client
-Version: 1.7
-Timestamp: 2025-04-20 13:18 CET
+Version: 2.2
+Timestamp: 2025-04-20 18:23 CET
 
 This module handles audio recording, processing, and resampling for the Whisper Client.
 It provides functionality for microphone access, audio capture, and conversion to the
@@ -19,25 +19,28 @@ Neue Struktur:
 - audio/__init__.py: API und Hauptklassen
 """
 
-from src.audio.device import check_device_availability, list_audio_devices, test_microphone_access
-from src.audio.manager import AudioManager as AudioManagerImpl
-from src.audio.processor import AudioProcessor as AudioProcessorImpl
+# Direkte Importe aus den Untermodulen
+from importlib import import_module
 
-# Imports der neuen Module
-from src.audio.resampling import normalize_audio
-from src.audio.window import TumblingWindow as TumblingWindowImpl
+import config
 
-# Legacy-Kompatibilitätsschicht
-# Alle Klassen und Funktionen werden aus den neuen Modulen exportiert
-# Neue Entwicklung sollte direkt die neuen Module verwenden
+# Dynamische Importe, um zirkuläre Abhängigkeiten zu vermeiden
+_audio_manager = import_module("src.audio.manager")
+_audio_processor = import_module("src.audio.processor")
+_audio_window = import_module("src.audio.window")
+_audio_resampling = import_module("src.audio.resampling")
+
+# Klassen und Funktionen aus den Modulen extrahieren
+AudioManagerImpl = _audio_manager.AudioManager
+AudioProcessorImpl = _audio_processor.AudioProcessor
+TumblingWindowImpl = _audio_window.TumblingWindow
+resample_impl = _audio_resampling.resample_to_16kHZ
 
 
 # MOVED TO: audio/resampling.py
 def resample_to_16kHZ(audio_data, current_rate):
     """Resamples audio data to 16kHz using librosa."""
     # Weiterleitung an die neue Implementierung
-    from src.audio.resampling import resample_to_16kHZ as resample_impl
-
     return resample_impl(audio_data, current_rate)
 
 
@@ -53,9 +56,6 @@ class TumblingWindow:
 
     # Weiterleitung an die neue Implementierung
     def __init__(self, window_size=None, overlap=None):
-        # Importiere config hier, um Zirkelbezüge zu vermeiden
-        import config
-
         window_size = window_size or config.TUMBLING_WINDOW_SIZE
         overlap = overlap or config.TUMBLING_WINDOW_OVERLAP
         self._instance = TumblingWindowImpl(window_size, overlap)

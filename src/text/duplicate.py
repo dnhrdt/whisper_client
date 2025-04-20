@@ -1,12 +1,10 @@
 """
 Duplicate Detection Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 14:00 CET
+Version: 1.1
+Timestamp: 2025-04-20 18:10 CET
 
 Dieses Modul enthält Funktionen zur Erkennung von Duplikaten in Textsegmenten.
 """
-
-import time
 
 
 def is_duplicate(manager, text):

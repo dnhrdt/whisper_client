@@ -1,15 +1,10 @@
 """
 Segment Parser Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 14:00 CET
+Version: 1.1
+Timestamp: 2025-04-20 18:11 CET
 
 Dieses Modul enthält Funktionen zum Parsen und Verarbeiten von Textsegmenten.
 """
-
-import time
-
-import config
-from src import logger
 
 from .segment_processor import process_single_sentence
 from .sentence_combiner import handle_sentence_continuation

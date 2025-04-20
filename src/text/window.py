@@ -1,7 +1,7 @@
 """
 Window Management Module for the Whisper Client
-Version: 1.2
-Timestamp: 2025-04-20 16:47 CET
+Version: 1.4
+Timestamp: 2025-04-20 18:12 CET
 
 Dieses Modul stellt Funktionen zur Fenstererkennung und -manipulation bereit,
 einschließlich VS Code-spezifischer Funktionen.
@@ -58,27 +58,24 @@ def find_vscode_edit_control(parent_hwnd):
 
         # Look for potential edit controls
         # Ensure class_name is not None before using 'in'
-        if class_name is not None and class_name in [  # Final None check again
-            "Edit",
-            "RichEdit",
-            "RichEdit20W",
-            "RICHEDIT50W",
-        ]:
-            controls.append((hwnd, class_name, "standard_edit"))
-        # VS Code's main editor might be in Chromium's structure
-        elif class_name == "Chrome_RenderWidgetHostHWND":
-            controls.append((hwnd, class_name, "chrome_render"))
-        # Electron apps often use Atom as a base
-        elif "Atom" in class_name:
-            controls.append((hwnd, class_name, "atom"))
-        # Look for the Monaco editor component
-        elif "Monaco" in text or "monaco" in text.lower():
-            controls.append((hwnd, class_name, "monaco"))
+        edit_classes = ["Edit", "RichEdit", "RichEdit20W", "RICHEDIT50W"]
+        if class_name is not None:
+            if any(edit_class == class_name for edit_class in edit_classes):
+                controls.append((hwnd, class_name, "standard_edit"))
+            # VS Code's main editor might be in Chromium's structure
+            elif class_name == "Chrome_RenderWidgetHostHWND":
+                controls.append((hwnd, class_name, "chrome_render"))
+            # Electron apps often use Atom as a base
+            elif "Atom" in class_name:
+                controls.append((hwnd, class_name, "atom"))
+            # Look for the Monaco editor component
+            elif text is not None and ("Monaco" in text or "monaco" in text.lower()):
+                controls.append((hwnd, class_name, "monaco"))
         return 1  # Continue enumeration
 
     try:
         # First try direct children
-        win32gui.EnumChildWindows(parent_hwnd, callback, result)  # Remove unused comment
+        win32gui.EnumChildWindows(parent_hwnd, callback, result)
 
         if not result:
             # If no results, try a recursive approach to find deeper controls
@@ -87,14 +84,13 @@ def find_vscode_edit_control(parent_hwnd):
                     return
 
                 try:
-                    win32gui.EnumChildWindows(
-                        hwnd,
-                        lambda child_hwnd, _: (
-                            callback(child_hwnd, result),
-                            recursive_find(child_hwnd, depth + 1, max_depth),
-                        ),
-                        None,
-                    )
+                    # Korrigierte Version der Lambda-Funktion
+                    def recursive_callback(child_hwnd, _):
+                        callback(child_hwnd, result)
+                        recursive_find(child_hwnd, depth + 1, max_depth)
+                        return 1  # Ensure we return an integer
+
+                    win32gui.EnumChildWindows(hwnd, recursive_callback, None)
                 except Exception:
                     pass  # Some windows might not allow enumeration
 

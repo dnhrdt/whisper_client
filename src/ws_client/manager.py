@@ -1,20 +1,17 @@
 """
 WebSocket Manager Module
-Version: 1.0
-Timestamp: 2025-04-20 14:05 CET
+Version: 1.1
+Timestamp: 2025-04-20 18:06 CET
 
 This module contains the main WhisperWebSocket class that manages the WebSocket
 connection to the WhisperLive server.
 """
 
 import threading
-import time
-
-import win32clipboard
 
 import config
 from src import logger
-from src.logging import log_audio, log_connection, log_error
+from src.logging import log_connection
 
 from .callbacks import on_close, on_error, on_message, on_open
 from .cleanup import handle_instance_deletion, perform_cleanup
@@ -60,7 +57,7 @@ class WhisperWebSocket:
 
         # Register this instance
         ConnectionManager.register_instance(self)
-        log_connection(logger, "Created WebSocket client with ID: %s" % self.client_id)
+        log_connection(logger, f"Created WebSocket client with ID: {self.client_id}")
 
     def __del__(self):
         """Remove this instance when garbage collected"""

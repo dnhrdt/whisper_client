@@ -1,7 +1,7 @@
 """
 Main Program for the Whisper Client
-Version: 1.7
-Timestamp: 2025-04-20 17:34 CET
+Version: 1.8
+Timestamp: 2025-04-20 18:14 CET
 
 This is the main entry point for the Whisper Client application.
 It initializes all components, manages the application lifecycle,
@@ -27,6 +27,7 @@ from src.utils import (
     update_task_history,
 )
 from src.ws_client import ConnectionState, WhisperWebSocket
+from src.ws_client.connection import ConnectionManager
 
 
 class WhisperClient:
@@ -154,7 +155,7 @@ class WhisperClient:
 
         # Cleanup all WebSocket instances to prevent multiple parallel connections
         log_info(logger, "Cleaning up all WebSocket instances...")
-        WhisperWebSocket.cleanup_all_instances()
+        ConnectionManager.cleanup_all_instances()
 
         self.hotkey_manager.stop()
         self.terminal_manager.cleanup()
@@ -169,10 +170,10 @@ def main():
     show_startup_message()
 
     # Check for existing WebSocket instances and clean them up
-    instance_count = WhisperWebSocket.get_instance_count()
+    instance_count = ConnectionManager.get_instance_count()
     if instance_count > 0:
         log_warning(logger, "Found %d existing WebSocket instances. Cleaning up...", instance_count)
-        WhisperWebSocket.cleanup_all_instances()
+        ConnectionManager.cleanup_all_instances()
 
     # Prüfe Server-Status
     if not check_server_status():

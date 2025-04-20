@@ -1,7 +1,7 @@
 """
 WebSocket Processing Module
-Version: 1.1
-Timestamp: 2025-04-20 17:14 CET
+Version: 1.3
+Timestamp: 2025-04-20 18:13 CET
 
 This module contains functions for processing WebSocket messages and data.
 """
@@ -14,7 +14,6 @@ import config
 from src import logger
 from src.logging import log_connection, log_error
 
-from .error_handling import wait_with_timeout
 from .messaging import send_audio_data as send_audio_to_server
 from .messaging import send_end_of_audio as send_eoa_to_server
 from .state import ConnectionState
@@ -151,7 +150,7 @@ def stop_message_processing(ws_instance):
                 else:
                     log_error(
                         logger,
-                        "Attempted to close WebSocket during stop_processing " "while it was None",
+                        "Attempted to close WebSocket during stop_processing while it was None",
                     )
                 close_duration = time.time() - close_start
                 log_connection(logger, f"Connection close() completed in {close_duration:.2f}s")
@@ -159,13 +158,20 @@ def stop_message_processing(ws_instance):
                 # Wait for thread to end with timeout
                 if ws_instance.ws_thread and ws_instance.ws_thread.is_alive():
                     join_start = time.time()
-                    thread_wait_msg = f"Waiting for WebSocket thread to terminate (timeout: {config.WS_THREAD_TIMEOUT}s)..."
+                    # Fix für implizite String-Verkettung
+                    thread_wait_msg = (
+                        f"Waiting for WebSocket thread to terminate "
+                        f"(timeout: {config.WS_THREAD_TIMEOUT}s)..."
+                    )
                     log_connection(logger, thread_wait_msg)
                     ws_instance.ws_thread.join(timeout=config.WS_THREAD_TIMEOUT)
 
                     # Check if thread is still alive after join timeout
                     if ws_instance.ws_thread.is_alive():
-                        thread_timeout_msg = f"WebSocket thread did not terminate within timeout ({config.WS_THREAD_TIMEOUT}s)"
+                        thread_timeout_msg = (
+                            f"WebSocket thread did not terminate within timeout "
+                            f"({config.WS_THREAD_TIMEOUT}s)"
+                        )
                         log_error(logger, thread_timeout_msg)
                         log_connection(
                             logger, "Proceeding with cleanup despite thread still running"

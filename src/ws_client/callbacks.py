@@ -1,13 +1,13 @@
 """
 WebSocket Callbacks Module
-Version: 1.1
-Timestamp: 2025-04-20 16:20 CET
+Version: 1.2
+Timestamp: 2025-04-20 18:12 CET
 
 This module contains callback functions for WebSocket events.
 """
 
 from src import logger
-from src.logging import log_connection, log_error
+from src.logging import log_error
 
 from .error_handling import handle_connection_close, handle_connection_error
 from .messaging import process_message, send_config

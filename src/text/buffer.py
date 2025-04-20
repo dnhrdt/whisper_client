@@ -1,7 +1,7 @@
 """
 Text Buffer Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 12:58 CET
+Version: 1.1
+Timestamp: 2025-04-20 18:07 CET
 
 This module provides a thread-safe buffer for text segments with
 functionality for duplicate detection and segment management.
@@ -10,7 +10,7 @@ functionality for duplicate detection and segment management.
 import collections
 import threading
 import time
-from typing import List
+from typing import List, Optional
 
 import config
 
@@ -47,7 +47,7 @@ class TextBuffer:
 
             return segment
 
-    def mark_processed(self, segment: TextSegment, output: str = None):
+    def mark_processed(self, segment: TextSegment, output: Optional[str] = None):
         """Mark a segment as processed with optional output text"""
         with self.lock:
             if segment in self.buffer:

@@ -1,12 +1,10 @@
 """
 Special Cases Module for the Whisper Client
-Version: 1.1
-Timestamp: 2025-04-20 16:40 CET
+Version: 1.2
+Timestamp: 2025-04-20 18:11 CET
 
 Dieses Modul behandelt Spezialfälle in der Textverarbeitung.
 """
-
-import time
 
 import config
 from src import logger

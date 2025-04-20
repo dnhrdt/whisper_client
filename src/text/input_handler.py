@@ -1,14 +1,13 @@
 """
 Input Handler Module for the Whisper Client
-Version: 1.1
-Timestamp: 2025-04-20 16:46 CET
+Version: 1.2
+Timestamp: 2025-04-20 18:10 CET
 
 Dieses Modul koordiniert die Verarbeitung von Textsegmenten.
 """
 
 import time
 
-import config
 from src import logger
 from src.logging import log_info
 

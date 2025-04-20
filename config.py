@@ -1,5 +1,7 @@
 """
 Central configuration file for the Whisper Client
+Version: 1.1
+Timestamp: 2025-04-20 18:08 CET
 """
 
 # Base Timing Constants
@@ -37,6 +39,7 @@ WS_FINAL_WAIT = BASE_WAIT * 30  # Wait time for final texts
 WS_CONNECT_TIMEOUT = BASE_TIMEOUT * 2.5  # Timeout for connection establishment
 WS_READY_TIMEOUT = BASE_TIMEOUT * 5  # Timeout for server-ready signal
 WS_CLEANUP_TIMEOUT = BASE_TIMEOUT * 3  # Timeout for cleanup operations
+WS_STATE_LOG_INTERVAL = BASE_DELAY * 50  # Interval for state logging (5 seconds)
 
 # Keyboard and Clipboard
 KEY_PRESS_DELAY = BASE_DELAY * 0.5  # Delay between key presses

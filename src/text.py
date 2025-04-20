@@ -1,7 +1,7 @@
 """
 Text Processing Module for the Whisper Client
-Version: 1.8
-Timestamp: 2025-04-20 14:30 CET
+Version: 2.1
+Timestamp: 2025-04-20 18:22 CET
 
 This module handles text processing, formatting, and output for the Whisper Client.
 It includes functionality for sentence detection, duplicate handling, and text insertion
@@ -20,22 +20,24 @@ Neue Struktur:
 - text/__init__.py: API und Hauptklasse
 """
 
-# Imports aus den neuen Modulen
-from src.text import TextManager
-from src.text.buffer import TextBuffer
-from src.text.duplicate import is_duplicate, normalize_text
-from src.text.input_handler import process_segments
-from src.text.output import (
-    send_message,
-    send_paste_command,
-    send_text_to_prompt,
-    set_clipboard_text,
-)
-from src.text.processing import find_overlap, format_sentence, is_sentence_end
-from src.text.segment import TextSegment
-from src.text.sentence import output_sentence, should_force_output
-from src.text.test_handler import get_test_output
-from src.text.window import find_prompt_window, find_vscode_edit_control
+# Direkte Importe aus den Untermodulen
+from importlib import import_module
+
+# Dynamische Importe, um zirkuläre Abhängigkeiten zu vermeiden
+_text_buffer = import_module("src.text.buffer")
+_text_manager = import_module("src.text.manager")
+_text_output = import_module("src.text.output")
+_text_processing = import_module("src.text.processing")
+_text_segment = import_module("src.text.segment")
+
+# Klassen und Funktionen aus den Modulen extrahieren
+TextBuffer = _text_buffer.TextBuffer
+TextManager = _text_manager.TextManager
+send_message = _text_output.send_message
+find_overlap = _text_processing.find_overlap
+format_sentence = _text_processing.format_sentence
+is_sentence_end = _text_processing.is_sentence_end
+TextSegment = _text_segment.TextSegment
 
 # Re-Export der öffentlichen API
 __all__ = [

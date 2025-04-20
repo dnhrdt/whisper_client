@@ -1,16 +1,12 @@
 """
 Text Manager Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 14:00 CET
+Version: 1.1
+Timestamp: 2025-04-20 18:10 CET
 
 Dieses Modul enthält die Hauptklasse für die Textverarbeitung.
 """
 
 import threading
-import time
-
-import config
-from src import logger
 
 from .buffer import TextBuffer
 from .duplicate import is_duplicate

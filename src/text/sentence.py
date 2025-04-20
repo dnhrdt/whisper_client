@@ -1,7 +1,7 @@
 """
 Sentence Processing Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 14:00 CET
+Version: 1.1
+Timestamp: 2025-04-20 18:11 CET
 
 Dieses Modul enthält Funktionen zur Satzverarbeitung und -ausgabe.
 """
@@ -9,7 +9,6 @@ Dieses Modul enthält Funktionen zur Satzverarbeitung und -ausgabe.
 import time
 
 import config
-from src import logger
 
 from .processing import format_sentence
 
