@@ -1,35 +1,44 @@
 """
 Audio Processing Module for the Whisper Client
-Version: 1.6
-Timestamp: 2025-04-15 22:12 CET
+Version: 1.7
+Timestamp: 2025-04-20 13:18 CET
 
 This module handles audio recording, processing, and resampling for the Whisper Client.
 It provides functionality for microphone access, audio capture, and conversion to the
 format required by the WhisperLive server.
 
-The module now includes a Tumbling Window implementation for improved audio processing
-with overlapping windows and better transitions between audio segments.
+REFACTORING NOTICE: Diese Datei wurde in mehrere Module aufgeteilt.
+Die aktuelle Version dient als Fassade für die neuen Module.
+
+Neue Struktur:
+- audio/resampling.py: Audio-Resampling und -Konvertierung
+- audio/window.py: TumblingWindow-Klasse und Überlappungslogik
+- audio/processor.py: AudioProcessor-Klasse und Thread-basierte Verarbeitung
+- audio/manager.py: AudioManager-Klasse und Mikrofonverwaltung
+- audio/device.py: Geräteerkennungs- und -verwaltungsfunktionen
+- audio/__init__.py: API und Hauptklassen
 """
 
-import threading
-from queue import Empty, Queue
-from typing import Optional  # Import Optional
+# Imports der neuen Module
+from audio.resampling import normalize_audio
+from audio.window import TumblingWindow as TumblingWindowImpl
+from audio.processor import AudioProcessor as AudioProcessorImpl
+from audio.manager import AudioManager as AudioManagerImpl
+from audio.device import list_audio_devices, check_device_availability, test_microphone_access
 
-import librosa
-import numpy as np
-import pyaudio
+# Legacy-Kompatibilitätsschicht
+# Alle Klassen und Funktionen werden aus den neuen Modulen exportiert
+# Neue Entwicklung sollte direkt die neuen Module verwenden
 
-import config
-from src import logger
-
-
+# MOVED TO: audio/resampling.py
 def resample_to_16kHZ(audio_data, current_rate):
     """Resamples audio data to 16kHz using librosa."""
-    y = np.frombuffer(audio_data, dtype=np.float32)
-    resampled_audio = librosa.resample(y, orig_sr=current_rate, target_sr=16000)
-    return resampled_audio.tobytes()
+    # Weiterleitung an die neue Implementierung
+    from audio.resampling import resample_to_16kHZ as resample_impl
+    return resample_impl(audio_data, current_rate)
 
 
+# MOVED TO: audio/window.py
 class TumblingWindow:
     """
     Implements a tumbling window approach for audio processing.
@@ -38,89 +47,20 @@ class TumblingWindow:
     providing a smooth transition between consecutive windows through linear
     crossfading in the overlap regions.
     """
+    # Weiterleitung an die neue Implementierung
+    def __init__(self, window_size=None, overlap=None):
+        # Importiere config hier, um Zirkelbezüge zu vermeiden
+        import config
+        window_size = window_size or config.TUMBLING_WINDOW_SIZE
+        overlap = overlap or config.TUMBLING_WINDOW_OVERLAP
+        self._instance = TumblingWindowImpl(window_size, overlap)
 
-    def __init__(
-        self, window_size=config.TUMBLING_WINDOW_SIZE, overlap=config.TUMBLING_WINDOW_OVERLAP
-    ):
-        """
-        Initialize the tumbling window processor.
-
-        Args:
-            window_size: Size of each window in samples
-            overlap: Overlap between windows as a fraction (0.0 - 1.0)
-        """
-        self.window_size = window_size
-        self.overlap = max(0.0, min(1.0, overlap))  # Ensure overlap is between 0 and 1
-        self.overlap_size = int(window_size * overlap)
-        self.buffer = []
-        self.previous_window = None
-        logger.debug("TumblingWindow initialized: size=%d, overlap=%.2f", window_size, overlap)
-
-    def add_chunk(self, chunk):
-        """
-        Add an audio chunk to the buffer.
-
-        Args:
-            chunk: Audio data as bytes or numpy array
-        """
-        # Convert bytes to numpy array if needed
-        if isinstance(chunk, bytes):
-            chunk = np.frombuffer(chunk, dtype=np.int16)
-
-        # Add chunk to buffer
-        self.buffer.extend(chunk)
-        logger.debug(
-            "Added chunk of %d samples, buffer now %d samples", len(chunk), len(self.buffer)
-        )
-
-    def get_windows(self):
-        """
-        Generator that yields available windows from the buffer.
-
-        Each window is a numpy array of samples with size equal to window_size.
-        Windows are removed from the buffer as they are yielded, with overlap
-        preserved for the next window.
-
-        Yields:
-            numpy.ndarray: Audio window of size window_size
-        """
-        while len(self.buffer) >= self.window_size:
-            # Extract a complete window
-            window = np.array(self.buffer[: self.window_size])
-
-            # Apply crossfade with previous window if available
-            if self.previous_window is not None and self.overlap > 0:
-                # Create linear fade curves
-                fade_out = np.linspace(1, 0, self.overlap_size)
-                fade_in = np.linspace(0, 1, self.overlap_size)
-
-                # Get overlap regions
-                overlap_region = self.previous_window[-self.overlap_size :]
-                current_overlap = window[: self.overlap_size]
-
-                # Blend the overlap regions
-                blended = (overlap_region * fade_out) + (current_overlap * fade_in)
-                window[: self.overlap_size] = blended
-
-                logger.debug("Applied crossfade of %d samples", self.overlap_size)
-
-            # Yield the processed window
-            yield window
-
-            # Update buffer and previous window
-            # Remove window from buffer, keeping overlap for next window
-            self.buffer = self.buffer[self.window_size - self.overlap_size :]
-            self.previous_window = window
-
-            logger.debug("Window processed, buffer now %d samples", len(self.buffer))
-
-    def clear(self):
-        """Clear the buffer and reset state."""
-        self.buffer = []
-        self.previous_window = None
-        logger.debug("TumblingWindow buffer cleared")
+    def __getattr__(self, name):
+        # Leite alle Attributzugriffe an die Instanz weiter
+        return getattr(self._instance, name)
 
 
+# MOVED TO: audio/processor.py
 class AudioProcessor:
     """
     Processes audio data using the tumbling window approach.
@@ -128,323 +68,27 @@ class AudioProcessor:
     This class integrates with the AudioManager to process audio chunks
     and prepare them for the WhisperLive server.
     """
-
+    # Weiterleitung an die neue Implementierung
     def __init__(self, test_mode=False):
-        """
-        Initialize the audio processor.
+        self._instance = AudioProcessorImpl(test_mode)
 
-        Args:
-            test_mode: If True, operates in test mode without sending data
-        """
-        self.tumbling_window = TumblingWindow()
-        self.test_mode = test_mode
-        self.processed_windows = []
-        self.window_callback = None
-        self.processing_lock = threading.Lock()
-        self.processing_queue: Queue[bytes] = Queue()
-        self.processing_thread: Optional[threading.Thread] = None  # Add type hint
-        self.running = False
-        logger.debug("AudioProcessor initialized")
-
-    def start_processing(self, callback):
-        """
-        Start the audio processing thread.
-
-        Args:
-            callback: Function to call with processed audio windows
-        """
-        with self.processing_lock:
-            if self.running:
-                return
-
-            self.window_callback = callback
-            self.running = True
-
-            # Start processing thread
-            self.processing_thread = threading.Thread(target=self._process_queue)
-            self.processing_thread.daemon = True
-            self.processing_thread.start()
-
-            logger.info("🔄 Audio processing started")
-
-    def stop_processing(self):
-        """Stop the audio processing thread."""
-        with self.processing_lock:
-            if not self.running:
-                return
-
-            self.running = False
-
-            # Wait for processing thread to finish
-            if self.processing_thread and self.processing_thread.is_alive():
-                self.processing_thread.join(timeout=config.AUDIO_THREAD_TIMEOUT)
-                if self.processing_thread.is_alive():
-                    logger.warning("Processing thread not responding - will terminate")
-
-            # Clear state
-            self.tumbling_window.clear()
-            self.processing_queue = Queue()
-
-            logger.info("🛑 Audio processing stopped")
-
-    def process_audio(self, audio_data):
-        """
-        Process audio data through the tumbling window.
-
-        Args:
-            audio_data: Audio data as bytes
-        """
-        # Add to processing queue
-        self.processing_queue.put(audio_data)
-
-        # If in test mode, process immediately
-        if self.test_mode:
-            self._process_audio_data(audio_data)
-
-    def _process_queue(self):
-        """Process audio data from the queue."""
-        logger.debug("Processing thread started")
-
-        try:
-            while self.running:
-                try:
-                    # Get audio data from queue with timeout
-                    try:
-                        audio_data = self.processing_queue.get(timeout=0.1)
-                        self._process_audio_data(audio_data)
-                        self.processing_queue.task_done()
-                    except Empty:
-                        continue
-
-                except Exception as e:
-                    logger.error("Error processing audio: %s", e)
-
-        finally:
-            logger.debug("Processing thread terminated")
-
-    def _process_audio_data(self, audio_data):
-        """
-        Process a chunk of audio data.
-
-        Args:
-            audio_data: Audio data as bytes
-        """
-        # Add to tumbling window
-        self.tumbling_window.add_chunk(audio_data)
-
-        # Get windows and process
-        windows = list(self.tumbling_window.get_windows())
-
-        # In test mode, store windows
-        if self.test_mode:
-            self.processed_windows.extend(windows)
-            return
-
-        # Process each window
-        for window in windows:
-            # Convert to bytes
-            window_bytes = window.tobytes()
-
-            # Call callback with window
-            if self.window_callback and self.running:
-                self.window_callback(window_bytes)
+    def __getattr__(self, name):
+        # Leite alle Attributzugriffe an die Instanz weiter
+        return getattr(self._instance, name)
 
 
+# MOVED TO: audio/manager.py
 class AudioManager:
+    """
+    Manages audio recording and device access.
+
+    This class handles microphone initialization, audio recording,
+    and provides the captured audio data to a callback function.
+    """
+    # Weiterleitung an die neue Implementierung
     def __init__(self):
-        self.audio = pyaudio.PyAudio()
-        self.stream = None
-        self.recording = False
-        self.recording_lock = threading.Lock()
-        self.record_thread: Optional[threading.Thread] = None  # Add type hint
+        self._instance = AudioManagerImpl()
 
-        # Load audio format from config
-        self.chunk = config.AUDIO_CHUNK
-        self.format = getattr(pyaudio, config.AUDIO_FORMAT)
-        self.channels = config.AUDIO_CHANNELS
-        self.rate = config.AUDIO_RATE
-        self.device_index = config.AUDIO_DEVICE_INDEX
-
-        # Initialize microphone
-        self._init_microphone()
-
-    def _init_microphone(self):
-        """Initialize and test microphone access"""
-        if not self._check_microphone():
-            logger.error("⚠️ Microphone not available!")
-            raise RuntimeError("No microphone found")
-
-        # Teste Mikrofonzugriff
-        try:
-            test_stream = self.audio.open(
-                format=self.format,
-                channels=self.channels,
-                rate=self.rate,
-                input=True,
-                input_device_index=self.device_index,
-                frames_per_buffer=self.chunk,
-            )
-            test_stream.close()
-            logger.info("✓ Microphone test successful")
-        except Exception as e:
-            logger.error("⚠️ Microphone test failed: %s", e)
-            raise
-
-    def _check_microphone(self):
-        """Checks if the configured microphone is available"""
-        try:
-            info = self.audio.get_host_api_info_by_index(0)
-            num_devices = info.get("deviceCount")  # Can be None or str
-
-            # Ensure num_devices is an integer before comparison
-            if isinstance(num_devices, int) and self.device_index < num_devices:
-                device_info = self.audio.get_device_info_by_index(self.device_index)
-                max_channels = device_info.get("maxInputChannels")  # Can be None or str
-
-                # Ensure max_channels is an integer before comparison
-                if isinstance(max_channels, int) and max_channels > 0:
-                    # Correct Windows umlauts, ensure name is a string before encoding
-                    name_raw = device_info.get("name", "")
-                    name = (
-                        name_raw.encode("latin-1").decode("utf-8")
-                        if isinstance(name_raw, str)
-                        else "Unknown Device"
-                    )
-                    logger.info("✓ Microphone found: %s", name)
-                    return True
-
-            logger.error("⚠️ Microphone not available")
-            return False
-
-        except Exception as e:
-            logger.error("⚠️ Error checking microphone: %s", e)
-            return False
-
-    def is_device_available(self):
-        """Checks if the audio device is still available"""
-        try:
-            device_info = self.audio.get_device_info_by_index(self.device_index)
-            max_channels = device_info.get("maxInputChannels")  # Can be None or str
-            # Ensure max_channels is an integer before comparison
-            return isinstance(max_channels, int) and max_channels > 0
-        except Exception as e:
-            logger.debug("Error checking device availability: %s", e)
-            return False
-
-    def start_recording(self, callback):
-        """Starts audio recording"""
-        with self.recording_lock:
-            if self.recording:
-                return
-
-            # Check if microphone is still available
-            if not self.is_device_available():
-                logger.warning("⚠️ Microphone no longer available")
-                if not self._check_microphone():
-                    logger.error("⚠️ No microphone found!")
-                    return
-
-            try:
-                self.stream = self.audio.open(
-                    format=self.format,
-                    channels=self.channels,
-                    rate=self.rate,
-                    input=True,
-                    input_device_index=self.device_index,
-                    frames_per_buffer=self.chunk,
-                )
-                self.recording = True
-                logger.info("🎤 Recording started...")
-
-                # Start recording thread
-                self.record_thread = threading.Thread(target=self._record_audio, args=(callback,))
-                self.record_thread.daemon = True
-                self.record_thread.start()
-
-            except Exception as e:
-                logger.error("⚠️ Error starting recording: %s", e)
-                self.recording = False
-
-    def stop_recording(self):
-        """Stops audio recording"""
-        with self.recording_lock:
-            if not self.recording:
-                return
-
-            logger.debug("Stopping recording...")
-            self.recording = False
-
-            # Close stream immediately to prevent further data
-            if self.stream:
-                try:
-                    self.stream.stop_stream()
-                    self.stream.close()
-                    self.stream = None
-                    logger.debug("Audio stream closed")
-                except Exception as e:
-                    logger.error("Error closing stream: %s", e)
-
-            # Wait for audio thread with longer timeout
-            # Check if record_thread exists and is not None before accessing attributes
-            if hasattr(self, "record_thread") and self.record_thread is not None:
-                if self.record_thread.is_alive():
-                    logger.debug("Waiting for audio thread...")
-                    self.record_thread.join(timeout=config.AUDIO_THREAD_TIMEOUT)
-                    if self.record_thread.is_alive():
-                        # Break long line for flake8 E501
-                        logger.warning("Audio thread not responding - will be terminated on exit")
-                        # Don't set to None here, just let the daemon thread property handle termination
-
-            logger.info("\n⏹️ Recording stopped")
-
-    def _record_audio(self, callback):
-        """Record audio and send to callback"""
-        buffer = []  # Audio buffer for more stable transmission
-        logger.debug("Audio thread started")
-
-        try:
-            while self.recording and self.stream and self.stream.is_active():
-                try:
-                    data = self.stream.read(self.chunk, exception_on_overflow=False)
-                    # Convert to float32 array
-                    audio_array = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
-
-                    # Add normalized float32 data to buffer
-                    buffer.append(audio_array)
-
-                    # Check if enough audio is available for a buffer
-                    buffer_size = int(config.AUDIO_BUFFER_SECONDS * 4)  # 4 chunks per second
-                    if len(buffer) >= buffer_size:
-                        combined_data = np.concatenate(buffer)
-
-                        # Resample to 16kHz
-                        resampled_data = resample_to_16kHZ(combined_data.tobytes(), self.rate)
-                        if self.recording:  # Nochmal prüfen vor dem Senden
-                            callback(resampled_data)
-                        buffer = []  # Clear buffer
-
-                except Exception as e:
-                    logger.error("⚠️ Error during recording: %s", e)
-                    break
-
-        finally:
-            # Send remaining buffer data
-            if buffer:
-                try:
-                    combined_data = np.concatenate(buffer)
-                    # Resample to 16kHz
-                    resampled_data = resample_to_16kHZ(combined_data.tobytes(), self.rate)
-                    callback(resampled_data)
-                    logger.debug("Last %d buffer chunks sent", len(buffer))
-                except Exception as e:
-                    logger.error("Error sending last buffer data: %s", e)
-
-            buffer = []
-            logger.debug("Audio thread terminated")
-            self.recording = False
-
-    def cleanup(self):
-        """Release resources"""
-        self.stop_recording()
-        if self.audio:
-            self.audio.terminate()
+    def __getattr__(self, name):
+        # Leite alle Attributzugriffe an die Instanz weiter
+        return getattr(self._instance, name)

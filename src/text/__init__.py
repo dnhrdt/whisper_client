@@ -1,9 +1,14 @@
 """
 Text Processing Package for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-18 12:22 CET
+Version: 1.2
+Timestamp: 2025-04-20 14:00 CET
 
-This package will provide text processing functionality for the Whisper Client.
-It will include classes and functions for text segmentation, buffering, processing,
-and output.
+Dieses Paket stellt Textverarbeitungsfunktionalität für den Whisper Client bereit.
+Es enthält Klassen und Funktionen für Textsegmentierung, Pufferung, Verarbeitung
+und Ausgabe.
 """
+
+from text.manager import TextManager
+
+# Öffentliche API
+__all__ = ["TextManager"]

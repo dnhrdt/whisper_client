@@ -1,11 +1,79 @@
 # Development Progress
-Version: 6.1
-Timestamp: 2025-04-15 01:23 CET
+Version: 6.4
+Timestamp: 2025-04-20 14:25 CET
 
 ## Current Focus: Core Stabilization & Refinement (CLI-First Strategy)
 
 ### Recently Completed (Last 3 Tasks)
-1.  **Addressed Pylint Warnings & Updated Headers** ⚠️ [T156] (Current Session)
+1.  **Implemented Websocket Fassade** ✓ [T157] (Current Session)
+    *   Implementation Details
+        *   Created a facade in src/websocket.py that imports and re-exports from the new module structure
+        *   The facade follows the same pattern as the text.py facade:
+            - Imports the main class and important types from the websocket package
+            - Re-exports all previously public functions for backward compatibility
+            - Includes proper documentation and module structure information
+            - Updates version and timestamp headers
+        *   All functionality from the original websocket.py is now available through the facade
+    *   Impact
+        *   Completed the refactoring of the websocket module
+        *   Improved code organization with clear separation of concerns
+        *   Enhanced maintainability through smaller, focused modules
+        *   Better testability with isolated components
+        *   Reduced cognitive load when working with the codebase
+    *   Task History
+        *   Updated Memory Bank documentation (`activeContext.md`, `progress.md`)
+
+2.  **Implemented Refactoring Structure for audio.py** ✓ [T158]
+    *   Implementation Details
+        *   Created new module structure for audio.py as outlined in docs/refactoring.md:
+            - audio/resampling.py: Audio-Resampling und -Konvertierung
+            - audio/window.py: TumblingWindow-Klasse und Überlappungslogik
+            - audio/processor.py: AudioProcessor-Klasse und Thread-basierte Verarbeitung
+            - audio/manager.py: AudioManager-Klasse und Mikrofonverwaltung
+            - audio/device.py: Geräteerkennungs- und -verwaltungsfunktionen
+            - audio/__init__.py: API und Hauptklassen
+        *   Implemented all modules with proper separation of concerns
+        *   Updated original file (src/audio.py) to act as a facade that imports and re-exports from the new module structure
+        *   All new files include proper version headers and documentation
+        *   Added new normalize_audio function for improved audio processing
+        *   Improved type hints throughout the audio module
+    *   Impact
+        *   Improved code organization with clear separation of concerns
+        *   Enhanced maintainability through smaller, focused modules
+        *   Better testability with isolated components
+        *   Prepared for future extensibility
+        *   Reduced cognitive load when working with the codebase
+    *   Task History
+        *   Updated Memory Bank documentation (`activeContext.md`, `progress.md`)
+
+2.  **Implemented Refactoring Structure for text.py and websocket.py** ✓ [T157]
+    *   Implementation Details
+        *   Created new module structure for both large modules as outlined in docs/refactoring.md:
+            - text/segment.py: TextSegment Dataclass
+            - text/buffer.py: TextBuffer-Klasse und Speicherverwaltung
+            - text/processing.py: Satzverarbeitung und Formatierung
+            - text/output.py: Text-Ausgabemethoden
+            - text/window.py: Fenstererkennung und -manipulation
+            - text/__init__.py: API und Hauptklasse
+            - websocket/state.py: ConnectionState Enum und Zustandsverwaltung
+            - websocket/connection.py: Verbindungsfunktionalität und Instance-Tracking
+            - websocket/messaging.py: Nachrichtenverarbeitung und Datenübertragung
+            - websocket/error_handling.py: Fehlerbehandlung und Recovery
+            - websocket/__init__.py: API und Hauptklasse
+        *   Implemented all modules with proper separation of concerns
+        *   Original files (src/text.py and src/websocket.py) remain untouched as they will serve as facades
+        *   All new files include proper version headers and documentation
+    *   Impact
+        *   Improved code organization with clear separation of concerns
+        *   Enhanced maintainability through smaller, focused modules
+        *   Better testability with isolated components
+        *   Prepared for future extensibility
+        *   Reduced cognitive load when working with the codebase
+    *   Task History
+        *   Created log entry with implementation details [T157] (logs/increments/log_039.json)
+        *   Updated Memory Bank documentation (`activeContext.md`, `progress.md`)
+
+3.  **Addressed Pylint Warnings & Updated Headers** ⚠️ [T156]
     *   Implementation Details
         *   Addressed specific `pylint` warnings (`W1203`, `I1101`, `R1702`, `C0201`, `W0612`) across multiple Python files (`src/audio.py`, `src/hotkeys.py`, `src/logging.py`, `src/terminal.py`, `src/text.py`, `src/utils.py`, `src/websocket.py`, `main.py`).
         *   Updated `.pylintrc` to ignore `I1101` for `win32` modules.
@@ -19,7 +87,7 @@ Timestamp: 2025-04-15 01:23 CET
         *   (Log entry to be created for this session)
         *   Updated Memory Bank documentation (`activeContext.md`, `progress.md`).
 
-2.  **Implemented Streamlined Linting System** ✓ [T156]
+4.  **Implemented Streamlined Linting System** ✓ [T156]
     *   Implementation Details
         *   Created a centralized PowerShell linting script (.linting/lint.ps1) with flexible options:
             - Support for running specific linters or all of them
@@ -42,7 +110,7 @@ Timestamp: 2025-04-15 01:23 CET
         *   Created log entry with implementation details [T156]
         *   Updated Memory Bank documentation
 
-3.  **Fixed Additional Linting Issues in WebSocket Module** ✓ [T156]
+5.  **Fixed Additional Linting Issues in WebSocket Module** ✓ [T156]
     *   Implementation Details
         *   Fixed trailing whitespace issues in multiple log_connection calls
         *   Improved line formatting for long lines to stay within the 100 character limit
@@ -56,7 +124,7 @@ Timestamp: 2025-04-15 01:23 CET
     *   Task History
         *   Created log entry with implementation details [T156]
         *   Updated Memory Bank documentation
-4. **Implemented Minimal Safeguards in WebSocket Implementation** ✓
+6. **Implemented Minimal Safeguards in WebSocket Implementation** ✓
    - Implementation Details
      * Added global timeout mechanism to all blocking operations
      * Implemented timeout for cleanup process to prevent hanging
@@ -77,10 +145,23 @@ Timestamp: 2025-04-15 01:23 CET
      * Updated main.json with the changes
      * Updated Memory Bank documentation
      * Updated version and timestamp in websocket.py
-
 ### Current Tasks (Focus on Core Stability)
 
-1.  **Complete Code Quality Checks** ⚠️ [T156]
+1.  **Complete Module Refactoring** ✓ [T157]
+    *   [x] Create new module structure for text.py and websocket.py
+    *   [x] Implement all modules with proper separation of concerns
+    *   [x] Ensure all new files have proper version headers and documentation
+    *   [x] Update original files (src/text.py and src/websocket.py) to act as facades
+    *   [ ] Verify that all functionality works correctly with the new structure
+    *   [ ] Run tests to ensure no regressions were introduced
+
+2.  **Test Refactored Modules** ⚠️ [T157, T158]
+    *   [x] Implement refactoring for audio.py
+    *   [x] Update audio.py to act as a facade
+    *   [ ] **Run tests to ensure no regressions were introduced** (Next Session)
+    *   [ ] Verify that all functionality works correctly with the new structure
+
+3.  **Complete Code Quality Checks** ⚠️ [T156]
     *   [x] Set up code quality tools and documentation
     *   [x] Run flake8 linting tool and fix identified issues
     *   [x] Implement streamlined linting system
@@ -90,18 +171,14 @@ Timestamp: 2025-04-15 01:23 CET
     *   [ ] Run `./.linting/lint.ps1` until all tools pass cleanly (Next Session).
     *   [ ] Re-verify all project file headers after fixes (Next Session).
 
-2.  **Core Stability Analysis & Improvement** ⚠️ [NEW - TBD]
+4.  **Core Stability Analysis & Improvement** ⚠️ [NEW - TBD]
     *   [ ] Systematically review and address known stability concerns (ref: T120 Audio Timing, WebSocket connection handling, error recovery, resource leaks).
     *   [ ] Conduct tests focused on long-running stability.
     *   [ ] Prioritize specific stability issues after linting is complete.
 
-3.  **Configuration Refinement (Planning)** ⚠️ [NEW - TBD]
+5.  **Configuration Refinement (Planning)** ⚠️ [NEW - TBD]
     *   [ ] Evaluate current `config.py`/`config.json` setup for CLI/library usage.
     *   [ ] Propose and plan migration to a simpler, standard configuration format (e.g., TOML or YAML).
-
-4.  **Plan Module Splitting** ⚠️ [NEW - TBD]
-    *   [ ] Create a new task to address user feedback regarding splitting `src/text.py` and `src/websocket.py`.
-    *   [ ] Analyze dependencies and propose a splitting strategy.
 
 *(Note: Tasks related to broader Alpha Release (Community prep, WhisperLive comms), specific test improvements (T145), and immediate feature work (Audio Opt, Text Enhancements) are deferred until the core is stable. See `archiveContext.md` for details.)*
 
@@ -130,12 +207,13 @@ Timestamp: 2025-04-15 01:23 CET
    - See docs/todo/documentation.md
 
 ## Development Log References
-- Current increment: (To be created: log_035.json)
+- Current increment: logs/increments/log_039.json
 - Recent major changes: logs/main.json
 - Full task history: progressHistory.md
 
 ## Next Steps (Immediate for New Session)
-1.  **Fix New Linting Errors [T156]:** Execute `./.linting/lint.ps1`, analyze errors (likely related to logging arguments), fix them in the affected files (esp. `src/websocket.py`), and re-run the script until clean.
-2.  **Verify Headers:** Briefly re-check headers in files modified during the fix process.
-3.  **Proceed with Stability Analysis:** Once T156 is truly complete, move to the next core stabilization tasks.
-4.  **Prioritize Stability:** Begin systematic review and improvement of core component stability (Audio, WebSocket, Text Processing, Error Handling) after linting.
+1.  **Test Refactored Modules [T157, T158]:** Run tests to ensure no regressions were introduced by the refactoring.
+3.  **Fix New Linting Errors [T156]:** Execute `./.linting/lint.ps1`, analyze errors (likely related to logging arguments), fix them in the affected files (esp. `src/websocket.py`), and re-run the script until clean.
+4.  **Verify Headers:** Briefly re-check headers in files modified during the fix process.
+5.  **Proceed with Stability Analysis:** Once T156 is truly complete, move to the next core stabilization tasks.
+6.  **Prioritize Stability:** Begin systematic review and improvement of core component stability (Audio, WebSocket, Text Processing, Error Handling) after linting.

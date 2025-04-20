@@ -1,0 +1,27 @@
+{
+  "type": "normal",
+  "task_id": "T157",
+  "component": "core",
+  "description": "Implementation of WebSocket Facade",
+  "details": [
+    "Created a facade in src/websocket.py that imports and re-exports from the new modules",
+    "The facade follows the same pattern as the text.py facade",
+    "Imports the main class and important types from the websocket package",
+    "Re-exports all previously public functions for backward compatibility",
+    "Includes proper documentation and module structure information",
+    "Updated version and timestamp headers"
+  ],
+  "files_changed": [
+    "src/websocket.py",
+    "cline_docs/activeContext.md",
+    "cline_docs/progress.md"
+  ],
+  "test_impact": {
+    "tests_affected": [
+      "tests/integration/test_websocket_multiple_connections.py",
+      "tests/integration/test_websocket_connection.py"
+    ],
+    "tests_added": []
+  },
+  "timestamp": "2025-04-20T14:25:00+02:00"
+}

@@ -1,0 +1,34 @@
+{
+  "type": "normal",
+  "task_id": "T157",
+  "component": "core",
+  "description": "Implementierung der Refactoring-Struktur für text.py und websocket.py",
+  "details": [
+    "Erstellung der neuen Modulstruktur für text.py",
+    "Erstellung der neuen Modulstruktur für websocket.py",
+    "Implementierung aller Module gemäß dem Refactoring-Plan",
+    "Aktualisierung der __init__.py-Dateien für beide Pakete"
+  ],
+  "files_changed": [
+    "src/text/segment.py",
+    "src/text/buffer.py",
+    "src/text/processing.py",
+    "src/text/output.py",
+    "src/text/window.py",
+    "src/text/__init__.py",
+    "src/websocket/state.py",
+    "src/websocket/connection.py",
+    "src/websocket/messaging.py",
+    "src/websocket/error_handling.py",
+    "src/websocket/__init__.py"
+  ],
+  "test_impact": {
+    "tests_affected": [
+      "tests/integration/test_websocket_multiple_connections.py",
+      "tests/integration/test_text_buffer.py",
+      "tests/integration/test_text_processing.py"
+    ],
+    "tests_added": []
+  },
+  "timestamp": "2025-04-20T13:04:00+02:00"
+}

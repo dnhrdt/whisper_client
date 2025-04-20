@@ -1,0 +1,126 @@
+"""
+Window Management Module for the Whisper Client
+Version: 1.1
+Timestamp: 2025-04-20 14:00 CET
+
+Dieses Modul stellt Funktionen zur Fenstererkennung und -manipulation bereit,
+einschließlich VS Code-spezifischer Funktionen.
+"""
+
+from typing import List, Tuple
+
+import win32gui
+
+import config
+from src import logger
+
+
+def find_prompt_window():
+    """Finds the prompt window by title"""
+    try:
+        prompt_window_title = config.PROMPT_WINDOW_TITLE
+
+        def callback(hwnd, windows):
+            if win32gui.IsWindowVisible(hwnd):
+                title = win32gui.GetWindowText(hwnd)
+                if prompt_window_title.lower() in title.lower():
+                    windows.append(hwnd)
+                return True
+
+        windows: List[int] = []
+        win32gui.EnumWindows(callback, windows)
+        return windows[0] if windows else None
+
+    except Exception as e:
+        logger.error("⚠️ Error during window search: %s", e)
+        return None
+
+
+def find_vscode_edit_control(parent_hwnd):
+    """Find the edit control within VS Code"""
+    result: List[Tuple[int, str, str]] = []
+
+    # VS Code uses a complex structure with Electron/Chromium
+    # We need to search more deeply for potential edit areas
+    def callback(hwnd, controls):
+        class_name = win32gui.GetClassName(hwnd)
+        # Log all controls for debugging
+        text = win32gui.GetWindowText(hwnd)
+        if text or class_name not in ["", "Static"]:
+            logger.debug(
+                "Control: %d, Class: %s, Text: %s",
+                hwnd,
+                class_name,
+                text[:20] + "..." if len(text) > 20 else text,
+            )
+
+        # Look for potential edit controls
+        # Ensure class_name is not None before using 'in'
+        if class_name is not None and class_name in [  # Final None check again
+            "Edit",
+            "RichEdit",
+            "RichEdit20W",
+            "RICHEDIT50W",
+        ]:
+            controls.append((hwnd, class_name, "standard_edit"))
+        # VS Code's main editor might be in Chromium's structure
+        elif class_name == "Chrome_RenderWidgetHostHWND":
+            controls.append((hwnd, class_name, "chrome_render"))
+        # Electron apps often use Atom as a base
+        elif "Atom" in class_name:
+            controls.append((hwnd, class_name, "atom"))
+        # Look for the Monaco editor component
+        elif "Monaco" in text or "monaco" in text.lower():
+            controls.append((hwnd, class_name, "monaco"))
+        return 1  # Continue enumeration
+
+    try:
+        # First try direct children
+        win32gui.EnumChildWindows(parent_hwnd, callback, result)  # Remove unused comment
+
+        if not result:
+            # If no results, try a recursive approach to find deeper controls
+            def recursive_find(hwnd, depth=0, max_depth=5):
+                if depth > max_depth:
+                    return
+
+                try:
+                    win32gui.EnumChildWindows(
+                        hwnd,
+                        lambda child_hwnd, _: (
+                            callback(child_hwnd, result),
+                            recursive_find(child_hwnd, depth + 1, max_depth),
+                        ),
+                        None,
+                    )
+                except Exception:
+                    pass  # Some windows might not allow enumeration
+
+            recursive_find(parent_hwnd)
+
+        if result:
+            logger.debug("Found %d potential edit controls in VS Code", len(result))
+            for i, (hwnd, class_name, control_type) in enumerate(result):
+                logger.debug(
+                    "  %d. Handle: %d, Class: %s, Type: %s",
+                    i + 1,
+                    hwnd,
+                    class_name,
+                    control_type,
+                )
+
+            # Prioritize standard edit controls if found
+            for hwnd, _, control_type in result:
+                if control_type == "standard_edit":
+                    return hwnd
+
+            # Otherwise return the first control found
+            return result[0][0]
+        else:
+            logger.debug("No potential edit controls found in VS Code")
+            # If no edit control found, return the parent window as fallback
+            return parent_hwnd
+    except Exception as e:
+        logger.error("⚠️ Error finding VS Code edit control: %s", e)
+        # Return parent window as fallback
+        return parent_hwnd
