@@ -21,16 +21,21 @@ Neue Struktur:
 """
 
 # Imports aus den neuen Modulen
-from text import TextManager
-from text.segment import TextSegment
-from text.buffer import TextBuffer
-from text.output import send_message, set_clipboard_text, send_paste_command, send_text_to_prompt
-from text.window import find_prompt_window, find_vscode_edit_control
-from text.processing import is_sentence_end, format_sentence, find_overlap
-from text.duplicate import is_duplicate, normalize_text
-from text.sentence import output_sentence, should_force_output
-from text.input_handler import process_segments
-from text.test_handler import get_test_output
+from src.text import TextManager
+from src.text.buffer import TextBuffer
+from src.text.duplicate import is_duplicate, normalize_text
+from src.text.input_handler import process_segments
+from src.text.output import (
+    send_message,
+    send_paste_command,
+    send_text_to_prompt,
+    set_clipboard_text,
+)
+from src.text.processing import find_overlap, format_sentence, is_sentence_end
+from src.text.segment import TextSegment
+from src.text.sentence import output_sentence, should_force_output
+from src.text.test_handler import get_test_output
+from src.text.window import find_prompt_window, find_vscode_edit_control
 
 # Re-Export der öffentlichen API
 __all__ = [
@@ -40,5 +45,5 @@ __all__ = [
     "send_message",
     "is_sentence_end",
     "format_sentence",
-    "find_overlap"
+    "find_overlap",
 ]

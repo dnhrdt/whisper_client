@@ -1,7 +1,7 @@
 """
 WebSocket Multiple Connections Test
-Version: 1.6
-Timestamp: 2025-03-03 19:08 CET
+Version: 1.7
+Timestamp: 2025-04-20 17:37 CET
 
 This module tests the prevention of multiple parallel connections in the WebSocket client.
 It verifies that the client properly tracks instances, throttles connection attempts,
@@ -22,7 +22,7 @@ sys.path.insert(0, str(project_root))
 
 import config
 from src import logging
-from src.websocket import ConnectionState, WhisperWebSocket
+from src.ws_client import ConnectionState, WhisperWebSocket
 
 # Configure logger
 logger = logging.get_logger()

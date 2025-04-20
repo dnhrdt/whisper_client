@@ -1,7 +1,7 @@
 """
 Terminal Management for the Whisper Client
-Version: 1.3
-Timestamp: 2025-04-15 01:08 CET
+Version: 1.4
+Timestamp: 2025-04-20 16:40 CET
 
 This module provides terminal management functionality for the Whisper Client.
 It tracks terminal status, handles terminal registration and cleanup, and
@@ -17,6 +17,7 @@ from typing import Dict, Optional
 
 import config
 from src import logger
+from src.logging import log_debug, log_error, log_info
 
 
 class TerminalStatus(Enum):
@@ -52,7 +53,7 @@ class TerminalManager:
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
 
-        logger.info("Terminal Manager started")
+        log_info(logger, "Terminal Manager started")
 
     def register_terminal(
         self, id: str, name: str, process: Optional[object] = None
@@ -80,7 +81,7 @@ class TerminalManager:
                 process=process,
             )
             self.terminals[id] = terminal
-            logger.debug("Terminal registered: %s (ID: %s)", name, id)
+            log_debug(logger, "Terminal registered: %s (ID: %s)", name, id)
             return terminal
 
     def update_activity(self, id: str):
@@ -90,7 +91,7 @@ class TerminalManager:
                 self.terminals[id].last_activity = time.time()
                 if self.terminals[id].status == TerminalStatus.INACTIVE:
                     self.terminals[id].status = TerminalStatus.ACTIVE
-                    logger.debug("Terminal reactivated: %s", self.terminals[id].name)
+                    log_debug(logger, "Terminal reactivated: %s", self.terminals[id].name)
 
     def close_terminal(self, id: str):
         """
@@ -104,19 +105,22 @@ class TerminalManager:
                 terminal = self.terminals[id]
                 if terminal.status not in [TerminalStatus.CLOSING, TerminalStatus.CLOSED]:
                     terminal.status = TerminalStatus.CLOSING
-                    logger.debug("Terminal is being closed: %s", terminal.name)
+                    log_debug(logger, "Terminal is being closed: %s", terminal.name)
 
                     # Prozess beenden falls vorhanden
                     if terminal.process and isinstance(terminal.process, subprocess.Popen):
                         try:
                             terminal.process.terminate()
                         except Exception as e:
-                            logger.debug(
-                                "Error terminating process for terminal %s: %s", terminal.name, e
+                            log_debug(
+                                logger,
+                                "Error terminating process for terminal %s: %s",
+                                terminal.name,
+                                e,
                             )
 
                     terminal.status = TerminalStatus.CLOSED
-                    logger.debug("Terminal closed: %s", terminal.name)
+                    log_debug(logger, "Terminal closed: %s", terminal.name)
 
     def get_terminal_info(self, id: str) -> Optional[TerminalInfo]:
         """
@@ -163,7 +167,7 @@ class TerminalManager:
                             inactive_time = current_time - terminal.last_activity
                             if inactive_time > config.TERMINAL_INACTIVITY_TIMEOUT:
                                 terminal.status = TerminalStatus.INACTIVE
-                                logger.debug("Terminal inactive: %s", terminal.name)
+                                log_debug(logger, "Terminal inactive: %s", terminal.name)
                                 to_close.append(id)
 
                 # Close inactive terminals
@@ -171,7 +175,7 @@ class TerminalManager:
                     self.close_terminal(id)
 
             except Exception as e:
-                logger.error("Error in terminal monitor: %s", e)
+                log_error(logger, "Error in terminal monitor: %s", e)
 
             time.sleep(config.TERMINAL_MONITOR_INTERVAL)  # Interval for terminal monitoring
 
@@ -188,4 +192,4 @@ class TerminalManager:
         if self.monitor_thread.is_alive():
             self.monitor_thread.join(timeout=config.TERMINAL_THREAD_TIMEOUT)
 
-        logger.info("Terminal Manager stopped")
+        log_info(logger, "Terminal Manager stopped")

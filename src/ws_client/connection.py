@@ -1,7 +1,7 @@
 """
 WebSocket Connection Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 13:01 CET
+Version: 1.1
+Timestamp: 2025-04-20 16:18 CET
 
 This module handles the core connection functionality for the WebSocket client,
 including connection establishment, reconnection logic, and instance tracking.
@@ -12,12 +12,12 @@ import time
 import uuid
 from typing import Dict
 
-import websocket
-
 import config
+import websocket
 from src import logger
 from src.logging import log_connection, log_error
-from websocket.state import ConnectionState
+
+from .state import ConnectionState
 
 
 class ConnectionManager:
@@ -52,7 +52,8 @@ class ConnectionManager:
         cleanup_start = time.time()
         log_connection(
             logger,
-            "Starting cleanup of all WebSocket instances (%d active)..." % cls.get_instance_count(),
+            "Starting cleanup of all WebSocket instances (%d active)...",
+            cls.get_instance_count(),
         )
 
         with cls._instances_lock:
@@ -67,31 +68,31 @@ class ConnectionManager:
                 success_count += 1
             except Exception as e:
                 error_count += 1
-                log_error(logger, "Error cleaning up instance %s: %s" % (instance.client_id, str(e)))
+                log_error(logger, "Error cleaning up instance %s: %s", instance.client_id, str(e))
 
         # Check if cleanup took too long
         cleanup_duration = time.time() - cleanup_start
         if cleanup_duration > config.WS_CLEANUP_TIMEOUT:
             log_error(
                 logger,
-                "Cleanup of all instances took longer than expected: %.2fs" % cleanup_duration,
+                "Cleanup of all instances took longer than expected: %.2fs",
+                cleanup_duration,
             )
 
         # Final cleanup status
         log_connection(
             logger,
-            "Cleanup completed: %d successful, %d failed, duration: %.2fs" % (
-                success_count,
-                error_count,
-                cleanup_duration,
-            )
+            "Cleanup completed: %d successful, %d failed, duration: %.2fs",
+            success_count,
+            error_count,
+            cleanup_duration,
         )
 
         # Check if any instances remain
         remaining = cls.get_instance_count()
         if remaining > 0:
             log_error(
-                logger, "Warning: %d WebSocket instances still active after cleanup" % remaining
+                logger, "Warning: %d WebSocket instances still active after cleanup", remaining
             )
 
 

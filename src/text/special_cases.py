@@ -1,7 +1,7 @@
 """
 Special Cases Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 14:00 CET
+Version: 1.1
+Timestamp: 2025-04-20 16:40 CET
 
 Dieses Modul behandelt Spezialfälle in der Textverarbeitung.
 """
@@ -10,6 +10,7 @@ import time
 
 import config
 from src import logger
+from src.logging import log_info
 
 
 def handle_empty_input(manager, current_time):
@@ -19,7 +20,7 @@ def handle_empty_input(manager, current_time):
         manager.current_sentence
         and current_time - manager.incomplete_sentence_time > config.MAX_SENTENCE_WAIT
     ):
-        logger.info("    ⏱️ Timeout for incomplete sentence (empty input)")
+        log_info(logger, "    ⏱️ Timeout for incomplete sentence (empty input)")
         manager.output_sentence(current_time)
 
 
@@ -30,7 +31,7 @@ def handle_empty_text(manager, current_time):
         manager.current_sentence
         and current_time - manager.incomplete_sentence_time > config.MAX_SENTENCE_WAIT
     ):
-        logger.info("    ⏱️ Timeout for incomplete sentence (empty text)")
+        log_info(logger, "    ⏱️ Timeout for incomplete sentence (empty text)")
         manager.output_sentence(current_time)
 
 
@@ -40,7 +41,7 @@ def check_timeout(manager, current_time):
         manager.current_sentence
         and current_time - manager.incomplete_sentence_time > config.MAX_SENTENCE_WAIT
     ):
-        logger.info("    ⏱️ Timeout for incomplete sentence")
+        log_info(logger, "    ⏱️ Timeout for incomplete sentence")
         manager.output_sentence(current_time)
 
 

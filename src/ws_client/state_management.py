@@ -1,7 +1,7 @@
 """
 WebSocket State Management Module
-Version: 1.0
-Timestamp: 2025-04-20 14:08 CET
+Version: 1.1
+Timestamp: 2025-04-20 17:14 CET
 
 This module contains functions for managing WebSocket connection states.
 """
@@ -10,7 +10,8 @@ import time
 
 from src import logger
 from src.logging import log_connection
-from websocket.connection import ConnectionManager
+
+from .connection import ConnectionManager
 
 
 def set_connection_state(ws_instance, new_state):
@@ -18,7 +19,7 @@ def set_connection_state(ws_instance, new_state):
     with ws_instance.connection_lock:
         old_state = ws_instance.state
         ws_instance.state = new_state
-        log_connection(logger, "State changed: %s -> %s" % (old_state.name, new_state.name))
+        log_connection(logger, f"State changed: {old_state.name} -> {new_state.name}")
 
 
 def log_state_periodically(ws_instance, operation_name):
@@ -28,9 +29,5 @@ def log_state_periodically(ws_instance, operation_name):
         ws_instance.last_state_log_time = current_time
         log_connection(
             logger,
-            "[%s] Current state: %s, Active instances: %d" % (
-                operation_name,
-                ws_instance.state.name,
-                ConnectionManager.get_instance_count(),
-            )
+            f"[{operation_name}] Current state: {ws_instance.state.name}, Active instances: {ConnectionManager.get_instance_count()}",
         )

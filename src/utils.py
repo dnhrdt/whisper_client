@@ -1,7 +1,7 @@
 """
 Utility Functions for the Whisper Client
-Version: 1.2
-Timestamp: 2025-04-15 01:09 CET
+Version: 1.3
+Timestamp: 2025-04-20 16:46 CET
 
 This module provides utility functions for the Whisper Client.
 It includes functions for server status checking, project status updates,
@@ -15,6 +15,7 @@ from datetime import datetime
 
 import config
 from src import logger
+from src.logging import log_debug, log_error, log_info
 
 
 def check_server_status(host=config.WS_HOST, port=config.WS_PORT):
@@ -26,7 +27,7 @@ def check_server_status(host=config.WS_HOST, port=config.WS_PORT):
         sock.close()
         return result == 0
     except Exception as e:
-        logger.debug("Error checking server status: %s", e)
+        log_debug(logger, "Error checking server status: %s", e)
         return False
 
 
@@ -67,7 +68,7 @@ def update_project_status(description=None, changes=None, status=None, files=Non
                 json.dump(projects, f, indent=2, ensure_ascii=False)
 
     except Exception as e:
-        logger.error("⚠️ Error updating project status: %s", e)
+        log_error(logger, "⚠️ Error updating project status: %s", e)
 
     # Update task history
     if description and changes:
@@ -103,7 +104,7 @@ def update_task_history(description, changes, status="completed", files=None):
             json.dump(history, f, indent=2, ensure_ascii=False)
 
     except Exception as e:
-        logger.error("⚠️ Error updating task history: %s", e)
+        log_error(logger, "⚠️ Error updating task history: %s", e)
 
 
 def show_startup_message():
@@ -118,7 +119,7 @@ def show_startup_message():
     # Only send to logger
     for line in startup_msg.split("\n"):
         if line.strip():
-            logger.info(line)
+            log_info(logger, line)
 
 
 def show_server_error():
@@ -140,4 +141,4 @@ Then restart this client."""
     # Only send to logger
     for line in error_msg.split("\n"):
         if line.strip():
-            logger.error(line)
+            log_error(logger, line)

@@ -15,39 +15,25 @@ import win32clipboard
 import config
 from src import logger
 from src.logging import log_audio, log_connection, log_error
-from websocket.state import ConnectionState
-from websocket.callbacks import (
-    on_open,
-    on_message,
-    on_error,
-    on_close,
-)
-from websocket.connection_management import (
+
+from .callbacks import on_close, on_error, on_message, on_open
+from .cleanup import handle_instance_deletion, perform_cleanup
+from .connection import ConnectionManager, generate_client_id, generate_session_id
+from .connection_management import (
     cleanup_previous_connection,
-    initialize_and_start_websocket,
-    wait_for_socket_connection,
-    wait_for_server_ready,
     connect_to_server,
+    initialize_and_start_websocket,
+    wait_for_server_ready,
+    wait_for_socket_connection,
 )
-from websocket.processing import (
+from .processing import (
     send_audio_data,
     send_end_of_audio_signal,
     start_message_processing,
     stop_message_processing,
 )
-from websocket.state_management import (
-    set_connection_state,
-    log_state_periodically,
-)
-from websocket.cleanup import (
-    perform_cleanup,
-    handle_instance_deletion,
-)
-from websocket.connection import (
-    ConnectionManager,
-    generate_client_id,
-    generate_session_id,
-)
+from .state import ConnectionState
+from .state_management import log_state_periodically, set_connection_state
 
 
 class WhisperWebSocket:
@@ -68,7 +54,9 @@ class WhisperWebSocket:
         self.connection_lock = threading.Lock()  # Lock for thread-safe state changes
         self.last_connection_attempt: float = 0.0  # Timestamp of last connection attempt
         self.last_state_log_time: float = 0.0  # Timestamp of last state logging
-        self.state_log_interval = config.WS_STATE_LOG_INTERVAL  # Log state every 5 seconds during long operations
+        self.state_log_interval = (
+            config.WS_STATE_LOG_INTERVAL
+        )  # Log state every 5 seconds during long operations
 
         # Register this instance
         ConnectionManager.register_instance(self)

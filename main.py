@@ -1,7 +1,7 @@
 """
 Main Program for the Whisper Client
-Version: 1.5
-Timestamp: 2025-04-15 01:10 CET
+Version: 1.7
+Timestamp: 2025-04-20 17:34 CET
 
 This is the main entry point for the Whisper Client application.
 It initializes all components, manages the application lifecycle,
@@ -17,6 +17,7 @@ import websocket
 from src import logger
 from src.audio import AudioManager, AudioProcessor
 from src.hotkeys import HotkeyManager
+from src.logging import log_debug, log_error, log_info, log_warning
 from src.terminal import TerminalManager
 from src.text import TextManager
 from src.utils import (
@@ -25,7 +26,7 @@ from src.utils import (
     show_startup_message,
     update_task_history,
 )
-from src.websocket import ConnectionState, WhisperWebSocket
+from src.ws_client import ConnectionState, WhisperWebSocket
 
 
 class WhisperClient:
@@ -68,7 +69,7 @@ class WhisperClient:
         try:
             self.websocket.connect()
         except Exception as e:
-            logger.error("⚠️ Connection error: %s", e)
+            log_error(logger, "⚠️ Connection error: %s", e)
             return False
 
         # Hauptschleife
@@ -96,7 +97,7 @@ class WhisperClient:
         """Start/stop recording"""
         if not self.audio_manager.recording:
             if self.websocket.state != ConnectionState.READY:
-                logger.error("⚠️ No connection to server")
+                log_error(logger, "⚠️ No connection to server")
                 return
             # Aktiviere Verarbeitung und starte Aufnahme
             self.websocket.start_processing()
@@ -111,14 +112,14 @@ class WhisperClient:
             self.terminal_manager.update_activity(self.audio_terminal.id)
         else:
             # Beende zuerst die Aufnahme
-            logger.info("Stopping recording...")
+            log_info(logger, "Stopping recording...")
             self.audio_manager.stop_recording()
 
             # Stop audio processing
             self.audio_processor.stop_processing()
 
             # Dann sende END_OF_AUDIO und warte auf letzte Texte
-            logger.info("Waiting for final texts from server...")
+            log_info(logger, "Waiting for final texts from server...")
             self.websocket.stop_processing()
 
     def on_audio_data(self, audio_data):
@@ -135,7 +136,7 @@ class WhisperClient:
 
     def cleanup(self):
         """Release resources and exit program"""
-        logger.info("\n🛑 Program is shutting down...")
+        log_info(logger, "\n🛑 Program is shutting down...")
         self.running = False  # Hauptschleife beenden
 
         # Stoppe zuerst die Aufnahme
@@ -152,7 +153,7 @@ class WhisperClient:
         self.websocket.cleanup()
 
         # Cleanup all WebSocket instances to prevent multiple parallel connections
-        logger.info("Cleaning up all WebSocket instances...")
+        log_info(logger, "Cleaning up all WebSocket instances...")
         WhisperWebSocket.cleanup_all_instances()
 
         self.hotkey_manager.stop()
@@ -170,7 +171,7 @@ def main():
     # Check for existing WebSocket instances and clean them up
     instance_count = WhisperWebSocket.get_instance_count()
     if instance_count > 0:
-        logger.warning("Found %d existing WebSocket instances. Cleaning up...", instance_count)
+        log_warning(logger, "Found %d existing WebSocket instances. Cleaning up...", instance_count)
         WhisperWebSocket.cleanup_all_instances()
 
     # Prüfe Server-Status
@@ -182,11 +183,11 @@ def main():
         # Client starten
         client = WhisperClient()
         if not client.start():
-            logger.error("⚠️ Client could not be started")
+            log_error(logger, "⚠️ Client could not be started")
             sys.exit(1)
     except Exception as e:
-        logger.error("\n⚠️ Critical error: %s", e)
-        logger.error("🛑 Program is shutting down...")
+        log_error(logger, "\n⚠️ Critical error: %s", e)
+        log_error(logger, "🛑 Program is shutting down...")
         sys.exit(1)
 
 
@@ -214,6 +215,6 @@ if __name__ == "__main__":
             files=["main.py", "src/websocket.py"],
         )
     except Exception as e:
-        logger.debug("Task history could not be updated: %s", e)
+        log_debug(logger, "Task history could not be updated: %s", e)
 
     main()

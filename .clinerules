@@ -37,6 +37,17 @@ Systematically capture and update the following aspects in .clinerules:
 - Best practices from development
 - Optimization potential (only after validation)
 
+### File Editing Best Practices
+- **Prefer write_to_file over replace_in_file for extensive changes**:
+  * Use `write_to_file` for complete file rewrites or extensive changes
+  * Use `replace_in_file` only for small, targeted changes to specific sections
+  * After refactoring, edit files in one piece with `write_to_file` rather than making multiple small changes
+  * This approach is significantly more efficient and reduces the risk of errors
+- **Editing Strategy**:
+  * For new files or major rewrites: Use `write_to_file`
+  * For minor adjustments to existing files: Use `replace_in_file`
+  * When updating multiple sections of a file: Prefer `write_to_file` with the complete content
+
 ## Code Standards
 - Follow PEP 8 conventions
 - Use typed functions (Python 3.12+)

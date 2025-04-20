@@ -11,21 +11,22 @@ The package now includes a Tumbling Window implementation for improved audio pro
 with overlapping windows and better transitions between audio segments.
 """
 
+from .device import check_device_availability, list_audio_devices, test_microphone_access
+from .manager import AudioManager
+from .processor import AudioProcessor
+
 # Importiere alle Module und Funktionen, die exportiert werden sollen
-from audio.resampling import resample_to_16kHZ, normalize_audio
-from audio.window import TumblingWindow
-from audio.processor import AudioProcessor
-from audio.manager import AudioManager
-from audio.device import list_audio_devices, check_device_availability, test_microphone_access
+from .resampling import normalize_audio, resample_to_16kHZ
+from .window import TumblingWindow
 
 # Definiere, welche Symbole bei "from audio import *" importiert werden
 __all__ = [
-    'resample_to_16kHZ',
-    'normalize_audio',
-    'TumblingWindow',
-    'AudioProcessor',
-    'AudioManager',
-    'list_audio_devices',
-    'check_device_availability',
-    'test_microphone_access',
+    "resample_to_16kHZ",
+    "normalize_audio",
+    "TumblingWindow",
+    "AudioProcessor",
+    "AudioManager",
+    "list_audio_devices",
+    "check_device_availability",
+    "test_microphone_access",
 ]

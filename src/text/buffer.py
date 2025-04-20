@@ -13,7 +13,8 @@ import time
 from typing import List
 
 import config
-from text.segment import TextSegment
+
+from .segment import TextSegment
 
 
 class TextBuffer:

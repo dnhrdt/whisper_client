@@ -1,7 +1,7 @@
 """
 Audio Device Management Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 13:17 CET
+Version: 1.1
+Timestamp: 2025-04-20 16:37 CET
 
 This module provides functions for audio device detection and management.
 """
@@ -9,6 +9,7 @@ This module provides functions for audio device detection and management.
 import pyaudio
 
 from src import logger
+from src.logging import log_debug, log_error, log_info
 
 
 def list_audio_devices():
@@ -24,10 +25,14 @@ def list_audio_devices():
     try:
         info = audio.get_host_api_info_by_index(0)
         num_devices = info.get("deviceCount", 0)
+        # Ensure num_devices is an integer
+        num_devices = int(num_devices) if num_devices else 0
 
         for i in range(num_devices):
             device_info = audio.get_device_info_by_index(i)
             max_input_channels = device_info.get("maxInputChannels", 0)
+            # Ensure max_input_channels is an integer
+            max_input_channels = int(max_input_channels) if max_input_channels else 0
 
             if max_input_channels > 0:
                 # Correct Windows umlauts
@@ -58,10 +63,12 @@ def check_device_availability(audio, device_index):
     """
     try:
         device_info = audio.get_device_info_by_index(device_index)
-        max_channels = device_info.get("maxInputChannels")
-        return isinstance(max_channels, int) and max_channels > 0
+        max_channels = device_info.get("maxInputChannels", 0)
+        # Ensure max_channels is an integer
+        max_channels = int(max_channels) if max_channels else 0
+        return max_channels > 0
     except Exception as e:
-        logger.debug("Error checking device availability: %s", e)
+        log_debug(logger, "Error checking device availability: %s", e)
         return False
 
 
@@ -90,8 +97,8 @@ def test_microphone_access(audio, device_index, format, channels, rate, chunk):
             frames_per_buffer=chunk,
         )
         test_stream.close()
-        logger.info("✓ Microphone test successful")
+        log_info(logger, "✓ Microphone test successful")
         return True
     except Exception as e:
-        logger.error("⚠️ Microphone test failed: %s", e)
+        log_error(logger, "⚠️ Microphone test failed: %s", e)
         return False

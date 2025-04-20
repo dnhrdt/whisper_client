@@ -8,7 +8,7 @@ Es enthält Klassen und Funktionen für Textsegmentierung, Pufferung, Verarbeitu
 und Ausgabe.
 """
 
-from text.manager import TextManager
+from .manager import TextManager
 
 # Öffentliche API
 __all__ = ["TextManager"]

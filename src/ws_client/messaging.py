@@ -1,7 +1,7 @@
 """
 WebSocket Messaging Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 13:02 CET
+Version: 1.1
+Timestamp: 2025-04-20 17:12 CET
 
 This module handles message processing, sending and receiving data,
 and callback handling for the WebSocket client.
@@ -10,9 +10,8 @@ and callback handling for the WebSocket client.
 import json
 import time
 
-import websocket
-
 import config
+import websocket
 from src import logger
 from src.logging import log_audio, log_connection, log_error, log_text
 
@@ -29,12 +28,12 @@ def send_config(ws, client_id, session_id):
             "backend": config.WHISPER_BACKEND,
         }
         json_str = json.dumps(ws_config).encode("utf-8")
-        log_connection(logger, "Sending config: %s" % json.dumps(ws_config, indent=2))
+        log_connection(logger, f"Sending config: {json.dumps(ws_config, indent=2)}")
         if ws:  # Check if ws is not None
             ws.send(json_str, websocket.ABNF.OPCODE_TEXT)
         return True
     except Exception as e:
-        log_error(logger, "Error sending config: %s" % str(e))
+        log_error(logger, f"Error sending config: {str(e)}")
         return False
 
 
@@ -50,15 +49,15 @@ def send_audio_data(ws, audio_data):
         send_duration = time.time() - send_start
 
         # Log audio send with timing information
-        log_audio(logger, "Sent %d bytes in %.3fs" % (len(audio_data), send_duration))
+        log_audio(logger, f"Sent {len(audio_data)} bytes in {send_duration:.3f}s")
 
         # Check if send took too long
         if send_duration > config.WS_MESSAGE_WAIT:
-            log_connection(logger, "Audio send took longer than expected: %.2fs" % send_duration)
+            log_connection(logger, f"Audio send took longer than expected: {send_duration:.2f}s")
 
         return True
     except Exception as e:
-        log_error(logger, "Error sending audio: %s" % str(e))
+        log_error(logger, f"Error sending audio: {str(e)}")
         return False
 
 
@@ -73,10 +72,10 @@ def send_end_of_audio(ws):
             return False
         send_duration = time.time() - send_start
 
-        log_audio(logger, "Sent END_OF_AUDIO signal in %.3fs" % send_duration)
+        log_audio(logger, f"Sent END_OF_AUDIO signal in {send_duration:.3f}s")
         return True
     except Exception as e:
-        log_error(logger, "Error sending END_OF_AUDIO: %s" % str(e))
+        log_error(logger, f"Error sending END_OF_AUDIO: {str(e)}")
         return False
 
 
@@ -91,7 +90,7 @@ def process_message(message, on_text_callback=None, processing_enabled=True):
         if isinstance(message, bytes):
             message = message.decode("utf-8")
 
-        log_connection(logger, "Raw server message: %s" % message)
+        log_connection(logger, f"Raw server message: {message}")
         data = json.loads(message)
 
         if "message" in data:
@@ -112,7 +111,7 @@ def process_message(message, on_text_callback=None, processing_enabled=True):
                     callback_duration = time.time() - callback_start
                     if callback_duration > config.WS_MESSAGE_WAIT:
                         log_connection(
-                            logger, "Text callback took too long: %.2fs" % callback_duration
+                            logger, f"Text callback took too long: {callback_duration:.2f}s"
                         )
                 return "TEXT", text
 
@@ -120,10 +119,10 @@ def process_message(message, on_text_callback=None, processing_enabled=True):
         message_duration = time.time() - message_start
         if message_duration > config.WS_MESSAGE_WAIT:
             log_connection(
-                logger, "Message processing took longer than expected: %.2fs" % message_duration
+                logger, f"Message processing took longer than expected: {message_duration:.2f}s"
             )
 
         return None, None
     except Exception as e:
-        log_error(logger, "Error processing message: %s" % str(e))
+        log_error(logger, f"Error processing message: {str(e)}")
         return "ERROR", str(e)

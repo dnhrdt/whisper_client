@@ -1,11 +1,54 @@
 # Development Progress
-Version: 6.4
-Timestamp: 2025-04-20 14:25 CET
+Version: 6.6
+Timestamp: 2025-04-20 17:50 CET
 
 ## Current Focus: Core Stabilization & Refinement (CLI-First Strategy)
 
 ### Recently Completed (Last 3 Tasks)
-1.  **Implemented Websocket Fassade** ✓ [T157] (Current Session)
+1.  **Renamed websocket Package to ws_client** ✓ [T157] (Current Session)
+    *   Implementation Details
+        *   Renamed the websocket package to ws_client to avoid conflicts with the standard Python websocket module
+        *   Updated all imports in the codebase to reference the new package name
+        *   Updated the following files to use the new package name:
+            - src/websocket.py (facade)
+            - main.py
+            - tools/alpha_test.py
+            - tests/timing/timing_tests.py
+            - tests/timing/test_server_flow.py
+            - tests/integration/test_websocket_state_tracking.py
+            - tests/integration/test_websocket_multiple_connections.py
+            - tests/integration/test_tumbling_window_websocket.py
+        *   Fixed all linting errors in src/websocket.py
+        *   Improved code quality score to 10.00/10 for src/websocket.py
+        *   Updated version and timestamp headers in all modified files
+    *   Impact
+        *   Resolved conflicts with the standard Python websocket module
+        *   Improved code quality and maintainability
+        *   Enhanced clarity of imports and module structure
+        *   Fixed all linting errors in src/websocket.py
+        *   Achieved perfect code quality score (10.00/10) for src/websocket.py
+    *   Task History
+        *   Updated Memory Bank documentation (`activeContext.md`, `progress.md`)
+
+2.  **Fixed Logging-Funktionen Refactoring** ✓ [T156]
+    *   Implementation Details
+        *   Implemented missing logging functions `log_info` and `log_warning` in `src/logging.py`
+        *   Replaced direct logger calls (`logger.info`, `logger.warning`, etc.) with specialized logging functions (`log_info`, `log_warning`, etc.) in 15 files
+        *   Fixed all E1205 errors ("Too many arguments for logging format string")
+        *   Improved code quality score from 7.42/10 to 9.06/10 (+1.64)
+        *   Updated version and timestamp headers in all modified files
+        *   Added best practice for file editing to .clinerules: prefer `write_to_file` over `replace_in_file` for extensive changes
+    *   Impact
+        *   Improved code quality and consistency
+        *   Enhanced maintainability through standardized logging approach
+        *   Reduced linting errors significantly
+        *   Documented best practices for file editing
+    *   Task History
+        *   Created log entry with implementation details [T156] (logs/increments/log_041.json)
+        *   Updated Memory Bank documentation (`activeContext.md`, `progress.md`, `.clinerules`)
+    *   **Note**: While E1205 errors are fixed, there are still other linting issues (C0209, unused imports, etc.) that need to be addressed in future sessions
+
+3.  **Implemented Websocket Fassade** ✓ [T157]
     *   Implementation Details
         *   Created a facade in src/websocket.py that imports and re-exports from the new module structure
         *   The facade follows the same pattern as the text.py facade:
@@ -23,7 +66,7 @@ Timestamp: 2025-04-20 14:25 CET
     *   Task History
         *   Updated Memory Bank documentation (`activeContext.md`, `progress.md`)
 
-2.  **Implemented Refactoring Structure for audio.py** ✓ [T158]
+4.  **Implemented Refactoring Structure for audio.py** ✓ [T158]
     *   Implementation Details
         *   Created new module structure for audio.py as outlined in docs/refactoring.md:
             - audio/resampling.py: Audio-Resampling und -Konvertierung
@@ -46,7 +89,7 @@ Timestamp: 2025-04-20 14:25 CET
     *   Task History
         *   Updated Memory Bank documentation (`activeContext.md`, `progress.md`)
 
-2.  **Implemented Refactoring Structure for text.py and websocket.py** ✓ [T157]
+5.  **Implemented Refactoring Structure for text.py and websocket.py** ✓ [T157]
     *   Implementation Details
         *   Created new module structure for both large modules as outlined in docs/refactoring.md:
             - text/segment.py: TextSegment Dataclass
@@ -73,7 +116,7 @@ Timestamp: 2025-04-20 14:25 CET
         *   Created log entry with implementation details [T157] (logs/increments/log_039.json)
         *   Updated Memory Bank documentation (`activeContext.md`, `progress.md`)
 
-3.  **Addressed Pylint Warnings & Updated Headers** ⚠️ [T156]
+6.  **Addressed Pylint Warnings & Updated Headers** ⚠️ [T156]
     *   Implementation Details
         *   Addressed specific `pylint` warnings (`W1203`, `I1101`, `R1702`, `C0201`, `W0612`) across multiple Python files (`src/audio.py`, `src/hotkeys.py`, `src/logging.py`, `src/terminal.py`, `src/text.py`, `src/utils.py`, `src/websocket.py`, `main.py`).
         *   Updated `.pylintrc` to ignore `I1101` for `win32` modules.
@@ -87,7 +130,7 @@ Timestamp: 2025-04-20 14:25 CET
         *   (Log entry to be created for this session)
         *   Updated Memory Bank documentation (`activeContext.md`, `progress.md`).
 
-4.  **Implemented Streamlined Linting System** ✓ [T156]
+7.  **Implemented Streamlined Linting System** ✓ [T156]
     *   Implementation Details
         *   Created a centralized PowerShell linting script (.linting/lint.ps1) with flexible options:
             - Support for running specific linters or all of them
@@ -110,7 +153,7 @@ Timestamp: 2025-04-20 14:25 CET
         *   Created log entry with implementation details [T156]
         *   Updated Memory Bank documentation
 
-5.  **Fixed Additional Linting Issues in WebSocket Module** ✓ [T156]
+8.  **Fixed Additional Linting Issues in WebSocket Module** ✓ [T156]
     *   Implementation Details
         *   Fixed trailing whitespace issues in multiple log_connection calls
         *   Improved line formatting for long lines to stay within the 100 character limit
@@ -124,7 +167,7 @@ Timestamp: 2025-04-20 14:25 CET
     *   Task History
         *   Created log entry with implementation details [T156]
         *   Updated Memory Bank documentation
-6. **Implemented Minimal Safeguards in WebSocket Implementation** ✓
+9. **Implemented Minimal Safeguards in WebSocket Implementation** ✓
    - Implementation Details
      * Added global timeout mechanism to all blocking operations
      * Implemented timeout for cleanup process to prevent hanging
@@ -152,6 +195,8 @@ Timestamp: 2025-04-20 14:25 CET
     *   [x] Implement all modules with proper separation of concerns
     *   [x] Ensure all new files have proper version headers and documentation
     *   [x] Update original files (src/text.py and src/websocket.py) to act as facades
+    *   [x] Rename websocket package to ws_client to avoid conflicts with standard Python websocket module
+    *   [x] Update all imports in the codebase to reference the new package name
     *   [ ] Verify that all functionality works correctly with the new structure
     *   [ ] Run tests to ensure no regressions were introduced
 
@@ -167,9 +212,11 @@ Timestamp: 2025-04-20 14:25 CET
     *   [x] Implement streamlined linting system
     *   [x] Address specific `pylint` warnings (`W1203`, `I1101`, `R1702`, `C0201`, `W0612`)
     *   [x] Update headers in modified files
-    *   [ ] **Fix new `mypy`/`pylint` errors** (`E1205`/`E1121`) introduced by `black` reformatting (Next Session).
-    *   [ ] Run `./.linting/lint.ps1` until all tools pass cleanly (Next Session).
-    *   [ ] Re-verify all project file headers after fixes (Next Session).
+    *   [x] Fix E1205 errors by implementing specialized logging functions
+    *   [x] Fix linting errors in src/websocket.py (achieved 10.00/10 score)
+    *   [ ] **Fix remaining linting errors** (C0209, unused imports, etc.) (Next Session)
+    *   [ ] Run `./.linting/lint.ps1` until all tools pass cleanly (Next Session)
+    *   [ ] Re-verify all project file headers after fixes (Next Session)
 
 4.  **Core Stability Analysis & Improvement** ⚠️ [NEW - TBD]
     *   [ ] Systematically review and address known stability concerns (ref: T120 Audio Timing, WebSocket connection handling, error recovery, resource leaks).
@@ -184,7 +231,8 @@ Timestamp: 2025-04-20 14:25 CET
 
 ### Known Issues
 1. **Linting**
-   - New `mypy`/`pylint` errors (`E1205`/`E1121`) after `black` reformatting, likely due to incorrect logging format changes.
+   - E1205 errors fixed, but other linting issues remain (C0209, unused imports, etc.)
+   - Need to address remaining linting issues in the next session
 2. **Server Communication**
    - Internal buffer size unknown
    - Processing triggers not documented
@@ -207,13 +255,13 @@ Timestamp: 2025-04-20 14:25 CET
    - See docs/todo/documentation.md
 
 ## Development Log References
-- Current increment: logs/increments/log_039.json
+- Current increment: logs/increments/log_041.json
 - Recent major changes: logs/main.json
 - Full task history: progressHistory.md
 
 ## Next Steps (Immediate for New Session)
 1.  **Test Refactored Modules [T157, T158]:** Run tests to ensure no regressions were introduced by the refactoring.
-3.  **Fix New Linting Errors [T156]:** Execute `./.linting/lint.ps1`, analyze errors (likely related to logging arguments), fix them in the affected files (esp. `src/websocket.py`), and re-run the script until clean.
-4.  **Verify Headers:** Briefly re-check headers in files modified during the fix process.
-5.  **Proceed with Stability Analysis:** Once T156 is truly complete, move to the next core stabilization tasks.
-6.  **Prioritize Stability:** Begin systematic review and improvement of core component stability (Audio, WebSocket, Text Processing, Error Handling) after linting.
+2.  **Fix Remaining Linting Errors [T156]:** Execute `./.linting/lint.ps1`, analyze errors (C0209, unused imports, etc.), fix them in the affected files, and re-run the script until clean.
+3.  **Verify Headers:** Briefly re-check headers in files modified during the fix process.
+4.  **Proceed with Stability Analysis:** Once T156 is truly complete, move to the next core stabilization tasks.
+5.  **Prioritize Stability:** Begin systematic review and improvement of core component stability (Audio, WebSocket, Text Processing, Error Handling) after linting.

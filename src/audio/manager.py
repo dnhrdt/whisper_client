@@ -1,22 +1,24 @@
 """
 Audio Recording and Management Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 13:17 CET
+Version: 1.1
+Timestamp: 2025-04-20 16:35 CET
 
 This module handles audio recording and management for the Whisper Client.
 It provides functionality for microphone access and audio capture.
 """
 
 import threading
-import numpy as np
-from typing import Optional, Callable
+from typing import Callable, Optional
 
+import numpy as np
 import pyaudio
 
 import config
 from src import logger
-from audio.device import check_device_availability, test_microphone_access
-from audio.resampling import resample_to_16kHZ
+from src.logging import log_debug, log_error, log_info, log_warning
+
+from .device import check_device_availability, test_microphone_access
+from .resampling import resample_to_16kHZ
 
 
 class AudioManager:
@@ -48,7 +50,7 @@ class AudioManager:
     def _init_microphone(self):
         """Initialize and test microphone access"""
         if not self._check_microphone():
-            logger.error("⚠️ Microphone not available!")
+            log_error(logger, "⚠️ Microphone not available!")
             raise RuntimeError("No microphone found")
 
         # Test microphone access
@@ -77,14 +79,14 @@ class AudioManager:
                         if isinstance(name_raw, str)
                         else "Unknown Device"
                     )
-                    logger.info("✓ Microphone found: %s", name)
+                    log_info(logger, "✓ Microphone found: %s", name)
                     return True
 
-            logger.error("⚠️ Microphone not available")
+            log_error(logger, "⚠️ Microphone not available")
             return False
 
         except Exception as e:
-            logger.error("⚠️ Error checking microphone: %s", e)
+            log_error(logger, "⚠️ Error checking microphone: %s", e)
             return False
 
     def is_device_available(self):
@@ -104,9 +106,9 @@ class AudioManager:
 
             # Check if microphone is still available
             if not self.is_device_available():
-                logger.warning("⚠️ Microphone no longer available")
+                log_warning(logger, "⚠️ Microphone no longer available")
                 if not self._check_microphone():
-                    logger.error("⚠️ No microphone found!")
+                    log_error(logger, "⚠️ No microphone found!")
                     return
 
             try:
@@ -119,7 +121,7 @@ class AudioManager:
                     frames_per_buffer=self.chunk,
                 )
                 self.recording = True
-                logger.info("🎤 Recording started...")
+                log_info(logger, "🎤 Recording started...")
 
                 # Start recording thread
                 self.record_thread = threading.Thread(target=self._record_audio, args=(callback,))
@@ -127,7 +129,7 @@ class AudioManager:
                 self.record_thread.start()
 
             except Exception as e:
-                logger.error("⚠️ Error starting recording: %s", e)
+                log_error(logger, "⚠️ Error starting recording: %s", e)
                 self.recording = False
 
     def stop_recording(self):
@@ -136,7 +138,7 @@ class AudioManager:
             if not self.recording:
                 return
 
-            logger.debug("Stopping recording...")
+            log_debug(logger, "Stopping recording...")
             self.recording = False
 
             # Close stream immediately to prevent further data
@@ -145,22 +147,24 @@ class AudioManager:
                     self.stream.stop_stream()
                     self.stream.close()
                     self.stream = None
-                    logger.debug("Audio stream closed")
+                    log_debug(logger, "Audio stream closed")
                 except Exception as e:
-                    logger.error("Error closing stream: %s", e)
+                    log_error(logger, "Error closing stream: %s", e)
 
             # Wait for audio thread with longer timeout
             # Check if record_thread exists and is not None before accessing attributes
             if hasattr(self, "record_thread") and self.record_thread is not None:
                 if self.record_thread.is_alive():
-                    logger.debug("Waiting for audio thread...")
+                    log_debug(logger, "Waiting for audio thread...")
                     self.record_thread.join(timeout=config.AUDIO_THREAD_TIMEOUT)
                     if self.record_thread.is_alive():
                         # Break long line for flake8 E501
-                        logger.warning("Audio thread not responding - will be terminated on exit")
+                        log_warning(
+                            logger, "Audio thread not responding - will be terminated on exit"
+                        )
                         # Don't set to None here, just let the daemon thread property handle termination
 
-            logger.info("\n⏹️ Recording stopped")
+            log_info(logger, "\n⏹️ Recording stopped")
 
     def _record_audio(self, callback: Callable[[bytes], None]):
         """
@@ -170,7 +174,7 @@ class AudioManager:
             callback: Function to call with recorded audio data
         """
         buffer = []  # Audio buffer for more stable transmission
-        logger.debug("Audio thread started")
+        log_debug(logger, "Audio thread started")
 
         try:
             while self.recording and self.stream and self.stream.is_active():
@@ -194,7 +198,7 @@ class AudioManager:
                         buffer = []  # Clear buffer
 
                 except Exception as e:
-                    logger.error("⚠️ Error during recording: %s", e)
+                    log_error(logger, "Error during recording: %s", e)
                     break
 
         finally:
@@ -205,12 +209,12 @@ class AudioManager:
                     # Resample to 16kHz
                     resampled_data = resample_to_16kHZ(combined_data.tobytes(), self.rate)
                     callback(resampled_data)
-                    logger.debug("Last %d buffer chunks sent", len(buffer))
+                    log_debug(logger, "Last %d buffer chunks sent", len(buffer))
                 except Exception as e:
-                    logger.error("Error sending last buffer data: %s", e)
+                    log_error(logger, "Error sending last buffer data: %s", e)
 
             buffer = []
-            logger.debug("Audio thread terminated")
+            log_debug(logger, "Audio thread terminated")
             self.recording = False
 
     def cleanup(self):

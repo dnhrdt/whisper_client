@@ -1,7 +1,7 @@
 """
 Logging Module for the Whisper Client
-Version: 1.5
-Timestamp: 2025-04-15 22:01 CET
+Version: 1.6
+Timestamp: 2025-04-20 16:33 CET
 
 This module provides logging functionality for the Whisper Client.
 It configures loggers, formatters, and handlers for different types of logs
@@ -69,6 +69,22 @@ def log_text(logger, message, *args, **kwargs):
     if args or kwargs:
         message = message % args if args else message % kwargs
     logger.info(message, extra={"log_type": "text"})
+
+
+def log_info(logger, message, *args, **kwargs):
+    """Log for info events"""
+    logger = logging.getLogger(logger.name)
+    if args or kwargs:
+        message = message % args if args else message % kwargs
+    logger.info(message, extra={"log_type": "info"})
+
+
+def log_warning(logger, message, *args, **kwargs):
+    """Log for warning events"""
+    logger = logging.getLogger(logger.name)
+    if args or kwargs:
+        message = message % args if args else message % kwargs
+    logger.warning(message, extra={"log_type": "warning"})
 
 
 def log_debug(logger, message, *args, **kwargs):

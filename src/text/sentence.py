@@ -10,7 +10,8 @@ import time
 
 import config
 from src import logger
-from text.processing import format_sentence
+
+from .processing import format_sentence
 
 
 def output_sentence(manager, current_time=None):

@@ -1,7 +1,7 @@
 """
 WebSocket Connection State Tracking Test
-Version: 1.0
-Timestamp: 2025-03-01 21:12 CET
+Version: 1.1
+Timestamp: 2025-04-20 17:36 CET
 
 This module tests the connection state tracking system implemented in the WebSocket client
 to ensure proper state transitions, reconnection behavior, and error handling.
@@ -20,7 +20,7 @@ sys.path.insert(0, str(project_root))
 
 import config
 from src import logging
-from src.websocket import ConnectionState, WhisperWebSocket
+from src.ws_client import ConnectionState, WhisperWebSocket
 
 # Configure logger
 logger = logging.get_logger()

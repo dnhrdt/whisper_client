@@ -1,12 +1,13 @@
 """
 Test Handler Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 14:00 CET
+Version: 1.1
+Timestamp: 2025-04-20 16:40 CET
 
 Dieses Modul enthält Funktionen zur Behandlung von Tests und Testausgaben.
 """
 
 from src import logger
+from src.logging import log_info
 
 
 def get_test_output(manager):
@@ -23,7 +24,7 @@ def handle_test_mode_output(manager, text):
 
     # In test mode, only capture the output without actually inserting it
     if manager.test_mode:
-        logger.info("\n📋 Test Mode - Captured: %s", text)
+        log_info(logger, "\n📋 Test Mode - Captured: %s", text)
         return True
 
     return False

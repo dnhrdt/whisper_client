@@ -1,7 +1,7 @@
 """
 Tumbling Window WebSocket Integration Test
-Version: 1.0
-Timestamp: 2025-02-28 23:33 CET
+Version: 1.1
+Timestamp: 2025-04-20 17:39 CET
 
 This module tests the integration of the Tumbling Window with the WebSocket client
 to ensure proper audio processing flow in the WhisperClient.
@@ -24,7 +24,7 @@ sys.path.insert(0, str(project_root))
 import config
 from src import logging
 from src.audio import AudioProcessor, TumblingWindow
-from src.websocket import WhisperWebSocket
+from src.ws_client import WhisperWebSocket
 
 # Configure logger
 logger = logging.get_logger()
@@ -135,7 +135,7 @@ class TumblingWindowWebSocketTest(unittest.TestCase):
 class MainIntegrationTest(unittest.TestCase):
     """Tests for the integration in main.py"""
 
-    @patch("src.websocket.WhisperWebSocket")
+    @patch("src.ws_client.WhisperWebSocket")
     @patch("src.audio.AudioProcessor")
     def test_main_integration(self, MockAudioProcessor, MockWebSocket):
         """Test the integration flow in main.py"""

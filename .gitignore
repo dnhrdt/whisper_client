@@ -50,6 +50,7 @@ tests/results/*.json
 
 # Project specific directories to ignore
 /backup/
+/research/
 
 # Temporary files
 commit_msg.txt

@@ -1,7 +1,7 @@
 """
 Audio Window Processing Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 13:16 CET
+Version: 1.1
+Timestamp: 2025-04-20 16:39 CET
 
 This module implements the tumbling window approach for audio processing,
 providing smooth transitions between consecutive windows through linear
@@ -12,6 +12,7 @@ import numpy as np
 
 import config
 from src import logger
+from src.logging import log_debug
 
 
 class TumblingWindow:
@@ -38,7 +39,7 @@ class TumblingWindow:
         self.overlap_size = int(window_size * overlap)
         self.buffer = []
         self.previous_window = None
-        logger.debug("TumblingWindow initialized: size=%d, overlap=%.2f", window_size, overlap)
+        log_debug(logger, "TumblingWindow initialized: size=%d, overlap=%.2f", window_size, overlap)
 
     def add_chunk(self, chunk):
         """
@@ -53,8 +54,8 @@ class TumblingWindow:
 
         # Add chunk to buffer
         self.buffer.extend(chunk)
-        logger.debug(
-            "Added chunk of %d samples, buffer now %d samples", len(chunk), len(self.buffer)
+        log_debug(
+            logger, "Added chunk of %d samples, buffer now %d samples", len(chunk), len(self.buffer)
         )
 
     def get_windows(self):
@@ -86,7 +87,7 @@ class TumblingWindow:
                 blended = (overlap_region * fade_out) + (current_overlap * fade_in)
                 window[: self.overlap_size] = blended
 
-                logger.debug("Applied crossfade of %d samples", self.overlap_size)
+                log_debug(logger, "Applied crossfade of %d samples", self.overlap_size)
 
             # Yield the processed window
             yield window
@@ -96,10 +97,10 @@ class TumblingWindow:
             self.buffer = self.buffer[self.window_size - self.overlap_size :]
             self.previous_window = window
 
-            logger.debug("Window processed, buffer now %d samples", len(self.buffer))
+            log_debug(logger, "Window processed, buffer now %d samples", len(self.buffer))
 
     def clear(self):
         """Clear the buffer and reset state."""
         self.buffer = []
         self.previous_window = None
-        logger.debug("TumblingWindow buffer cleared")
+        log_debug(logger, "TumblingWindow buffer cleared")

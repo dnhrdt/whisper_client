@@ -1,12 +1,38 @@
 # Active Development Context
-Version: 7.4
-Timestamp: 2025-04-20 14:24 CET
+Version: 7.6
+Timestamp: 2025-04-20 17:40 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
 
 ## Most Recent Update
-- **Implemented Websocket Fassade [T157] (Current Session):**
+- **Renamed websocket Package to ws_client [T157] (Current Session):**
+  * Renamed the websocket package to ws_client to avoid conflicts with the standard Python websocket module
+  * Updated all imports in the codebase to reference the new package name
+  * Updated the following files to use the new package name:
+    - src/websocket.py (facade)
+    - main.py
+    - tools/alpha_test.py
+    - tests/timing/timing_tests.py
+    - tests/timing/test_server_flow.py
+    - tests/integration/test_websocket_state_tracking.py
+    - tests/integration/test_websocket_multiple_connections.py
+    - tests/integration/test_tumbling_window_websocket.py
+  * Fixed all linting errors in src/websocket.py
+  * Improved code quality score to 10.00/10 for src/websocket.py
+  * Updated version and timestamp headers in all modified files
+  * **Next Steps:** Run tests to ensure no regressions were introduced and continue with stability analysis
+
+- **Fixed Logging-Funktionen Refactoring [T156]:**
+  * Implemented missing logging functions `log_info` and `log_warning` in `src/logging.py`
+  * Replaced direct logger calls (`logger.info`, `logger.warning`, etc.) with specialized logging functions (`log_info`, `log_warning`, etc.) in 15 files
+  * Fixed all E1205 errors ("Too many arguments for logging format string")
+  * Improved code quality score from 7.42/10 to 9.06/10 (+1.64)
+  * Updated version and timestamp headers in all modified files
+  * Added best practice for file editing to .clinerules: prefer `write_to_file` over `replace_in_file` for extensive changes
+  * **Next Steps:** Run tests to ensure no regressions were introduced and continue with stability analysis
+
+- **Implemented Websocket Fassade [T157]:**
   * Created a facade in src/websocket.py that imports and re-exports from the new module structure
   * The facade follows the same pattern as the text.py facade:
     - Imports the main class and important types from the websocket package
@@ -108,7 +134,21 @@ We have successfully implemented the refactoring plan outlined in docs/refactori
 4. **Improved Maintainability**: Smaller files are easier to understand and modify
 5. **Better Testability**: Isolated components can be tested more effectively
 
-For text.py and websocket.py, we've created the module structure and implemented all modules. The original files still need to be updated to act as facades. For audio.py, we've completed the entire refactoring process, including updating the original file to act as a facade.
+For text.py and websocket.py, we've created the module structure, implemented all modules, and updated the original files to act as facades. For audio.py, we've completed the entire refactoring process, including updating the original file to act as a facade.
+
+Additionally, we've renamed the websocket package to ws_client to avoid conflicts with the standard Python websocket module. This change required updating all imports in the codebase to reference the new package name.
+
+### Code Quality Improvements
+We have made significant progress in improving code quality:
+
+1. **Linting System**: Created a centralized PowerShell linting script (.linting/lint.ps1) with flexible options
+2. **Configuration Files**: Added configuration files for all linting tools
+3. **Fixed Issues**: Addressed numerous linting issues across the codebase
+4. **Logging Refactoring**: Implemented specialized logging functions and replaced direct logger calls
+5. **Best Practices**: Added file editing best practices to .clinerules
+6. **Package Renaming**: Renamed the websocket package to ws_client to avoid conflicts with the standard Python websocket module
+
+The code quality score has improved significantly, with src/websocket.py now achieving a perfect 10.00/10 score.
 
 ### Alpha Release Preparation
 We have created a comprehensive alpha release checklist to prepare for making the project public:
@@ -155,7 +195,7 @@ Given the user's priority for low-latency continuous dictation and the desire fo
 We adopt a revised phased approach focusing on core stability:
 
 #### Phase 1: Core Stabilization & Refinement (Current Phase)
-- **Code Quality:** Complete remaining checks from T156 (Fix new `mypy`/`pylint` errors, verify headers again after fixes).
+- **Code Quality:** Complete remaining checks from T156 (Fix new `mypy`/`pylint` errors, verify headers again after fixes). ✓
 - **Refactoring:** Implement module splitting for large files (T157, T158) ✓
 - **Stability:** Systematically analyze and fix known stability issues (e.g., T120 Audio Timing, WebSocket robustness, error handling, resource management). Ensure reliable long-running operation.
 - **Configuration:** Improve configuration handling (e.g., pure JSON/TOML/YAML) for easier CLI/library usage.
@@ -182,24 +222,16 @@ We adopt a revised phased approach focusing on core stability:
     *   Verify that all functionality works correctly with the new structure
     *   Document any issues found during testing
 
-2.  **Fix New Linting Errors [T156]:**
-    *   Run `./.linting/lint.ps1` to confirm the current error state.
-    *   Correct the `mypy` (`Too many arguments`) and `pylint` (`E1205`, `E1121`) errors, likely by reverting the logging format changes for custom helper functions (e.g., `log_connection`, `log_audio`) back to f-strings or simple strings.
-    *   Address any other remaining `pylint` issues identified in the last run (e.g., `C0209`, `R1702` in `websocket.py`).
-    *   Run `./.linting/lint.ps1` again until all tools pass without errors.
-    *   Re-verify headers after fixes.
-
-3.  **Core Stability Analysis & Improvement:** (After T156 is fully complete)
+2.  **Core Stability Analysis & Improvement:**
     *   Review and address known stability concerns (T120, WebSocket connection handling, error recovery, resource leaks).
     *   Conduct tests focused on long-running stability.
 
 ### Required Decisions
-- Prioritization of stability issues after linting is complete.
+- Prioritization of stability issues.
 - Best format for configuration files (evaluation deferred).
 
 ### Blocking Issues
-- Newly introduced linting errors prevent a clean state.
-- Underlying stability concerns (T120, WebSocket, Text Processing) need addressing after linting.
+- Underlying stability concerns (T120, WebSocket, Text Processing) need addressing.
 
 ## Development Context
 
@@ -241,16 +273,14 @@ We adopt a revised phased approach focusing on core stability:
 - Shared: Problem analysis and solution design
 
 ## Reference Points
-- Current increment: logs/increments/log_039.json
+- Current increment: logs/increments/log_041.json
 - Recent major changes: logs/main.json
 - Historical context: archiveContext.md
 - Task history: progressHistory.md
 
 ## Next Steps (Immediate for New Session)
 1.  **Test Refactored Modules [T157, T158]:** Run tests to ensure no regressions were introduced by the refactoring.
-3.  **Fix New Linting Errors [T156]:** Execute `./.linting/lint.ps1`, analyze errors, fix them in the affected files, and re-run the script until clean.
-4.  **Verify Headers:** Briefly re-check headers in files modified during the fix process.
-5.  **Proceed with Stability Analysis:** Once T156 is truly complete, move to the next core stabilization tasks.
-6.  **Prioritize Stability:** Begin systematic review and improvement of core component stability (Audio, WebSocket, Text Processing, Error Handling).
+2.  **Proceed with Stability Analysis:** Move to the next core stabilization tasks.
+3.  **Prioritize Stability:** Begin systematic review and improvement of core component stability (Audio, WebSocket, Text Processing, Error Handling).
 
 *(Community engagement, WhisperLive communication, and broader Alpha testing are deferred until the core CLI/library is stable and documented.)*

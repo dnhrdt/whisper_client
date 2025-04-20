@@ -1,7 +1,7 @@
 """
 Systematic Timing Test Script
-Version: 1.0
-Timestamp: 2025-02-26 22:34 CET
+Version: 1.1
+Timestamp: 2025-04-20 17:35 CET
 """
 
 import json
@@ -17,7 +17,7 @@ sys.path.insert(0, str(project_root))
 import config
 from src.audio import AudioManager
 from src.text import TextManager
-from src.websocket import WhisperWebSocket
+from src.ws_client import WhisperWebSocket
 
 
 class TimingTest:

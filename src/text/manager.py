@@ -11,12 +11,13 @@ import time
 
 import config
 from src import logger
-from text.buffer import TextBuffer
-from text.duplicate import is_duplicate
-from text.input_handler import process_segments
-from text.output import insert_text
-from text.sentence import output_sentence, should_force_output
-from text.test_handler import get_test_output
+
+from .buffer import TextBuffer
+from .duplicate import is_duplicate
+from .input_handler import process_segments
+from .output import insert_text
+from .sentence import output_sentence, should_force_output
+from .test_handler import get_test_output
 
 
 class TextManager:

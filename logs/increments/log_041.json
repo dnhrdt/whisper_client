@@ -1,0 +1,50 @@
+{
+  "type": "normal",
+  "task_id": "T041",
+  "timestamp": "2025-04-20T16:52:00+02:00",
+  "component": "logging",
+  "description": "Logging-Funktionen Refactoring zur Behebung von E1205-Fehlern",
+  "changes": [
+    {
+      "type": "feat",
+      "description": "Fehlende Logging-Funktionen log_info und log_warning in src/logging.py implementiert"
+    },
+    {
+      "type": "refactor",
+      "description": "Direkte Logger-Aufrufe durch spezialisierte Logging-Funktionen in 15 Dateien ersetzt"
+    },
+    {
+      "type": "improvement",
+      "description": "Linting-Bewertung von 7.42/10 auf 9.06/10 verbessert (+1.64)"
+    },
+    {
+      "type": "process",
+      "description": "Effizienzverbesserung: write_to_file ist effizienter als replace_in_file für umfangreiche Dateiänderungen"
+    }
+  ],
+  "files_changed": [
+    "src/logging.py",
+    "src/audio/manager.py",
+    "src/audio/device.py",
+    "src/audio/processor.py",
+    "src/audio/resampling.py",
+    "src/audio/window.py",
+    "src/hotkeys.py",
+    "src/terminal.py",
+    "src/text/test_handler.py",
+    "src/text/special_cases.py",
+    "src/text/segment_processor.py",
+    "src/text/output.py",
+    "src/text/input_handler.py",
+    "src/utils.py",
+    "src/text/window.py",
+    "src/websocket/cleanup.py",
+    "src/websocket/error_handling.py",
+    "main.py"
+  ],
+  "test_impact": {
+    "tests_affected": [],
+    "tests_added": []
+  },
+  "regression_potential": "low"
+}

@@ -1,7 +1,7 @@
 """
 Server Data Flow Test Script
-Version: 1.0
-Timestamp: 2025-02-26 22:34 CET
+Version: 1.1
+Timestamp: 2025-04-20 17:36 CET
 """
 
 import json
@@ -17,7 +17,7 @@ import logging
 
 import config
 from src.text import TextManager
-from src.websocket import WhisperWebSocket
+from src.ws_client import WhisperWebSocket
 
 # Configure logger for tests
 logging.basicConfig(level=logging.DEBUG)

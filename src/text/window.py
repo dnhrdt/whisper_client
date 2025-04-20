@@ -1,7 +1,7 @@
 """
 Window Management Module for the Whisper Client
-Version: 1.1
-Timestamp: 2025-04-20 14:00 CET
+Version: 1.2
+Timestamp: 2025-04-20 16:47 CET
 
 Dieses Modul stellt Funktionen zur Fenstererkennung und -manipulation bereit,
 einschließlich VS Code-spezifischer Funktionen.
@@ -13,6 +13,7 @@ import win32gui
 
 import config
 from src import logger
+from src.logging import log_debug, log_error
 
 
 def find_prompt_window():
@@ -32,7 +33,7 @@ def find_prompt_window():
         return windows[0] if windows else None
 
     except Exception as e:
-        logger.error("⚠️ Error during window search: %s", e)
+        log_error(logger, "⚠️ Error during window search: %s", e)
         return None
 
 
@@ -47,7 +48,8 @@ def find_vscode_edit_control(parent_hwnd):
         # Log all controls for debugging
         text = win32gui.GetWindowText(hwnd)
         if text or class_name not in ["", "Static"]:
-            logger.debug(
+            log_debug(
+                logger,
                 "Control: %d, Class: %s, Text: %s",
                 hwnd,
                 class_name,
@@ -99,9 +101,10 @@ def find_vscode_edit_control(parent_hwnd):
             recursive_find(parent_hwnd)
 
         if result:
-            logger.debug("Found %d potential edit controls in VS Code", len(result))
+            log_debug(logger, "Found %d potential edit controls in VS Code", len(result))
             for i, (hwnd, class_name, control_type) in enumerate(result):
-                logger.debug(
+                log_debug(
+                    logger,
                     "  %d. Handle: %d, Class: %s, Type: %s",
                     i + 1,
                     hwnd,
@@ -117,10 +120,10 @@ def find_vscode_edit_control(parent_hwnd):
             # Otherwise return the first control found
             return result[0][0]
         else:
-            logger.debug("No potential edit controls found in VS Code")
+            log_debug(logger, "No potential edit controls found in VS Code")
             # If no edit control found, return the parent window as fallback
             return parent_hwnd
     except Exception as e:
-        logger.error("⚠️ Error finding VS Code edit control: %s", e)
+        log_error(logger, "⚠️ Error finding VS Code edit control: %s", e)
         # Return parent window as fallback
         return parent_hwnd

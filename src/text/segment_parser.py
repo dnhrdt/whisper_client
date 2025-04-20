@@ -10,9 +10,10 @@ import time
 
 import config
 from src import logger
-from text.sentence_splitter import split_into_sentences
-from text.sentence_combiner import handle_sentence_continuation
-from text.segment_processor import process_single_sentence
+
+from .segment_processor import process_single_sentence
+from .sentence_combiner import handle_sentence_continuation
+from .sentence_splitter import split_into_sentences
 
 
 def process_text(manager, text, current_time):
@@ -85,10 +86,7 @@ def restore_special_markers(sentences):
             if start_idx >= 0:
                 # Replace the marker with the actual characters (without spaces)
                 marker_text = sentence[
-                    start_idx
-                    + len("COMBINED_MARKER_") : start_idx
-                    + len("COMBINED_MARKER_")
-                    + 2
+                    start_idx + len("COMBINED_MARKER_") : start_idx + len("COMBINED_MARKER_") + 2
                 ]
                 sentence = sentence.replace("COMBINED_MARKER_" + marker_text, marker_text, 1)
             else:

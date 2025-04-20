@@ -1,7 +1,7 @@
 """
 Alpha Test Script for WhisperClient
-Version: 1.0
-Timestamp: 2025-03-07 21:40 CET
+Version: 1.1
+Timestamp: 2025-04-20 17:34 CET
 
 This script provides a simple test to verify the basic functionality of the WhisperClient.
 It checks if the WhisperLive server is running, initializes the client, records a short
@@ -29,7 +29,7 @@ from src import logger
 from src.audio import AudioManager, AudioProcessor
 from src.text import TextManager
 from src.utils import check_server_status
-from src.websocket import ConnectionState, WhisperWebSocket
+from src.ws_client import ConnectionState, WhisperWebSocket
 
 
 class AlphaTest:

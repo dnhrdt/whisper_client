@@ -20,50 +20,37 @@ The package has been refactored into multiple modules for better maintainability
 - state.py: Connection state definitions
 """
 
-# Export the main class and important types
-from websocket.manager import WhisperWebSocket
-from websocket.state import ConnectionState
-from websocket.connection import ConnectionManager
-
 # For backward compatibility, re-export any previously public functions
-from websocket.connection import (
+from .connection import (
+    ConnectionManager,
     create_websocket_app,
     generate_client_id,
     generate_session_id,
 )
-from websocket.error_handling import (
-    handle_connection_close,
-    handle_connection_error,
-    wait_with_timeout,
-)
-from websocket.messaging import (
-    process_message,
-    send_audio_data,
-    send_config,
-    send_end_of_audio,
-)
+from .error_handling import handle_connection_close, handle_connection_error, wait_with_timeout
+
+# Export the main class and important types
+from .manager import WhisperWebSocket
+from .messaging import process_message, send_audio_data, send_config, send_end_of_audio
+from .state import ConnectionState
 
 __all__ = [
     # Main class
-    'WhisperWebSocket',
-
+    "WhisperWebSocket",
     # Important types
-    'ConnectionState',
-    'ConnectionManager',
-
+    "ConnectionState",
+    "ConnectionManager",
     # Connection utilities
-    'create_websocket_app',
-    'generate_client_id',
-    'generate_session_id',
-
+    "create_websocket_app",
+    "generate_client_id",
+    "generate_session_id",
     # Error handling
-    'handle_connection_close',
-    'handle_connection_error',
-    'wait_with_timeout',
-
+    "handle_connection_close",
+    "handle_connection_error",
+    "wait_with_timeout",
     # Messaging
-    'process_message',
-    'send_audio_data',
-    'send_config',
-    'send_end_of_audio',
+    "process_message",
+    "send_audio_data",
+    "send_config",
+    "send_end_of_audio",
 ]

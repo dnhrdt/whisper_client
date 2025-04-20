@@ -1,7 +1,7 @@
 """
 Input Handler Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 14:00 CET
+Version: 1.1
+Timestamp: 2025-04-20 16:46 CET
 
 Dieses Modul koordiniert die Verarbeitung von Textsegmenten.
 """
@@ -10,13 +10,20 @@ import time
 
 import config
 from src import logger
-from text.segment_parser import process_text
-from text.special_cases import handle_empty_input, handle_empty_text, check_timeout, handle_special_test_cases
+from src.logging import log_info
+
+from .segment_parser import process_text
+from .special_cases import (
+    check_timeout,
+    handle_empty_input,
+    handle_empty_text,
+    handle_special_test_cases,
+)
 
 
 def process_segments(manager, segments):
     """Processes received text segments"""
-    logger.info("\n🎯 Processing new text segments:")
+    log_info(logger, "\n🎯 Processing new text segments:")
     current_time = time.time()
 
     # Basisprüfungen für leere Segmente
@@ -31,7 +38,7 @@ def process_segments(manager, segments):
         handle_empty_text(manager, current_time)
         return
 
-    logger.info("  → Segment: %s", text)
+    log_info(logger, "  → Segment: %s", text)
 
     # Timeout-Prüfung
     check_timeout(manager, current_time)

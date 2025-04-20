@@ -1,7 +1,7 @@
 """
 Audio Processing Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 13:17 CET
+Version: 1.1
+Timestamp: 2025-04-20 16:38 CET
 
 This module provides audio processing functionality using the tumbling window approach.
 It integrates with the AudioManager to process audio chunks and prepare them for
@@ -10,13 +10,15 @@ the WhisperLive server.
 
 import threading
 from queue import Empty, Queue
-from typing import Optional, List, Callable
+from typing import Callable, List, Optional
 
 import numpy as np
 
 import config
 from src import logger
-from audio.window import TumblingWindow
+from src.logging import log_debug, log_error, log_info, log_warning
+
+from .window import TumblingWindow
 
 
 class AudioProcessor:
@@ -42,7 +44,7 @@ class AudioProcessor:
         self.processing_queue: Queue[bytes] = Queue()
         self.processing_thread: Optional[threading.Thread] = None
         self.running = False
-        logger.debug("AudioProcessor initialized")
+        log_debug(logger, "AudioProcessor initialized")
 
     def start_processing(self, callback):
         """
@@ -63,7 +65,7 @@ class AudioProcessor:
             self.processing_thread.daemon = True
             self.processing_thread.start()
 
-            logger.info("🔄 Audio processing started")
+            log_info(logger, "🔄 Audio processing started")
 
     def stop_processing(self):
         """Stop the audio processing thread."""
@@ -77,13 +79,13 @@ class AudioProcessor:
             if self.processing_thread and self.processing_thread.is_alive():
                 self.processing_thread.join(timeout=config.AUDIO_THREAD_TIMEOUT)
                 if self.processing_thread.is_alive():
-                    logger.warning("Processing thread not responding - will terminate")
+                    log_warning(logger, "Processing thread not responding - will terminate")
 
             # Clear state
             self.tumbling_window.clear()
             self.processing_queue = Queue()
 
-            logger.info("🛑 Audio processing stopped")
+            log_info(logger, "🛑 Audio processing stopped")
 
     def process_audio(self, audio_data):
         """
@@ -101,7 +103,7 @@ class AudioProcessor:
 
     def _process_queue(self):
         """Process audio data from the queue."""
-        logger.debug("Processing thread started")
+        log_debug(logger, "Processing thread started")
 
         try:
             while self.running:
@@ -115,10 +117,10 @@ class AudioProcessor:
                         continue
 
                 except Exception as e:
-                    logger.error("Error processing audio: %s", e)
+                    log_error(logger, "Error processing audio: %s", e)
 
         finally:
-            logger.debug("Processing thread terminated")
+            log_debug(logger, "Processing thread terminated")
 
     def _process_audio_data(self, audio_data):
         """

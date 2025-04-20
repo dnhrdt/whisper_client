@@ -1,7 +1,7 @@
 """
 Segment Processor Module for the Whisper Client
-Version: 1.0
-Timestamp: 2025-04-20 14:00 CET
+Version: 1.1
+Timestamp: 2025-04-20 16:41 CET
 
 Dieses Modul enthält Funktionen zur Verarbeitung einzelner Textsegmente.
 """
@@ -10,7 +10,9 @@ import time
 
 import config
 from src import logger
-from text.processing import find_overlap
+from src.logging import log_info
+
+from .processing import find_overlap
 
 
 def process_single_sentence(manager, sentence, current_time):
@@ -24,7 +26,7 @@ def process_single_sentence(manager, sentence, current_time):
 
     # Auf Duplikate prüfen
     if manager.is_duplicate(normalized_text):
-        logger.info("    ⚠️ Duplicate skipped: %s", sentence)
+        log_info(logger, "    ⚠️ Duplicate skipped: %s", sentence)
         return
 
     # Zum Textpuffer hinzufügen
@@ -41,11 +43,11 @@ def process_single_sentence(manager, sentence, current_time):
     # Text zum aktuellen Satz hinzufügen
     add_to_current_sentence(manager, sentence)
 
-    logger.info("    ✓ Added to sentence: %s", sentence)
+    log_info(logger, "    ✓ Added to sentence: %s", sentence)
 
     # Prüfen, ob Ausgabe notwendig ist
     if manager.should_force_output(current_time):
-        logger.info("    ⚡ Output is forced")
+        log_info(logger, "    ⚡ Output is forced")
         # Nur warten, wenn nötig
         wait_time = config.MIN_OUTPUT_INTERVAL - (current_time - manager.last_output_time)
         if wait_time > 0:
