@@ -21,8 +21,7 @@ def resample_to_16kHZ(audio_data, current_rate):
 
 
 def normalize_audio(audio_data, dtype=np.int16):
-    """
-    Normalizes audio data to float32 in range [-1.0, 1.0].
+    """Normalizes audio data to float32 in range [-1.0, 1.0].
 
     Args:
         audio_data: Audio data as bytes or numpy array
@@ -30,6 +29,7 @@ def normalize_audio(audio_data, dtype=np.int16):
 
     Returns:
         Normalized audio as float32 numpy array
+
     """
     if isinstance(audio_data, bytes):
         audio_array = np.frombuffer(audio_data, dtype=dtype)

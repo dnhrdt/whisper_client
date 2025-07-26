@@ -28,7 +28,7 @@ config.LOG_LEVEL_CONSOLE = "DEBUG"
 
 
 class TextProcessingValidator:
-    """Validates text processing functionality"""
+    """Validates text processing functionality."""
 
     def __init__(self):
         # Create TextManager in test mode to prevent actual text insertion
@@ -44,16 +44,16 @@ class TextProcessingValidator:
         self.manager.insert_text = self._capture_output
 
     def _capture_output(self, text):
-        """Captures output text instead of inserting it"""
+        """Captures output text instead of inserting it."""
         self.outputs.append(text)
         print(f"📤 Output: {text}")
 
     def restore_insert_text(self):
-        """Restores the original insert_text method"""
+        """Restores the original insert_text method."""
         self.manager.insert_text = self.original_insert_text
 
     def simulate_segments(self, segments, reset=True, delay=0.2):
-        """Simulates incoming text segments"""
+        """Simulates incoming text segments."""
         if reset:
             self.manager.current_sentence = []
             self.manager.last_output_time = 0
@@ -69,7 +69,7 @@ class TextProcessingValidator:
         return self.outputs
 
     def run_test(self, name, segments, expected_outputs=None, reset=True, delay=0.2):
-        """Runs a test and validates the output"""
+        """Runs a test and validates the output."""
         print(f"\n🧪 Test: {name}")
         print("-" * 30)
 
@@ -121,7 +121,7 @@ class TextProcessingValidator:
         return result["passed"]
 
     def measure_performance(self, segments, iterations=5):
-        """Measures text processing performance"""
+        """Measures text processing performance."""
         print(f"\n⏱️ Performance Test ({iterations} iterations)")
         print("-" * 30)
 
@@ -166,7 +166,7 @@ class TextProcessingValidator:
         }
 
     def save_results(self, filename="tests/results/text_processing_results.json"):
-        """Saves test results to a file"""
+        """Saves test results to a file."""
         # Ensure the directory exists
         Path(filename).parent.mkdir(parents=True, exist_ok=True)
 
@@ -176,7 +176,7 @@ class TextProcessingValidator:
         print(f"\n💾 Test results saved to {filename}")
 
     def print_summary(self):
-        """Prints a summary of test results"""
+        """Prints a summary of test results."""
         summary = self.test_results["summary"]
         print("\n📊 Test Summary")
         print("-" * 30)
@@ -191,7 +191,7 @@ class TextProcessingValidator:
 
 
 def run_basic_tests():
-    """Runs basic text processing tests"""
+    """Runs basic text processing tests."""
     print("\n🧪 Running Basic Text Processing Tests...")
     print("=" * 50)
 
@@ -316,7 +316,7 @@ def run_basic_tests():
 
 
 def run_edge_case_tests():
-    """Runs edge case text processing tests"""
+    """Runs edge case text processing tests."""
     print("\n🧪 Running Edge Case Text Processing Tests...")
     print("=" * 50)
 
@@ -398,7 +398,7 @@ def run_edge_case_tests():
 
 
 def run_integration_tests():
-    """Runs integration tests with the SendMessage API"""
+    """Runs integration tests with the SendMessage API."""
     print("\n🧪 Running Integration Tests with SendMessage API...")
     print("=" * 50)
 
@@ -458,7 +458,7 @@ def run_integration_tests():
 
 
 def run_tests():
-    """Runs all text processing tests"""
+    """Runs all text processing tests."""
     print("\n🧪 Starting Text Processing Validation Framework...")
     print("=" * 50)
 

@@ -1,6 +1,6 @@
 # Technical Context
-Version: 1.3
-Timestamp: 2025-03-03 21:42 CET
+Version: 1.4
+Timestamp: 2025-01-27 00:50 CET
 
 ## Core Technologies
 
@@ -181,3 +181,35 @@ WHISPER_BACKEND = "faster_whisper"
 - Autostart configuration options
 - Installation procedures
 - Line endings preserved in builds
+
+## Strategic Technical Considerations (Current Session)
+
+### Whispering Integration Architecture
+Based on comprehensive analysis (see `docs/strategic_plans/whispering_integration_strategy.md`):
+
+**Our Technical Advantages:**
+- **WebSocket Streaming:** 130ms average latency vs. Whispering's HTTP POST batch processing
+- **Real-time Processing:** Continuous audio streaming with immediate feedback
+- **Robust Connection Management:** 11-state connection tracking with automatic recovery
+- **Advanced Audio Processing:** Tumbling window with crossfading for smooth transitions
+
+**Integration Technical Requirements:**
+- **Stage 1:** FastAPI server with OpenAI-compatible `/v1/audio/transcriptions` endpoint
+- **Stage 2:** WebSocket streaming endpoint `/v1/audio/stream` for real-time capabilities
+- **Docker Integration:** Multi-container setup with WhisperLive backend
+- **API Compatibility:** Maintain OpenAI API format for seamless integration
+
+**Technical Dependencies for Integration:**
+```python
+# New dependencies for API server mode
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6  # For file upload handling
+docker>=6.1.0  # For container management
+```
+
+**Performance Benchmarks to Document:**
+- Latency comparison: Our 130ms vs. Whispering's batch processing
+- Memory usage during streaming vs. file-based processing
+- CPU utilization patterns for continuous vs. batch operations
+- Connection stability metrics over extended sessions

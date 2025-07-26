@@ -10,7 +10,7 @@ import config
 
 
 def split_into_sentences(text, common_abbreviations):
-    """Teilt Text in Sätze auf"""
+    """Teilt Text in Sätze auf."""
     # Prüfen, ob der Text sehr lang ist
     is_very_long = len(text) > 500
 
@@ -39,7 +39,7 @@ def split_into_sentences(text, common_abbreviations):
 
 
 def check_sentence_end(text, i, current_sentence):
-    """Prüft, ob an der aktuellen Position ein Satzende ist"""
+    """Prüft, ob an der aktuellen Position ein Satzende ist."""
     # Check for sentence end
     if any(
         text[i - len(marker) + 1 : i + 1] == marker
@@ -53,8 +53,7 @@ def check_sentence_end(text, i, current_sentence):
 
         # Check for combined markers
         is_combined_marker = (
-            "COMBINED_MARKER_" in current_sentence
-            or "TRIPLE_MARKER_" in current_sentence
+            "COMBINED_MARKER_" in current_sentence or "TRIPLE_MARKER_" in current_sentence
         )
 
         if not is_abbreviation and not is_combined_marker:

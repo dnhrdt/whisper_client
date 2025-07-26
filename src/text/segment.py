@@ -13,7 +13,8 @@ from typing import Optional
 
 @dataclass
 class TextSegment:
-    """Represents a text segment with metadata"""
+    """Represents a text segment with metadata."""
+
     text: str
     timestamp: float
     sequence: int
@@ -21,5 +22,5 @@ class TextSegment:
     output: Optional[str] = None
 
     def __hash__(self):
-        """Enable use in sets and as dict keys"""
+        """Enable use in sets and as dict keys."""
         return hash((self.text, self.sequence))

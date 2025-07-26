@@ -17,7 +17,7 @@ from .state import ConnectionState
 
 
 def handle_instance_deletion(client_id):
-    """Remove this instance when garbage collected"""
+    """Remove this instance when garbage collected."""
     try:
         ConnectionManager.unregister_instance(client_id)
     except Exception as e:
@@ -29,7 +29,7 @@ def handle_instance_deletion(client_id):
 
 
 def perform_cleanup(ws_instance):
-    """Release resources with enhanced timeout handling and logging"""
+    """Release resources with enhanced timeout handling and logging."""
     if not ws_instance.ws:
         return
 

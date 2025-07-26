@@ -29,16 +29,16 @@ logger = logging.get_logger()
 
 
 class TumblingWindowTest(unittest.TestCase):
-    """Tests for the TumblingWindow class"""
+    """Tests for the TumblingWindow class."""
 
     def setUp(self):
-        """Set up test environment"""
+        """Set up test environment."""
         self.window_size = 2048
         self.overlap = 0.25
         self.window = TumblingWindow(window_size=self.window_size, overlap=self.overlap)
 
     def test_initialization(self):
-        """Test proper initialization of TumblingWindow"""
+        """Test proper initialization of TumblingWindow."""
         self.assertEqual(self.window.window_size, self.window_size)
         self.assertEqual(self.window.overlap, self.overlap)
         self.assertEqual(self.window.overlap_size, int(self.window_size * self.overlap))
@@ -46,7 +46,7 @@ class TumblingWindowTest(unittest.TestCase):
         self.assertIsNone(self.window.previous_window)
 
     def test_add_chunk_bytes(self):
-        """Test adding a bytes chunk to the window"""
+        """Test adding a bytes chunk to the window."""
         # Create a simple sine wave as bytes
         samples = 1000
         audio = np.sin(2 * np.pi * 440 * np.linspace(0, 1, samples))
@@ -60,7 +60,7 @@ class TumblingWindowTest(unittest.TestCase):
         self.assertEqual(len(self.window.buffer), samples)
 
     def test_add_chunk_numpy(self):
-        """Test adding a numpy array chunk to the window"""
+        """Test adding a numpy array chunk to the window."""
         # Create a simple sine wave as numpy array
         samples = 1000
         audio = np.sin(2 * np.pi * 440 * np.linspace(0, 1, samples))
@@ -73,7 +73,7 @@ class TumblingWindowTest(unittest.TestCase):
         self.assertEqual(len(self.window.buffer), samples)
 
     def test_get_windows(self):
-        """Test retrieving windows from the buffer"""
+        """Test retrieving windows from the buffer."""
         # Create a simple sine wave
         samples = 5000  # Enough for multiple windows
         audio = np.sin(2 * np.pi * 440 * np.linspace(0, 1, samples))
@@ -98,7 +98,7 @@ class TumblingWindowTest(unittest.TestCase):
             self.assertEqual(len(window), self.window_size)
 
     def test_window_overlap(self):
-        """Test that windows properly overlap"""
+        """Test that windows properly overlap."""
         # Create a simple sine wave
         samples = 5000
         audio = np.sin(2 * np.pi * 440 * np.linspace(0, 1, samples))
@@ -123,7 +123,7 @@ class TumblingWindowTest(unittest.TestCase):
             )
 
     def test_buffer_management(self):
-        """Test that buffer is properly managed after getting windows"""
+        """Test that buffer is properly managed after getting windows."""
         # Create a simple sine wave
         samples = 5000
         audio = np.sin(2 * np.pi * 440 * np.linspace(0, 1, samples))
@@ -143,7 +143,7 @@ class TumblingWindowTest(unittest.TestCase):
         self.assertEqual(len(self.window.buffer), expected_size)
 
     def test_incremental_processing(self):
-        """Test processing audio in small increments"""
+        """Test processing audio in small increments."""
         # Create a simple sine wave
         sample_rate = 16000
         duration = 1.0  # seconds
@@ -169,10 +169,10 @@ class TumblingWindowTest(unittest.TestCase):
 
 
 class TumblingWindowPerformanceTest(unittest.TestCase):
-    """Performance tests for the TumblingWindow class"""
+    """Performance tests for the TumblingWindow class."""
 
     def test_realtime_performance(self):
-        """Test performance under simulated real-time conditions"""
+        """Test performance under simulated real-time conditions."""
         window = TumblingWindow(window_size=2048, overlap=0.25)
         audio_queue = Queue()
         stop_event = Event()
@@ -189,7 +189,7 @@ class TumblingWindowPerformanceTest(unittest.TestCase):
         chunks = [audio[i : i + chunk_size] for i in range(0, len(audio), chunk_size)]
 
         def audio_producer():
-            """Simulates audio input"""
+            """Simulates audio input."""
             for chunk in chunks:
                 if stop_event.is_set():
                     break
@@ -197,7 +197,7 @@ class TumblingWindowPerformanceTest(unittest.TestCase):
                 time.sleep(chunk_size / sample_rate)  # Simulate real-time
 
         def audio_consumer():
-            """Processes audio windows"""
+            """Processes audio windows."""
             windows_processed = 0
             start_time = time.time()
 
@@ -236,14 +236,15 @@ class TumblingWindowPerformanceTest(unittest.TestCase):
 
 
 class AudioProcessorIntegrationTest(unittest.TestCase):
-    """Tests for the integration of TumblingWindow with AudioProcessor"""
+    """Tests for the integration of TumblingWindow with AudioProcessor."""
 
     def setUp(self):
-        """Set up test environment"""
+        """Set up test environment."""
         self.audio_processor = AudioProcessor(test_mode=True)
 
     def test_tumbling_window_integration(self):
-        """Test that TumblingWindow is properly integrated with AudioProcessor"""
+        """Test that TumblingWindow is properly integrated with
+        AudioProcessor."""
         # Verify TumblingWindow is initialized
         self.assertIsNotNone(self.audio_processor.tumbling_window)
 

@@ -75,7 +75,7 @@ def wait_for_server_ready(ws_instance):
 
 
 def connect_to_server(ws_instance, max_retries=3):
-    """Establish WebSocket connection with enhanced timeout handling"""
+    """Establish WebSocket connection with enhanced timeout handling."""
     # Check if already connected
     if (
         ws_instance.state

@@ -22,7 +22,7 @@ config.LOG_LEVEL_CONSOLE = "DEBUG"
 
 
 def test_prompt_output():
-    """Tests text output to the prompt window"""
+    """Tests text output to the prompt window."""
     print("\n🧪 Testing Prompt Output...")
     print("=" * 50)
 
@@ -34,7 +34,7 @@ def test_prompt_output():
     output_history = []
 
     def mock_insert_text(self, text):
-        """Mock for insert_text that logs outputs"""
+        """Mock for insert_text that logs outputs."""
         output_history.append({"timestamp": time.time(), "text": text})
         print(f"\n[{len(output_history)}] Output:")
         print("-" * 20)

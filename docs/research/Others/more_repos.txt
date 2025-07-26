@@ -1,0 +1,3 @@
+https://github.com/dhruvyad/uttertype
+https://github.com/braden-w/whispering
+https://speaches.ai/usage/text-to-speech/

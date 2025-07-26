@@ -20,7 +20,7 @@ from .state import ConnectionState
 
 
 def send_audio_data(ws_instance, audio_data):
-    """Sends audio data to the server with enhanced error handling"""
+    """Sends audio data to the server with enhanced error handling."""
     if not ws_instance.processing_enabled or not ws_instance.is_ready():
         return False
 
@@ -32,7 +32,8 @@ def send_audio_data(ws_instance, audio_data):
 
 
 def send_end_of_audio_signal(ws_instance):
-    """Sends END_OF_AUDIO signal to the server with enhanced timeout handling"""
+    """Sends END_OF_AUDIO signal to the server with enhanced timeout
+    handling."""
     if not ws_instance.is_ready() and ws_instance.state != ConnectionState.PROCESSING:
         return False
 
@@ -64,7 +65,7 @@ def send_end_of_audio_signal(ws_instance):
 
 
 def start_message_processing(ws_instance):
-    """Starts processing server messages with enhanced error handling"""
+    """Starts processing server messages with enhanced error handling."""
     if not ws_instance.is_ready():
         not_ready_msg = f"Server not ready for processing (current state: {ws_instance.state.name})"
         log_error(logger, not_ready_msg)
@@ -100,7 +101,7 @@ def start_message_processing(ws_instance):
 
 
 def stop_message_processing(ws_instance):
-    """Stops processing server messages with enhanced timeout handling"""
+    """Stops processing server messages with enhanced timeout handling."""
     if ws_instance.processing_enabled:
         stop_start = time.time()
         log_connection(logger, "Stopping message processing...")

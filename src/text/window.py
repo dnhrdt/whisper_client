@@ -17,7 +17,7 @@ from src.logging import log_debug, log_error
 
 
 def find_prompt_window():
-    """Finds the prompt window by title"""
+    """Finds the prompt window by title."""
     try:
         prompt_window_title = config.PROMPT_WINDOW_TITLE
 
@@ -38,7 +38,7 @@ def find_prompt_window():
 
 
 def find_vscode_edit_control(parent_hwnd):
-    """Find the edit control within VS Code"""
+    """Find the edit control within VS Code."""
     result: List[Tuple[int, str, str]] = []
 
     # VS Code uses a complex structure with Electron/Chromium

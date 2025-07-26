@@ -19,7 +19,7 @@ from src.logging import log_connection, log_error
 
 
 class ConnectionManager:
-    """Manages WebSocket connections and instance tracking"""
+    """Manages WebSocket connections and instance tracking."""
 
     # Class-level variable to track active instances
     # Verwende eine Vorwärtsreferenz für den Typ, um zirkuläre Importe zu vermeiden
@@ -28,26 +28,27 @@ class ConnectionManager:
 
     @classmethod
     def register_instance(cls, instance):
-        """Register a WebSocket instance"""
+        """Register a WebSocket instance."""
         with cls._instances_lock:
             cls._active_instances[instance.client_id] = instance
 
     @classmethod
     def unregister_instance(cls, client_id):
-        """Unregister a WebSocket instance"""
+        """Unregister a WebSocket instance."""
         with cls._instances_lock:
             if client_id in cls._active_instances:
                 del cls._active_instances[client_id]
 
     @classmethod
     def get_instance_count(cls):
-        """Returns the number of active WebSocket instances"""
+        """Returns the number of active WebSocket instances."""
         with cls._instances_lock:
             return len(cls._active_instances)
 
     @classmethod
     def cleanup_all_instances(cls):
-        """Cleanup all active WebSocket instances with proper timeout handling"""
+        """Cleanup all active WebSocket instances with proper timeout
+        handling."""
         cleanup_start = time.time()
         log_connection(
             logger,
@@ -96,7 +97,7 @@ class ConnectionManager:
 
 
 def create_websocket_app(url, on_open, on_message, on_error, on_close):
-    """Creates a WebSocketApp instance"""
+    """Creates a WebSocketApp instance."""
     return websocket.WebSocketApp(
         url,
         on_open=on_open,
@@ -107,10 +108,10 @@ def create_websocket_app(url, on_open, on_message, on_error, on_close):
 
 
 def generate_client_id():
-    """Generate a unique client ID"""
+    """Generate a unique client ID."""
     return str(uuid.uuid4())
 
 
 def generate_session_id():
-    """Generate a unique session ID"""
+    """Generate a unique session ID."""
     return str(uuid.uuid4())

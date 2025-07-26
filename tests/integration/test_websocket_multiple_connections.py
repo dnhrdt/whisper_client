@@ -30,7 +30,8 @@ logger = logging.get_logger()
 
 # Patch the connect method to avoid actual server connections
 def mock_connect(self, *args, **kwargs):
-    """Mock implementation of connect that doesn't actually connect to a server"""
+    """Mock implementation of connect that doesn't actually connect to a
+    server."""
     print(f"DEBUG: mock_connect called for client {self.client_id}")
 
     # Always generate a new session ID for each connection with unique timestamp
@@ -73,11 +74,11 @@ def mock_connect(self, *args, **kwargs):
 
 
 class WebSocketMultipleConnectionsTest(unittest.TestCase):
-    """Tests for the prevention of multiple parallel connections"""
+    """Tests for the prevention of multiple parallel connections."""
 
     @classmethod
     def setUpClass(cls):
-        """Set up test environment once for all tests"""
+        """Set up test environment once for all tests."""
         print("\nDEBUG: Setting up test class")
 
         # Save original values
@@ -100,7 +101,7 @@ class WebSocketMultipleConnectionsTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        """Clean up test environment once after all tests"""
+        """Clean up test environment once after all tests."""
         print("\nDEBUG: Tearing down test class")
 
         # Restore original values
@@ -124,7 +125,7 @@ class WebSocketMultipleConnectionsTest(unittest.TestCase):
         print("DEBUG: Class teardown completed")
 
     def setUp(self):
-        """Set up test environment for each test"""
+        """Set up test environment for each test."""
         print(f"\nDEBUG: Setting up test: {self._testMethodName}")
 
         # Patch time.sleep to avoid delays in tests
@@ -148,7 +149,7 @@ class WebSocketMultipleConnectionsTest(unittest.TestCase):
         print(f"DEBUG: Setup completed for test: {self._testMethodName}")
 
     def tearDown(self):
-        """Clean up after each test"""
+        """Clean up after each test."""
         print(f"DEBUG: Tearing down test: {self._testMethodName}")
 
         # Clean up all instances created in this test
@@ -205,7 +206,7 @@ class WebSocketMultipleConnectionsTest(unittest.TestCase):
         print(f"DEBUG: Teardown completed for test: {self._testMethodName}")
 
     def test_client_and_session_ids(self):
-        """Test client and session ID tracking"""
+        """Test client and session ID tracking."""
         print("DEBUG: Starting test_client_and_session_ids")
 
         # Create a WebSocket client
@@ -277,7 +278,7 @@ class WebSocketMultipleConnectionsTest(unittest.TestCase):
         print("DEBUG: test_client_and_session_ids completed")
 
     def test_instance_tracking(self):
-        """Test tracking of WebSocket instances"""
+        """Test tracking of WebSocket instances."""
         print("DEBUG: Starting test_instance_tracking")
 
         # Initially no instances
@@ -357,7 +358,7 @@ class WebSocketMultipleConnectionsTest(unittest.TestCase):
         print("DEBUG: test_instance_tracking completed")
 
     def test_cleanup_all_instances(self):
-        """Test cleanup of all WebSocket instances"""
+        """Test cleanup of all WebSocket instances."""
         print("DEBUG: Starting test_cleanup_all_instances")
 
         # Create multiple instances - reduce to 2 for faster testing
@@ -403,7 +404,7 @@ class WebSocketMultipleConnectionsTest(unittest.TestCase):
         print("DEBUG: test_cleanup_all_instances completed")
 
     def test_connection_throttling(self):
-        """Test throttling of connection attempts"""
+        """Test throttling of connection attempts."""
         print("DEBUG: Starting test_connection_throttling")
 
         # We'll use a mock for time.sleep but track the calls
@@ -493,7 +494,7 @@ class WebSocketMultipleConnectionsTest(unittest.TestCase):
         print("DEBUG: test_connection_throttling completed")
 
     def test_parallel_connections(self):
-        """Test handling of parallel connection attempts"""
+        """Test handling of parallel connection attempts."""
         print("DEBUG: Starting test_parallel_connections")
 
         # Create two WebSocket clients
@@ -546,7 +547,7 @@ class WebSocketMultipleConnectionsTest(unittest.TestCase):
         print("DEBUG: test_parallel_connections completed")
 
     def test_reconnection_with_new_session(self):
-        """Test reconnection with new session ID"""
+        """Test reconnection with new session ID."""
         print("DEBUG: Starting test_reconnection_with_new_session")
 
         # Create a WebSocket client

@@ -47,7 +47,7 @@ def send_message(hwnd, text):
 
 
 def set_clipboard_text(text):
-    """Copy text to clipboard using multiple methods"""
+    """Copy text to clipboard using multiple methods."""
     # Primary method: Win32 API
     try:
         win32clipboard.OpenClipboard()
@@ -66,7 +66,7 @@ def set_clipboard_text(text):
 
 
 def send_paste_command():
-    """Sends Ctrl+V key combination"""
+    """Sends Ctrl+V key combination."""
     try:
         # Simulate Ctrl+V
         win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)  # Press Ctrl
@@ -81,7 +81,7 @@ def send_paste_command():
 
 
 def send_text_to_prompt(text):
-    """Sends text directly to the prompt"""
+    """Sends text directly to the prompt."""
     try:
         # Copy text to clipboard
         set_clipboard_text(text)
@@ -105,7 +105,7 @@ def send_text_to_prompt(text):
 
 
 def insert_text(manager, text):
-    """Output text based on configured mode"""
+    """Output text based on configured mode."""
     try:
         # Save text for tests
         manager.test_output.append(text)

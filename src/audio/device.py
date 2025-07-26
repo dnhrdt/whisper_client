@@ -13,11 +13,11 @@ from src.logging import log_debug, log_error, log_info
 
 
 def list_audio_devices():
-    """
-    Lists all available audio input devices.
+    """Lists all available audio input devices.
 
     Returns:
         List of (index, name, channels) tuples for all input devices
+
     """
     audio = pyaudio.PyAudio()
     devices = []
@@ -51,8 +51,7 @@ def list_audio_devices():
 
 
 def check_device_availability(audio, device_index):
-    """
-    Checks if a specific audio device is available.
+    """Checks if a specific audio device is available.
 
     Args:
         audio: PyAudio instance
@@ -60,6 +59,7 @@ def check_device_availability(audio, device_index):
 
     Returns:
         True if device is available, False otherwise
+
     """
     try:
         device_info = audio.get_device_info_by_index(device_index)
@@ -73,8 +73,7 @@ def check_device_availability(audio, device_index):
 
 
 def test_microphone_access(audio, device_index, format, channels, rate, chunk):
-    """
-    Tests microphone access by opening a stream.
+    """Tests microphone access by opening a stream.
 
     Args:
         audio: PyAudio instance
@@ -86,6 +85,7 @@ def test_microphone_access(audio, device_index, format, channels, rate, chunk):
 
     Returns:
         True if test successful, False otherwise
+
     """
     try:
         test_stream = audio.open(

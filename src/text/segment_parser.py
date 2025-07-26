@@ -12,7 +12,7 @@ from .sentence_splitter import split_into_sentences
 
 
 def process_text(manager, text, current_time):
-    """Verarbeitet einen Text"""
+    """Verarbeitet einen Text."""
     # Text für die Verarbeitung vorbereiten
     prepared_text = prepare_text(text, manager.common_abbreviations)
 
@@ -31,7 +31,7 @@ def process_text(manager, text, current_time):
 
 
 def prepare_text(text, common_abbreviations):
-    """Bereitet Text für die Verarbeitung vor"""
+    """Bereitet Text für die Verarbeitung vor."""
     # Ellipsen behandeln
     text = text.replace("...", " ELLIPSIS_MARKER ")
 
@@ -47,7 +47,7 @@ def prepare_text(text, common_abbreviations):
 
 
 def handle_multiple_end_markers(text):
-    """Behandelt mehrfache Satzendemarker"""
+    """Behandelt mehrfache Satzendemarker."""
     # First, identify and mark all combinations as special tokens
     # This prevents them from being split during sentence detection
     for marker1 in ".!?":
@@ -69,7 +69,7 @@ def handle_multiple_end_markers(text):
 
 
 def restore_special_markers(sentences):
-    """Stellt spezielle Marker wieder her"""
+    """Stellt spezielle Marker wieder her."""
     # Ellipsen wiederherstellen
     sentences = [s.replace("ELLIPSIS_MARKER", "...") for s in sentences]
 

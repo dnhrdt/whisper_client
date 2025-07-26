@@ -34,7 +34,7 @@ from .state_management import log_state_periodically, set_connection_state
 
 
 class WhisperWebSocket:
-    """WebSocket client for communication with the WhisperLive server"""
+    """WebSocket client for communication with the WhisperLive server."""
 
     def __init__(self):
         # Generate a persistent client ID that remains the same across reconnections
@@ -60,15 +60,15 @@ class WhisperWebSocket:
         log_connection(logger, f"Created WebSocket client with ID: {self.client_id}")
 
     def __del__(self):
-        """Remove this instance when garbage collected"""
+        """Remove this instance when garbage collected."""
         handle_instance_deletion(self.client_id)
 
     def _set_state(self, new_state):
-        """Sets the connection state and logs the transition"""
+        """Sets the connection state and logs the transition."""
         set_connection_state(self, new_state)
 
     def _log_state_periodically(self, operation_name):
-        """Log state periodically during long-running operations"""
+        """Log state periodically during long-running operations."""
         log_state_periodically(self, operation_name)
 
     def _cleanup_previous_connection(self):
@@ -88,49 +88,51 @@ class WhisperWebSocket:
         wait_for_server_ready(self)
 
     def connect(self, max_retries=3):
-        """Establish WebSocket connection with enhanced timeout handling"""
+        """Establish WebSocket connection with enhanced timeout handling."""
         return connect_to_server(self, max_retries)
 
     def _on_open(self, ws):
-        """Callback when WebSocket connection is opened"""
+        """Callback when WebSocket connection is opened."""
         on_open(self, ws)
 
     def _on_message(self, ws, message):
-        """Callback for incoming server messages with enhanced error handling"""
+        """Callback for incoming server messages with enhanced error
+        handling."""
         on_message(self, ws, message)
 
     def _on_error(self, ws, error):
-        """Callback for WebSocket errors with enhanced logging"""
+        """Callback for WebSocket errors with enhanced logging."""
         on_error(self, ws, error)
 
     def _on_close(self, ws, close_status_code, close_msg):
-        """Callback when WebSocket connection is closed"""
+        """Callback when WebSocket connection is closed."""
         on_close(self, ws, close_status_code, close_msg)
 
     def is_ready(self):
-        """Checks if the server is ready"""
+        """Checks if the server is ready."""
         return self.state == ConnectionState.READY
 
     def send_audio(self, audio_data):
-        """Sends audio data to the server with enhanced error handling"""
+        """Sends audio data to the server with enhanced error handling."""
         return send_audio_data(self, audio_data)
 
     def set_text_callback(self, callback):
-        """Sets the callback for received text segments"""
+        """Sets the callback for received text segments."""
         self.on_text_callback = callback
 
     def send_end_of_audio(self):
-        """Sends END_OF_AUDIO signal to the server with enhanced timeout handling"""
+        """Sends END_OF_AUDIO signal to the server with enhanced timeout
+        handling."""
         return send_end_of_audio_signal(self)
 
     def stop_processing(self):
-        """Stops processing server messages with enhanced timeout handling"""
+        """Stops processing server messages with enhanced timeout handling."""
         stop_message_processing(self)
 
     def start_processing(self):
-        """Starts processing server messages with enhanced error handling"""
+        """Starts processing server messages with enhanced error handling."""
         return start_message_processing(self)
 
     def cleanup(self):
-        """Release resources with enhanced timeout handling and logging"""
+        """Release resources with enhanced timeout handling and logging."""
         perform_cleanup(self)

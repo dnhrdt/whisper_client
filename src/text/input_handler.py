@@ -21,7 +21,7 @@ from .special_cases import (
 
 
 def process_segments(manager, segments):
-    """Processes received text segments"""
+    """Processes received text segments."""
     log_info(logger, "\n🎯 Processing new text segments:")
     current_time = time.time()
 

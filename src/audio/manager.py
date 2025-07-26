@@ -22,11 +22,11 @@ from .resampling import resample_to_16kHZ
 
 
 class AudioManager:
-    """
-    Manages audio recording and device access.
+    """Manages audio recording and device access.
 
-    This class handles microphone initialization, audio recording,
-    and provides the captured audio data to a callback function.
+    This class handles microphone initialization, audio recording, and
+    provides the captured audio data to a callback function.
+
     """
 
     def __init__(self):
@@ -48,7 +48,7 @@ class AudioManager:
         self._init_microphone()
 
     def _init_microphone(self):
-        """Initialize and test microphone access"""
+        """Initialize and test microphone access."""
         if not self._check_microphone():
             log_error(logger, "⚠️ Microphone not available!")
             raise RuntimeError("No microphone found")
@@ -60,7 +60,7 @@ class AudioManager:
             raise RuntimeError("Microphone test failed")
 
     def _check_microphone(self):
-        """Checks if the configured microphone is available"""
+        """Checks if the configured microphone is available."""
         try:
             info = self.audio.get_host_api_info_by_index(0)
             num_devices = info.get("deviceCount")  # Can be None or str
@@ -90,15 +90,15 @@ class AudioManager:
             return False
 
     def is_device_available(self):
-        """Checks if the audio device is still available"""
+        """Checks if the audio device is still available."""
         return check_device_availability(self.audio, self.device_index)
 
     def start_recording(self, callback: Callable[[bytes], None]):
-        """
-        Starts audio recording.
+        """Starts audio recording.
 
         Args:
             callback: Function to call with recorded audio data
+
         """
         with self.recording_lock:
             if self.recording:
@@ -133,7 +133,7 @@ class AudioManager:
                 self.recording = False
 
     def stop_recording(self):
-        """Stops audio recording"""
+        """Stops audio recording."""
         with self.recording_lock:
             if not self.recording:
                 return
@@ -167,11 +167,11 @@ class AudioManager:
             log_info(logger, "\n⏹️ Recording stopped")
 
     def _record_audio(self, callback: Callable[[bytes], None]):
-        """
-        Record audio and send to callback.
+        """Record audio and send to callback.
 
         Args:
             callback: Function to call with recorded audio data
+
         """
         buffer = []  # Audio buffer for more stable transmission
         log_debug(logger, "Audio thread started")
@@ -218,7 +218,7 @@ class AudioManager:
             self.recording = False
 
     def cleanup(self):
-        """Release resources"""
+        """Release resources."""
         self.stop_recording()
         if self.audio:
             self.audio.terminate()

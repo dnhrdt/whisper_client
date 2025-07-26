@@ -16,7 +16,7 @@ from .processing import find_overlap
 
 
 def process_single_sentence(manager, sentence, current_time):
-    """Verarbeitet einen einzelnen Satz"""
+    """Verarbeitet einen einzelnen Satz."""
     # Leere Sätze überspringen
     if not sentence.strip():
         return
@@ -56,7 +56,7 @@ def process_single_sentence(manager, sentence, current_time):
 
 
 def add_to_current_sentence(manager, sentence):
-    """Fügt Text zum aktuellen Satz hinzu"""
+    """Fügt Text zum aktuellen Satz hinzu."""
     if not manager.current_sentence:
         manager.current_sentence = [sentence]
     else:

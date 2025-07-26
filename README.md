@@ -148,20 +148,23 @@ We welcome contributions! See our [Contributing Guidelines](CONTRIBUTING.md) for
 
 Current focus areas:
 
-1. **Server Integration**
-   - Understanding WhisperLive server parameters
-   - Timing optimization
-   - Protocol documentation
+1. **Core Stability & Performance**
+   - Long-running session reliability
+   - Audio timing optimization (130ms latency advantage)
+   - WebSocket connection robustness
+   - Memory and resource management
 
-2. **Performance**
-   - Audio streaming optimization
-   - Latency minimization
-   - Resource efficiency
+2. **API Integration & Extensibility**
+   - OpenAI-compatible API server mode
+   - Docker containerization support
+   - Cross-platform compatibility research
+   - Backend flexibility for different transcription services
 
-3. **User Experience**
-   - GUI development
-   - Configuration interface
-   - Installation wizard
+3. **Community & Ecosystem**
+   - Integration with existing transcription UIs
+   - Developer-friendly core library
+   - Comprehensive documentation and examples
+   - Performance benchmarking and comparison tools
 
 ## 📝 License
 

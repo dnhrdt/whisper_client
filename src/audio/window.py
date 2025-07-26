@@ -16,23 +16,23 @@ from src.logging import log_debug
 
 
 class TumblingWindow:
-    """
-    Implements a tumbling window approach for audio processing.
+    """Implements a tumbling window approach for audio processing.
 
-    This class manages audio data in windows with configurable size and overlap,
-    providing a smooth transition between consecutive windows through linear
-    crossfading in the overlap regions.
+    This class manages audio data in windows with configurable size and
+    overlap, providing a smooth transition between consecutive windows
+    through linear crossfading in the overlap regions.
+
     """
 
     def __init__(
         self, window_size=config.TUMBLING_WINDOW_SIZE, overlap=config.TUMBLING_WINDOW_OVERLAP
     ):
-        """
-        Initialize the tumbling window processor.
+        """Initialize the tumbling window processor.
 
         Args:
             window_size: Size of each window in samples
             overlap: Overlap between windows as a fraction (0.0 - 1.0)
+
         """
         self.window_size = window_size
         self.overlap = max(0.0, min(1.0, overlap))  # Ensure overlap is between 0 and 1
@@ -42,11 +42,11 @@ class TumblingWindow:
         log_debug(logger, "TumblingWindow initialized: size=%d, overlap=%.2f", window_size, overlap)
 
     def add_chunk(self, chunk):
-        """
-        Add an audio chunk to the buffer.
+        """Add an audio chunk to the buffer.
 
         Args:
             chunk: Audio data as bytes or numpy array
+
         """
         # Convert bytes to numpy array if needed
         if isinstance(chunk, bytes):
@@ -59,8 +59,7 @@ class TumblingWindow:
         )
 
     def get_windows(self):
-        """
-        Generator that yields available windows from the buffer.
+        """Generator that yields available windows from the buffer.
 
         Each window is a numpy array of samples with size equal to window_size.
         Windows are removed from the buffer as they are yielded, with overlap
@@ -68,6 +67,7 @@ class TumblingWindow:
 
         Yields:
             numpy.ndarray: Audio window of size window_size
+
         """
         while len(self.buffer) >= self.window_size:
             # Extract a complete window

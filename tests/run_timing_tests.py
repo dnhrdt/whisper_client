@@ -1,6 +1,4 @@
-"""
-Test-Runner für Timing-Tests mit verschiedenen Konfigurationen
-"""
+"""Test-Runner für Timing-Tests mit verschiedenen Konfigurationen."""
 
 import json
 import time
@@ -31,7 +29,7 @@ TIMING_CONFIGS = [
 
 
 def backup_config():
-    """Aktuelle Konfiguration sichern"""
+    """Aktuelle Konfiguration sichern."""
     backup = {}
     for config_name in TIMING_CONFIGS[1]["config"].keys():
         backup[config_name] = getattr(config, config_name)
@@ -39,19 +37,19 @@ def backup_config():
 
 
 def restore_config(backup):
-    """Konfiguration wiederherstellen"""
+    """Konfiguration wiederherstellen."""
     for name, value in backup.items():
         setattr(config, name, value)
 
 
 def apply_config(test_config):
-    """Test-Konfiguration anwenden"""
+    """Test-Konfiguration anwenden."""
     for name, value in test_config.items():
         setattr(config, name, value)
 
 
 def run_test_suite(register_recording_handler):
-    """Führt alle Tests mit verschiedenen Konfigurationen aus"""
+    """Führt alle Tests mit verschiedenen Konfigurationen aus."""
     results_dir = Path("tests/results")
     results_dir.mkdir(exist_ok=True)
 

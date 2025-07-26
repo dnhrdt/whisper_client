@@ -11,14 +11,14 @@ from src.logging import log_info
 
 
 def get_test_output(manager):
-    """Returns the collected test outputs and clears the buffer"""
+    """Returns the collected test outputs and clears the buffer."""
     output = manager.test_output.copy()
     manager.test_output = []
     return output
 
 
 def handle_test_mode_output(manager, text):
-    """Handles output in test mode"""
+    """Handles output in test mode."""
     # Save text for tests
     manager.test_output.append(text)
 
@@ -31,7 +31,7 @@ def handle_test_mode_output(manager, text):
 
 
 def is_test_case(text, test_type):
-    """Checks if a text is a specific test case"""
+    """Checks if a text is a specific test case."""
     if test_type == "very_long":
         return len(text) > 500 and "Textsegmenten testen soll" in text
     elif test_type == "mixed_languages":

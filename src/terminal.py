@@ -21,7 +21,7 @@ from src.logging import log_debug, log_error, log_info
 
 
 class TerminalStatus(Enum):
-    """Status of a terminal"""
+    """Status of a terminal."""
 
     ACTIVE = "active"  # Terminal is active and in use
     INACTIVE = "inactive"  # Terminal is inactive (no activity for INACTIVITY_TIMEOUT)
@@ -31,7 +31,7 @@ class TerminalStatus(Enum):
 
 @dataclass
 class TerminalInfo:
-    """Information about a terminal"""
+    """Information about a terminal."""
 
     id: str  # Unique ID of the terminal
     name: str  # User-friendly name (e.g., "Audio Terminal")
@@ -41,7 +41,7 @@ class TerminalInfo:
 
 
 class TerminalManager:
-    """Central management of all terminals"""
+    """Central management of all terminals."""
 
     def __init__(self):
         self.terminals: Dict[str, TerminalInfo] = {}
@@ -58,8 +58,7 @@ class TerminalManager:
     def register_terminal(
         self, id: str, name: str, process: Optional[object] = None
     ) -> TerminalInfo:
-        """
-        Registers a new terminal
+        """Registers a new terminal.
 
         Args:
             id: Unique ID of the terminal
@@ -68,6 +67,7 @@ class TerminalManager:
 
         Returns:
             TerminalInfo: Information about the registered terminal
+
         """
         with self.lock:
             if id in self.terminals:
@@ -85,7 +85,7 @@ class TerminalManager:
             return terminal
 
     def update_activity(self, id: str):
-        """Updates the timestamp of the last activity"""
+        """Updates the timestamp of the last activity."""
         with self.lock:
             if id in self.terminals:
                 self.terminals[id].last_activity = time.time()
@@ -94,11 +94,11 @@ class TerminalManager:
                     log_debug(logger, "Terminal reactivated: %s", self.terminals[id].name)
 
     def close_terminal(self, id: str):
-        """
-        Closes a terminal
+        """Closes a terminal.
 
         Args:
             id: ID of the terminal to close
+
         """
         with self.lock:
             if id in self.terminals:
@@ -123,24 +123,24 @@ class TerminalManager:
                     log_debug(logger, "Terminal closed: %s", terminal.name)
 
     def get_terminal_info(self, id: str) -> Optional[TerminalInfo]:
-        """
-        Returns information about a terminal
+        """Returns information about a terminal.
 
         Args:
             id: Terminal ID
 
         Returns:
             Optional[TerminalInfo]: Terminal information or None if not found
+
         """
         with self.lock:
             return self.terminals.get(id)
 
     def get_active_terminals(self) -> Dict[str, TerminalInfo]:
-        """
-        Returns all active terminals
+        """Returns all active terminals.
 
         Returns:
             Dict[str, TerminalInfo]: Dictionary with terminal IDs and information
+
         """
         with self.lock:
             return {
@@ -150,10 +150,7 @@ class TerminalManager:
             }
 
     def _monitor_terminals(self):
-        """
-        Monitors terminals for inactivity
-        Runs in its own thread
-        """
+        """Monitors terminals for inactivity Runs in its own thread."""
         while self.monitoring:
             try:
                 current_time = time.time()
@@ -180,7 +177,7 @@ class TerminalManager:
             time.sleep(config.TERMINAL_MONITOR_INTERVAL)  # Interval for terminal monitoring
 
     def cleanup(self):
-        """Release resources"""
+        """Release resources."""
         self.monitoring = False
 
         # Close all terminals

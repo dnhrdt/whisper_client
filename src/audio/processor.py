@@ -22,19 +22,19 @@ from .window import TumblingWindow
 
 
 class AudioProcessor:
-    """
-    Processes audio data using the tumbling window approach.
+    """Processes audio data using the tumbling window approach.
 
     This class integrates with the AudioManager to process audio chunks
     and prepare them for the WhisperLive server.
+
     """
 
     def __init__(self, test_mode=False):
-        """
-        Initialize the audio processor.
+        """Initialize the audio processor.
 
         Args:
             test_mode: If True, operates in test mode without sending data
+
         """
         self.tumbling_window = TumblingWindow()
         self.test_mode = test_mode
@@ -47,11 +47,11 @@ class AudioProcessor:
         log_debug(logger, "AudioProcessor initialized")
 
     def start_processing(self, callback):
-        """
-        Start the audio processing thread.
+        """Start the audio processing thread.
 
         Args:
             callback: Function to call with processed audio windows
+
         """
         with self.processing_lock:
             if self.running:
@@ -88,11 +88,11 @@ class AudioProcessor:
             log_info(logger, "🛑 Audio processing stopped")
 
     def process_audio(self, audio_data):
-        """
-        Process audio data through the tumbling window.
+        """Process audio data through the tumbling window.
 
         Args:
             audio_data: Audio data as bytes
+
         """
         # Add to processing queue
         self.processing_queue.put(audio_data)
@@ -123,11 +123,11 @@ class AudioProcessor:
             log_debug(logger, "Processing thread terminated")
 
     def _process_audio_data(self, audio_data):
-        """
-        Process a chunk of audio data.
+        """Process a chunk of audio data.
 
         Args:
             audio_data: Audio data as bytes
+
         """
         # Add to tumbling window
         self.tumbling_window.add_chunk(audio_data)

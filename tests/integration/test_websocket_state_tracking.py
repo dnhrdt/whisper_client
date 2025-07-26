@@ -27,7 +27,7 @@ logger = logging.get_logger()
 
 
 class MockWebSocketApp:
-    """Mock WebSocketApp for testing"""
+    """Mock WebSocketApp for testing."""
 
     def __init__(self, url, on_open=None, on_message=None, on_error=None, on_close=None):
         self.url = url
@@ -41,7 +41,7 @@ class MockWebSocketApp:
         self.messages_sent = []
 
     def run_forever(self):
-        """Simulate running the WebSocket"""
+        """Simulate running the WebSocket."""
         self.sock = MagicMock()
         self.sock.connected = True
         self.connected = True
@@ -54,11 +54,11 @@ class MockWebSocketApp:
             self.on_message(self, server_ready_msg)
 
     def send(self, message, opcode=None):
-        """Record sent messages"""
+        """Record sent messages."""
         self.messages_sent.append((message, opcode))
 
     def close(self):
-        """Simulate closing the WebSocket"""
+        """Simulate closing the WebSocket."""
         self.closed = True
         self.connected = False
         if self.sock:
@@ -68,23 +68,23 @@ class MockWebSocketApp:
 
 
 class WebSocketStateTrackingTest(unittest.TestCase):
-    """Tests for the WebSocket connection state tracking system"""
+    """Tests for the WebSocket connection state tracking system."""
 
     @patch("websocket.WebSocketApp", MockWebSocketApp)
     def setUp(self):
-        """Set up test environment"""
+        """Set up test environment."""
         self.ws_client = WhisperWebSocket()
         # Patch time.sleep to avoid delays in tests
         self.sleep_patcher = patch("time.sleep")
         self.mock_sleep = self.sleep_patcher.start()
 
     def tearDown(self):
-        """Clean up after tests"""
+        """Clean up after tests."""
         self.sleep_patcher.stop()
         self.ws_client.cleanup()
 
     def test_initial_state(self):
-        """Test initial connection state"""
+        """Test initial connection state."""
         self.assertEqual(
             self.ws_client.state,
             ConnectionState.DISCONNECTED,
@@ -93,7 +93,7 @@ class WebSocketStateTrackingTest(unittest.TestCase):
 
     @patch("websocket.WebSocketApp", MockWebSocketApp)
     def test_connect_state_transition(self):
-        """Test state transitions during connection"""
+        """Test state transitions during connection."""
         # Connect to server
         self.ws_client.connect()
 
@@ -106,7 +106,7 @@ class WebSocketStateTrackingTest(unittest.TestCase):
 
     @patch("websocket.WebSocketApp", MockWebSocketApp)
     def test_processing_state_transition(self):
-        """Test state transitions during audio processing"""
+        """Test state transitions during audio processing."""
         # Connect and set to READY state
         self.ws_client.connect()
         server_ready_msg = '{"message": "SERVER_READY"}'
@@ -134,7 +134,7 @@ class WebSocketStateTrackingTest(unittest.TestCase):
 
     @patch("websocket.WebSocketApp", MockWebSocketApp)
     def test_error_state_transition(self):
-        """Test state transitions during errors"""
+        """Test state transitions during errors."""
         # Connect to server
         self.ws_client.connect()
 
@@ -150,7 +150,7 @@ class WebSocketStateTrackingTest(unittest.TestCase):
 
     @patch("websocket.WebSocketApp", MockWebSocketApp)
     def test_close_state_transition(self):
-        """Test state transitions during connection closure"""
+        """Test state transitions during connection closure."""
         # Connect to server
         self.ws_client.connect()
 
@@ -166,7 +166,7 @@ class WebSocketStateTrackingTest(unittest.TestCase):
 
     @patch("websocket.WebSocketApp", MockWebSocketApp)
     def test_end_of_audio_acknowledgment(self):
-        """Test END_OF_AUDIO acknowledgment handling"""
+        """Test END_OF_AUDIO acknowledgment handling."""
         # Connect and set to READY state
         self.ws_client.connect()
         server_ready_msg = '{"message": "SERVER_READY"}'
@@ -191,7 +191,7 @@ class WebSocketStateTrackingTest(unittest.TestCase):
 
     @patch("websocket.WebSocketApp", MockWebSocketApp)
     def test_reconnection_behavior(self):
-        """Test reconnection behavior after connection error"""
+        """Test reconnection behavior after connection error."""
         # Mock connect method to track calls
         original_connect = self.ws_client.connect
         connect_called = [0]
@@ -223,7 +223,7 @@ class WebSocketStateTrackingTest(unittest.TestCase):
 
     @patch("websocket.WebSocketApp", MockWebSocketApp)
     def test_thread_safety(self):
-        """Test thread safety of state transitions"""
+        """Test thread safety of state transitions."""
         # This is a basic test to ensure no exceptions are thrown
         # when multiple state transitions occur in quick succession
 
@@ -244,11 +244,11 @@ class WebSocketStateTrackingTest(unittest.TestCase):
 
 
 class WebSocketMultipleConnectionsTest(unittest.TestCase):
-    """Tests for handling multiple parallel connections"""
+    """Tests for handling multiple parallel connections."""
 
     @patch("websocket.WebSocketApp", MockWebSocketApp)
     def test_multiple_connections(self):
-        """Test handling of multiple connection attempts"""
+        """Test handling of multiple connection attempts."""
         # Create two WebSocket clients
         ws_client1 = WhisperWebSocket()
         ws_client2 = WhisperWebSocket()

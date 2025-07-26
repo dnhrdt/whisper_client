@@ -14,7 +14,7 @@ from .processing import format_sentence
 
 
 def output_sentence(manager, current_time=None):
-    """Outputs the current sentence"""
+    """Outputs the current sentence."""
     if not manager.current_sentence:
         return
 
@@ -53,7 +53,7 @@ def output_sentence(manager, current_time=None):
 
 
 def should_force_output(manager, current_time):
-    """Checks if the current sentence should be output"""
+    """Checks if the current sentence should be output."""
     if not manager.current_sentence:
         return False
 

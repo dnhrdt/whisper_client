@@ -60,7 +60,7 @@ class WhisperClient:
         self.websocket.set_text_callback(self.on_text_segments)
 
     def start(self):
-        """Starts the client"""
+        """Starts the client."""
         # Hotkeys registrieren
         self.hotkey_manager.register_hotkey(config.HOTKEY_TOGGLE_RECORDING, self.toggle_recording)
         self.hotkey_manager.register_hotkey(config.HOTKEY_EXIT, self.cleanup)
@@ -88,14 +88,14 @@ class WhisperClient:
         return True
 
     def on_text_segments(self, segments):
-        """Callback for new text segments"""
+        """Callback for new text segments."""
         # Terminal-Aktivität aktualisieren
         self.terminal_manager.update_activity(self.websocket_terminal.id)
         # Textsegmente verarbeiten
         self.text_manager.process_segments(segments)
 
     def toggle_recording(self):
-        """Start/stop recording"""
+        """Start/stop recording."""
         if not self.audio_manager.recording:
             if self.websocket.state != ConnectionState.READY:
                 log_error(logger, "⚠️ No connection to server")
@@ -124,19 +124,19 @@ class WhisperClient:
             self.websocket.stop_processing()
 
     def on_audio_data(self, audio_data):
-        """Callback for raw audio data"""
+        """Callback for raw audio data."""
         # Terminal-Aktivität aktualisieren
         self.terminal_manager.update_activity(self.audio_terminal.id)
         # Process audio data through tumbling window
         self.audio_processor.process_audio(audio_data)
 
     def on_processed_audio(self, processed_audio):
-        """Callback for processed audio data from tumbling window"""
+        """Callback for processed audio data from tumbling window."""
         # Send processed audio to WebSocket
         self.websocket.send_audio(processed_audio)
 
     def cleanup(self):
-        """Release resources and exit program"""
+        """Release resources and exit program."""
         log_info(logger, "\n🛑 Program is shutting down...")
         self.running = False  # Hauptschleife beenden
 

@@ -11,7 +11,7 @@ import config
 
 
 def is_sentence_end(text, common_abbreviations):
-    """Checks if a text marks the end of a sentence"""
+    """Checks if a text marks the end of a sentence."""
     # Check for abbreviations at the end of the text
     text_lower = text.lower()
     for abbr in common_abbreviations:
@@ -34,7 +34,7 @@ def is_sentence_end(text, common_abbreviations):
 
 
 def format_sentence(text, common_abbreviations):
-    """Formats a sentence for output"""
+    """Formats a sentence for output."""
     # Remove multiple spaces
     text = " ".join(text.split())
 
@@ -55,18 +55,14 @@ def format_sentence(text, common_abbreviations):
     )
 
     # First letter uppercase if it's the beginning of a sentence
-    if (
-        text
-        and starts_sentence
-        and not any(text.startswith(abbr) for abbr in common_abbreviations)
-    ):
+    if text and starts_sentence and not any(text.startswith(abbr) for abbr in common_abbreviations):
         text = text[0].upper() + text[1:]
 
     return text
 
 
 def find_overlap(text1, text2):
-    """Finds the overlap between two texts"""
+    """Finds the overlap between two texts."""
     # Find the longest overlap between the end of text1 and the start of text2
     max_overlap = ""
     for i in range(1, min(len(text1), len(text2)) + 1):

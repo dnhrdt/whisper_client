@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 def simulate_server_message():
-    """Simulates a typical server message"""
+    """Simulates a typical server message."""
     return {
         "segments": [
             {"text": "This is a test."},
@@ -38,7 +38,7 @@ def simulate_server_message():
 
 
 def test_server_flow():
-    """Tests data flow from server to text processing"""
+    """Tests data flow from server to text processing."""
     print("\n🔍 Testing Server Data Flow...")
     print("=" * 50)
 
@@ -65,7 +65,7 @@ def test_server_flow():
     output_history = []
 
     def mock_insert_text(self, text):
-        """Mock for insert_text that logs outputs"""
+        """Mock for insert_text that logs outputs."""
         output_history.append({"timestamp": time.time(), "text": text})
         print(f"Output: {text}")
 
@@ -95,7 +95,8 @@ def test_server_flow():
 
 
 def test_websocket_connection():
-    """Tests WebSocket connection with server-ready-check and END_OF_AUDIO signal"""
+    """Tests WebSocket connection with server-ready-check and END_OF_AUDIO
+    signal."""
     print("\n🔌 Testing WebSocket Connection...")
     print("=" * 50)
 

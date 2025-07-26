@@ -15,7 +15,7 @@ from src.logging import log_connection, log_debug, log_error
 
 
 def handle_connection_error(error, state, client_id, session_id, server_ready, processing_enabled):
-    """Handle WebSocket connection errors"""
+    """Handle WebSocket connection errors."""
     log_error(logger, f"WebSocket error: {str(error)}")
 
     # Log additional context for the error
@@ -33,7 +33,7 @@ def handle_connection_error(error, state, client_id, session_id, server_ready, p
 
 
 def handle_connection_close(close_status_code, close_msg):
-    """Handle WebSocket connection close events"""
+    """Handle WebSocket connection close events."""
     if close_status_code and close_msg:
         log_connection(
             logger, f"Connection closed (Status: {close_status_code}) (Message: {close_msg})"
@@ -47,7 +47,7 @@ def handle_connection_close(close_status_code, close_msg):
 
 
 def wait_with_timeout(condition_func, timeout, operation_name, poll_interval=None):
-    """Wait for a condition with timeout"""
+    """Wait for a condition with timeout."""
     if poll_interval is None:
         poll_interval = config.WS_POLL_INTERVAL
 

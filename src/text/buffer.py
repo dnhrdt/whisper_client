@@ -1,10 +1,11 @@
-"""
-Text Buffer Module for the Whisper Client
-Version: 1.1
-Timestamp: 2025-04-20 18:07 CET
+"""Text Buffer Module for the Whisper Client.
+
+Version: 1.2
+Timestamp: 2025-04-20 19:51 CET
 
 This module provides a thread-safe buffer for text segments with
 functionality for duplicate detection and segment management.
+
 """
 
 import collections
@@ -18,10 +19,10 @@ from .segment import TextSegment
 
 
 class TextBuffer:
-    """Thread-safe ring buffer for text segments"""
+    """Thread-safe ring buffer for text segments."""
 
     def __init__(self, max_size=config.TEXT_BUFFER_SIZE, max_age=config.TEXT_BUFFER_MAX_AGE):
-        """Initialize the buffer with specified size and age limits"""
+        """Initialize the buffer with specified size and age limits."""
         self.max_size = max_size
         self.max_age = max_age
         self.buffer: collections.deque[TextSegment] = collections.deque(maxlen=max_size)
@@ -30,7 +31,7 @@ class TextBuffer:
         self.text_lookup = {}  # For quick duplicate detection
 
     def add_segment(self, text: str) -> TextSegment:
-        """Add a new text segment to the buffer"""
+        """Add a new text segment to the buffer."""
         with self.lock:
             # Clean up old segments first
             self._cleanup_old_segments()
@@ -48,14 +49,14 @@ class TextBuffer:
             return segment
 
     def mark_processed(self, segment: TextSegment, output: Optional[str] = None):
-        """Mark a segment as processed with optional output text"""
+        """Mark a segment as processed with optional output text."""
         with self.lock:
             if segment in self.buffer:
                 segment.processed = True
                 segment.output = output
 
     def is_duplicate(self, text: str) -> bool:
-        """Check if text is a duplicate of recent segments"""
+        """Check if text is a duplicate of recent segments."""
         with self.lock:
             # Normalize text for comparison
             normalized_text = " ".join(text.lower().split())
@@ -86,7 +87,7 @@ class TextBuffer:
     def get_recent_segments(
         self, count=None, processed_only=False, max_age=None
     ) -> List[TextSegment]:
-        """Get recent segments from the buffer"""
+        """Get recent segments from the buffer."""
         with self.lock:
             if max_age is None:
                 max_age = self.max_age
@@ -112,18 +113,18 @@ class TextBuffer:
             return result  # Already in chronological order
 
     def get_unprocessed_segments(self) -> List[TextSegment]:
-        """Get all unprocessed segments"""
+        """Get all unprocessed segments."""
         with self.lock:
             return [s for s in self.buffer if not s.processed]
 
     def clear(self):
-        """Clear the buffer"""
+        """Clear the buffer."""
         with self.lock:
             self.buffer.clear()
             self.text_lookup.clear()
 
     def _cleanup_old_segments(self):
-        """Remove segments that exceed the maximum age"""
+        """Remove segments that exceed the maximum age."""
         with self.lock:
             current_time = time.time()
             to_remove = []

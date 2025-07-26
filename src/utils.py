@@ -19,7 +19,7 @@ from src.logging import log_debug, log_error, log_info
 
 
 def check_server_status(host=config.WS_HOST, port=config.WS_PORT):
-    """Checks if the WhisperLive Server is running"""
+    """Checks if the WhisperLive Server is running."""
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(2)
@@ -32,7 +32,7 @@ def check_server_status(host=config.WS_HOST, port=config.WS_PORT):
 
 
 def update_project_status(description=None, changes=None, status=None, files=None):
-    """Updates the project status and task history"""
+    """Updates the project status and task history."""
     try:
         # Update projects file
         projects_file = "projects.json"
@@ -76,7 +76,7 @@ def update_project_status(description=None, changes=None, status=None, files=Non
 
 
 def update_task_history(description, changes, status="completed", files=None):
-    """Updates the task history"""
+    """Updates the task history."""
     history_file = "task_history.json"
 
     try:
@@ -108,7 +108,7 @@ def update_task_history(description, changes, status="completed", files=None):
 
 
 def show_startup_message():
-    """Shows the startup message"""
+    """Shows the startup message."""
     startup_msg = f"""
 === Whisper Client ===
 🔥 Client started!
@@ -123,7 +123,7 @@ def show_startup_message():
 
 
 def show_server_error():
-    """Shows error message when server is not reachable"""
+    """Shows error message when server is not reachable."""
     error_msg = """
 ⚠️ WhisperLive Server is not reachable!
 

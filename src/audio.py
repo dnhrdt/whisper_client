@@ -46,12 +46,12 @@ def resample_to_16kHZ(audio_data, current_rate):
 
 # MOVED TO: audio/window.py
 class TumblingWindow:
-    """
-    Implements a tumbling window approach for audio processing.
+    """Implements a tumbling window approach for audio processing.
 
-    This class manages audio data in windows with configurable size and overlap,
-    providing a smooth transition between consecutive windows through linear
-    crossfading in the overlap regions.
+    This class manages audio data in windows with configurable size and
+    overlap, providing a smooth transition between consecutive windows
+    through linear crossfading in the overlap regions.
+
     """
 
     # Weiterleitung an die neue Implementierung
@@ -67,11 +67,11 @@ class TumblingWindow:
 
 # MOVED TO: audio/processor.py
 class AudioProcessor:
-    """
-    Processes audio data using the tumbling window approach.
+    """Processes audio data using the tumbling window approach.
 
     This class integrates with the AudioManager to process audio chunks
     and prepare them for the WhisperLive server.
+
     """
 
     # Weiterleitung an die neue Implementierung
@@ -85,11 +85,11 @@ class AudioProcessor:
 
 # MOVED TO: audio/manager.py
 class AudioManager:
-    """
-    Manages audio recording and device access.
+    """Manages audio recording and device access.
 
-    This class handles microphone initialization, audio recording,
-    and provides the captured audio data to a callback function.
+    This class handles microphone initialization, audio recording, and
+    provides the captured audio data to a callback function.
+
     """
 
     # Weiterleitung an die neue Implementierung

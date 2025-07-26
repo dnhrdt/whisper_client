@@ -18,15 +18,15 @@ from src.text import TextBuffer, TextSegment
 
 
 class TextBufferTest(unittest.TestCase):
-    """Tests for the TextBuffer class"""
+    """Tests for the TextBuffer class."""
 
     def setUp(self):
-        """Set up test environment"""
+        """Set up test environment."""
         # Use a smaller buffer size and age for testing
         self.buffer = TextBuffer(max_size=10, max_age=5.0)
 
     def test_add_segment(self):
-        """Test adding segments to the buffer"""
+        """Test adding segments to the buffer."""
         # Add a segment
         segment = self.buffer.add_segment("Test segment")
 
@@ -41,7 +41,7 @@ class TextBufferTest(unittest.TestCase):
         self.assertIn("test segment", self.buffer.text_lookup)
 
     def test_mark_processed(self):
-        """Test marking segments as processed"""
+        """Test marking segments as processed."""
         # Add a segment
         segment = self.buffer.add_segment("Test segment")
 
@@ -53,7 +53,7 @@ class TextBufferTest(unittest.TestCase):
         self.assertEqual(segment.output, "Processed output")
 
     def test_is_duplicate(self):
-        """Test duplicate detection"""
+        """Test duplicate detection."""
         # Add a segment
         self.buffer.add_segment("This is a test segment")
 
@@ -76,7 +76,7 @@ class TextBufferTest(unittest.TestCase):
         self.assertFalse(self.buffer.is_duplicate("This is a different segment"))
 
     def test_get_recent_segments(self):
-        """Test retrieving recent segments"""
+        """Test retrieving recent segments."""
         # Add multiple segments
         segment1 = self.buffer.add_segment("Segment 1")
         segment2 = self.buffer.add_segment("Segment 2")
@@ -103,7 +103,7 @@ class TextBufferTest(unittest.TestCase):
         self.assertEqual(limited[1].text, "Segment 2")
 
     def test_get_unprocessed_segments(self):
-        """Test retrieving unprocessed segments"""
+        """Test retrieving unprocessed segments."""
         # Add multiple segments
         segment1 = self.buffer.add_segment("Segment 1")
         segment2 = self.buffer.add_segment("Segment 2")
@@ -119,7 +119,7 @@ class TextBufferTest(unittest.TestCase):
         self.assertEqual(unprocessed[1].text, "Segment 3")
 
     def test_clear(self):
-        """Test clearing the buffer"""
+        """Test clearing the buffer."""
         # Add segments
         self.buffer.add_segment("Segment 1")
         self.buffer.add_segment("Segment 2")
@@ -132,7 +132,7 @@ class TextBufferTest(unittest.TestCase):
         self.assertEqual(len(self.buffer.text_lookup), 0)
 
     def test_cleanup_old_segments(self):
-        """Test automatic cleanup of old segments"""
+        """Test automatic cleanup of old segments."""
         # Add segments
         self.buffer.add_segment("Segment 1")
         self.buffer.add_segment("Segment 2")
@@ -149,7 +149,7 @@ class TextBufferTest(unittest.TestCase):
         self.assertIn("segment 3", self.buffer.text_lookup)
 
     def test_max_size_limit(self):
-        """Test maximum size limit"""
+        """Test maximum size limit."""
         # Add more segments than max_size
         for i in range(15):  # max_size is 10
             self.buffer.add_segment(f"Segment {i}")

@@ -27,7 +27,7 @@ config.LOG_LEVEL_CONSOLE = "DEBUG"
 
 
 def get_vscode_window():
-    """Find VS Code window handle"""
+    """Find VS Code window handle."""
     result = []
 
     def callback(hwnd, windows):
@@ -50,7 +50,7 @@ def get_vscode_window():
 
 
 def get_edit_control(parent_hwnd):
-    """Find the edit control within VS Code"""
+    """Find the edit control within VS Code."""
     result = []
 
     # VS Code uses a complex structure with Electron/Chromium
@@ -122,7 +122,7 @@ def get_edit_control(parent_hwnd):
 
 
 def measure_performance(func, *args, iterations=5):
-    """Measure performance of a function"""
+    """Measure performance of a function."""
     times = []
     for i in range(iterations):
         start_time = time.time()
@@ -152,7 +152,7 @@ def measure_performance(func, *args, iterations=5):
 
 
 def test_clipboard_method(text_manager, text):
-    """Test the clipboard method"""
+    """Test the clipboard method."""
     print(f"\nTesting clipboard method with text: '{text}'")
     # Save original output mode
     original_mode = config.OUTPUT_MODE
@@ -167,14 +167,14 @@ def test_clipboard_method(text_manager, text):
 
 
 def test_sendmessage_method(text_manager, text, hwnd):
-    """Test the SendMessage method"""
+    """Test the SendMessage method."""
     print(f"\nTesting SendMessage method with text: '{text}'")
     # Call send_message directly
     send_message(hwnd, text)
 
 
 def test_sendmessage_api():
-    """Test the Windows SendMessage API"""
+    """Test the Windows SendMessage API."""
     print("\n🧪 Testing Windows SendMessage API...")
     print("=" * 50)
 

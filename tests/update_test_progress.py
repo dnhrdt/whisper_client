@@ -1,6 +1,4 @@
-"""
-Hilfsskript zum Aktualisieren des Testfortschritts
-"""
+"""Hilfsskript zum Aktualisieren des Testfortschritts."""
 
 import json
 import sys
@@ -9,7 +7,7 @@ from pathlib import Path
 
 
 def load_progress():
-    """Lädt den aktuellen Testfortschritt"""
+    """Lädt den aktuellen Testfortschritt."""
     try:
         with open("tests/speech_test_progress.json", "r", encoding="utf-8") as f:
             return json.load(f)
@@ -19,14 +17,14 @@ def load_progress():
 
 
 def save_progress(data):
-    """Speichert den aktualisierten Testfortschritt"""
+    """Speichert den aktualisierten Testfortschritt."""
     data["meta"]["last_updated"] = datetime.now().isoformat()
     with open("tests/speech_test_progress.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
 def update_test_result(stage_id, test_id, success, notes):
-    """Aktualisiert das Ergebnis eines Tests"""
+    """Aktualisiert das Ergebnis eines Tests."""
     data = load_progress()
 
     # Finde Stage und Test
@@ -70,7 +68,7 @@ def update_test_result(stage_id, test_id, success, notes):
 
 
 def show_current_test():
-    """Zeigt den aktuellen Teststatus"""
+    """Zeigt den aktuellen Teststatus."""
     data = load_progress()
     current_stage = next((s for s in data["test_stages"] if s["status"] == "in_progress"), None)
 

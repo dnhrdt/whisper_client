@@ -15,13 +15,13 @@ from .state import ConnectionState
 
 
 def on_open(ws_instance, ws):
-    """Callback when WebSocket connection is opened"""
+    """Callback when WebSocket connection is opened."""
     ws_instance._set_state(ConnectionState.CONNECTED)
     send_config(ws, ws_instance.client_id, ws_instance.session_id)
 
 
 def on_message(ws_instance, ws, message):
-    """Callback for incoming server messages with enhanced error handling"""
+    """Callback for incoming server messages with enhanced error handling."""
     if not ws_instance.processing_enabled:
         return
 
@@ -48,7 +48,7 @@ def on_message(ws_instance, ws, message):
 
 
 def on_error(ws_instance, ws, error):
-    """Callback for WebSocket errors with enhanced logging"""
+    """Callback for WebSocket errors with enhanced logging."""
     handle_connection_error(
         error,
         ws_instance.state,
@@ -61,7 +61,7 @@ def on_error(ws_instance, ws, error):
 
 
 def on_close(ws_instance, ws, close_status_code, close_msg):
-    """Callback when WebSocket connection is closed"""
+    """Callback when WebSocket connection is closed."""
     handle_connection_close(close_status_code, close_msg)
     ws_instance._set_state(ConnectionState.CLOSED)
     ws_instance.server_ready = False

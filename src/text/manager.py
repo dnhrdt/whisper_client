@@ -18,7 +18,7 @@ from .test_handler import get_test_output
 
 class TextManager:
     def __init__(self, test_mode=False):
-        """Initialisiert den TextManager"""
+        """Initialisiert den TextManager."""
         self.current_sentence = []  # Collects segments for complete sentences
         self.last_output_time: float = 0.0  # Timestamp of the last output
         self.incomplete_sentence_time: float = 0.0  # Timestamp for incomplete sentences
@@ -56,26 +56,26 @@ class TextManager:
         self.lock = threading.RLock()
 
     def is_duplicate(self, text):
-        """Checks if a text is a duplicate using the memory buffer"""
+        """Checks if a text is a duplicate using the memory buffer."""
         # Use the memory buffer for duplicate detection
         return is_duplicate(self, text)
 
     def output_sentence(self, current_time=None):
-        """Outputs the current sentence"""
+        """Outputs the current sentence."""
         return output_sentence(self, current_time)
 
     def should_force_output(self, current_time):
-        """Checks if the current sentence should be output"""
+        """Checks if the current sentence should be output."""
         return should_force_output(self, current_time)
 
     def process_segments(self, segments):
-        """Processes received text segments"""
+        """Processes received text segments."""
         return process_segments(self, segments)
 
     def insert_text(self, text):
-        """Output text based on configured mode"""
+        """Output text based on configured mode."""
         return insert_text(self, text)
 
     def get_test_output(self):
-        """Returns the collected test outputs and clears the buffer"""
+        """Returns the collected test outputs and clears the buffer."""
         return get_test_output(self)

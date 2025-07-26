@@ -33,10 +33,10 @@ from src.ws_client import ConnectionState, WhisperWebSocket
 
 
 class AlphaTest:
-    """Simple test class for WhisperClient alpha testing"""
+    """Simple test class for WhisperClient alpha testing."""
 
     def __init__(self):
-        """Initialize the test"""
+        """Initialize the test."""
         self.text_manager = TextManager(test_mode=True)
         self.websocket = WhisperWebSocket()
         self.audio_manager = AudioManager()
@@ -62,7 +62,7 @@ class AlphaTest:
         self.test_complete = threading.Event()
 
     def on_text_segments(self, segments):
-        """Callback for text segments"""
+        """Callback for text segments."""
         for segment in segments:
             text = segment.get("text", "").strip()
             if text:
@@ -71,16 +71,16 @@ class AlphaTest:
                 self.test_results["text_output"] = True
 
     def on_audio_data(self, audio_data):
-        """Callback for audio data"""
+        """Callback for audio data."""
         self.audio_processor.process_audio(audio_data)
 
     def on_processed_audio(self, processed_audio):
-        """Callback for processed audio"""
+        """Callback for processed audio."""
         self.websocket.send_audio(processed_audio)
         self.test_results["processing"] = True
 
     def check_server(self):
-        """Check if the WhisperLive server is running"""
+        """Check if the WhisperLive server is running."""
         logger.info("Checking server status...")
         server_status = check_server_status()
         self.test_results["server_check"] = server_status
@@ -92,7 +92,7 @@ class AlphaTest:
         return True
 
     def connect_websocket(self):
-        """Connect to the WhisperLive server"""
+        """Connect to the WhisperLive server."""
         logger.info("Connecting to WhisperLive server...")
         try:
             self.websocket.connect()
@@ -113,7 +113,7 @@ class AlphaTest:
             return False
 
     def check_audio_device(self):
-        """Check if the audio device is available"""
+        """Check if the audio device is available."""
         logger.info("Checking audio device...")
         if not self.audio_manager.is_device_available():
             self.test_results["errors"].append("Audio device not available")
@@ -125,7 +125,7 @@ class AlphaTest:
         return True
 
     def record_audio(self, duration=5.0):
-        """Record audio for the specified duration"""
+        """Record audio for the specified duration."""
         logger.info(f"Recording audio for {duration} seconds...")
 
         # Start audio processing
@@ -158,7 +158,7 @@ class AlphaTest:
         return True
 
     def cleanup(self):
-        """Clean up resources"""
+        """Clean up resources."""
         logger.info("Cleaning up resources...")
         try:
             self.audio_manager.cleanup()
@@ -172,7 +172,7 @@ class AlphaTest:
             return False
 
     def run_test(self, duration=5.0):
-        """Run the alpha test"""
+        """Run the alpha test."""
         logger.info("\n=== WhisperClient Alpha Test ===\n")
 
         # Check server
@@ -202,7 +202,7 @@ class AlphaTest:
         return self.test_results
 
     def print_results(self):
-        """Print test results"""
+        """Print test results."""
         logger.info("\n=== Test Results ===\n")
 
         # Check if all tests passed
@@ -251,7 +251,7 @@ class AlphaTest:
 
 
 def main():
-    """Main function"""
+    """Main function."""
     # Parse command line arguments
     import argparse
 

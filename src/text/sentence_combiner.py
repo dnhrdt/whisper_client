@@ -10,16 +10,14 @@ import config
 
 
 def handle_sentence_continuation(sentences):
-    """Behandelt Satzfortsetzungen"""
+    """Behandelt Satzfortsetzungen."""
     if len(sentences) <= 1:
         return sentences
 
     i = len(sentences) - 1
     while i > 0:
         # Case 1: Previous sentence doesn't end with a sentence marker
-        if not any(
-            sentences[i - 1].endswith(marker) for marker in config.SENTENCE_END_MARKERS
-        ):
+        if not any(sentences[i - 1].endswith(marker) for marker in config.SENTENCE_END_MARKERS):
             # Combine with the next sentence
             sentences[i - 1] = sentences[i - 1] + " " + sentences[i]
             sentences.pop(i)
@@ -47,7 +45,7 @@ def handle_sentence_continuation(sentences):
 
 
 def should_combine_sentences(sentence1, sentence2):
-    """Prüft, ob zwei Sätze kombiniert werden sollten"""
+    """Prüft, ob zwei Sätze kombiniert werden sollten."""
     # Case 1: First sentence doesn't end with a sentence marker
     if not any(sentence1.endswith(marker) for marker in config.SENTENCE_END_MARKERS):
         return True
@@ -57,11 +55,7 @@ def should_combine_sentences(sentence1, sentence2):
         return True
 
     # Case 3: First sentence ends with a period and second starts with a connector
-    if (
-        sentence1.endswith(".")
-        and sentence2
-        and sentence2.startswith(("Y ", "y ", "And ", "and "))
-    ):
+    if sentence1.endswith(".") and sentence2 and sentence2.startswith(("Y ", "y ", "And ", "and ")):
         return True
 
     return False

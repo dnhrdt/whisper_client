@@ -31,7 +31,7 @@ logger = logging.get_logger()
 
 
 class MockWebSocket:
-    """Mock WebSocket client for testing"""
+    """Mock WebSocket client for testing."""
 
     def __init__(self):
         self.connected = True
@@ -40,29 +40,29 @@ class MockWebSocket:
         self.on_text_callback = None
 
     def send_audio(self, audio_data):
-        """Record sent audio data"""
+        """Record sent audio data."""
         self.sent_audio.append(audio_data)
         return True
 
     def is_ready(self):
-        """Always return ready for testing"""
+        """Always return ready for testing."""
         return self.connected and self.server_ready
 
     def set_text_callback(self, callback):
-        """Set callback for text segments"""
+        """Set callback for text segments."""
         self.on_text_callback = callback
 
 
 class TumblingWindowWebSocketTest(unittest.TestCase):
-    """Tests for the integration of TumblingWindow with WebSocket client"""
+    """Tests for the integration of TumblingWindow with WebSocket client."""
 
     def setUp(self):
-        """Set up test environment"""
+        """Set up test environment."""
         self.mock_websocket = MockWebSocket()
         self.audio_processor = AudioProcessor(test_mode=False)
 
     def test_audio_flow(self):
-        """Test audio data flow from AudioProcessor to WebSocket"""
+        """Test audio data flow from AudioProcessor to WebSocket."""
         # Start audio processing with mock WebSocket callback
         self.audio_processor.start_processing(self.mock_websocket.send_audio)
 
@@ -91,7 +91,8 @@ class TumblingWindowWebSocketTest(unittest.TestCase):
             self.assertIsInstance(audio_chunk, bytes, "WebSocket should receive audio as bytes")
 
     def test_window_size_and_overlap(self):
-        """Test that audio is processed with correct window size and overlap"""
+        """Test that audio is processed with correct window size and
+        overlap."""
         # Start audio processing with mock WebSocket callback
         self.audio_processor.start_processing(self.mock_websocket.send_audio)
 
@@ -133,12 +134,12 @@ class TumblingWindowWebSocketTest(unittest.TestCase):
 
 
 class MainIntegrationTest(unittest.TestCase):
-    """Tests for the integration in main.py"""
+    """Tests for the integration in main.py."""
 
     @patch("src.ws_client.WhisperWebSocket")
     @patch("src.audio.AudioProcessor")
     def test_main_integration(self, MockAudioProcessor, MockWebSocket):
-        """Test the integration flow in main.py"""
+        """Test the integration flow in main.py."""
         # Import main module
         from main import WhisperClient
 

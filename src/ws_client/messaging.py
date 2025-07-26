@@ -17,7 +17,7 @@ from src.logging import log_audio, log_connection, log_error, log_text
 
 
 def send_config(ws, client_id, session_id):
-    """Sends configuration to the server"""
+    """Sends configuration to the server."""
     try:
         ws_config = {
             "uid": client_id,
@@ -38,7 +38,7 @@ def send_config(ws, client_id, session_id):
 
 
 def send_audio_data(ws, audio_data):
-    """Sends audio data to the server"""
+    """Sends audio data to the server."""
     try:
         send_start = time.time()
         if ws:  # Check if ws is not None
@@ -62,7 +62,7 @@ def send_audio_data(ws, audio_data):
 
 
 def send_end_of_audio(ws):
-    """Sends END_OF_AUDIO signal to the server"""
+    """Sends END_OF_AUDIO signal to the server."""
     try:
         send_start = time.time()
         if ws:  # Check if ws is not None
@@ -80,7 +80,7 @@ def send_end_of_audio(ws):
 
 
 def process_message(message, on_text_callback=None, processing_enabled=True):
-    """Process a message from the server"""
+    """Process a message from the server."""
     if not processing_enabled:
         return None, None
 

@@ -1,12 +1,28 @@
 # Active Development Context
-Version: 7.7
-Timestamp: 2025-04-20 18:26 CET
+Version: 8.0
+Timestamp: 2025-01-27 00:47 CET
 
 ## Document Purpose
 This file serves as the source of truth for current development state and recent changes. It is frequently updated to maintain accurate context.
 
 ## Most Recent Update
-- **Fixed All Linting Issues [T156] (Current Session):**
+- **Strategic Planning Session with Whispering Integration Analysis [NEW] (Current Session):**
+  * Completed comprehensive analysis of Whispering repository integration potential
+  * Gemini provided detailed strategic analysis in `docs/strategic_plans/whispering_integration_strategy.md`
+  * Identified two-stage integration approach: OpenAI-compatible API first, then true streaming
+  * Confirmed technical feasibility but emphasized need for stable core before integration
+  * **Strategic Decision:** Prioritize core stabilization before Whispering integration
+  * **Next Steps:** Complete Phase 1 (Core Stabilization) before Phase 2 (Whispering Integration)
+
+- **Integrated docformatter for Docstring Formatting [T156] (Previous Session):**
+  * Added docformatter to the pre-commit-config.yaml to automatically format docstrings
+  * Configured docformatter with the options `--blank` and `--in-place` to add blank lines and make changes directly
+  * Fixed D400 issues (first line should end with a period) in many files
+  * Installed VS Code extension "autoDocstring" for better docstring generation
+  * Identified limitations: docformatter has issues with Unicode characters and doesn't fix D401 (imperative mood)
+  * **Next Steps:** Manually fix remaining docstring issues (D401, files with Unicode characters)
+
+- **Fixed All Linting Issues [T156]:**
   * Fixed all remaining linting issues in the codebase
   * Improved code quality score from 9.75/10 to 10.00/10
   * Used dynamic imports with import_module to resolve E0611 errors in facade files
@@ -191,12 +207,19 @@ Before moving on to more productive development tasks, we'll implement minimal s
 ### Strategic Re-evaluation (Post-'Whispering' Analysis)
 After analyzing the "Whispering" application (see `research/comparison_whisper_client_vs_whispering.md`), we confirmed that its HTTP POST approach for entire audio files is less suitable for long, continuous dictation compared to our WebSocket streaming approach. However, "Whispering" offers a mature UI, cross-platform support, and backend flexibility.
 
-Given the user's priority for low-latency continuous dictation and the desire for a robust, potentially community-extendable core, we have decided to adopt a **"CLI-First" strategy**:
+**Updated Strategic Direction (Current Session):**
+Based on comprehensive analysis by Gemini (documented in `docs/strategic_plans/whispering_integration_strategy.md`), we have identified a **two-stage integration opportunity** with Whispering:
+
+1. **Stage 1: OpenAI-Compatible API Server** - Create FastAPI server that mimics OpenAI Whisper API while using our streaming backend internally
+2. **Stage 2: True Streaming Integration** - Collaborate with Whispering maintainer to expose real-time streaming capabilities
+
+**However, this integration requires a stable, well-tested core first.** Therefore, we maintain the **"CLI-First" strategy** with enhanced focus:
 
 1.  **Focus on Core:** Prioritize building an extremely stable and robust core library/CLI tool based on our existing Python WebSocket streaming approach.
 2.  **Decouple UI:** Separate the core logic cleanly from any UI concerns.
 3.  **Attract Developers:** Aim for a well-documented, easy-to-use core that encourages community contributions, potentially including GUIs.
 4.  **User Need:** Address the primary need for a reliable dictation tool first, deferring extensive UI development.
+5.  **Integration Readiness:** Ensure core is bulletproof before pursuing Whispering integration.
 
 ### Current Development Approach (Revised: CLI-First)
 We adopt a revised phased approach focusing on core stability:
@@ -286,8 +309,28 @@ We adopt a revised phased approach focusing on core stability:
 - Task history: progressHistory.md
 
 ## Next Steps (Immediate for New Session)
-1.  **Test Refactored Modules [T157, T158]:** Run tests to ensure no regressions were introduced by the refactoring.
-2.  **Proceed with Stability Analysis:** Move to the next core stabilization tasks.
-3.  **Prioritize Stability:** Begin systematic review and improvement of core component stability (Audio, WebSocket, Text Processing, Error Handling).
 
-*(Community engagement, WhisperLive communication, and broader Alpha testing are deferred until the core CLI/library is stable and documented.)*
+### Phase 1: Core Stabilization (CURRENT PRIORITY - Before Whispering Integration)
+
+**Week 1: Critical Regression Testing and Stability**
+1.  **Test Refactored Modules [T157, T158] - URGENT:** Run comprehensive tests to ensure no regressions were introduced by the refactoring.
+2.  **T120 Audio Timing Analysis:** Begin systematic investigation and resolution of known audio timing issues.
+3.  **WebSocket Robustness:** Address connection stability and recovery mechanisms.
+4.  **Test Suite Integration:** Fix hanging tests in sequential execution.
+
+**Week 2: Alpha Release Preparation**
+1.  **Alpha Release Checklist:** Systematically complete all items in `docs/alpha_release_checklist.md`.
+2.  **Documentation Updates:** Ensure README, CONTRIBUTING, and CHANGELOG are current.
+3.  **Configuration Consistency:** Fix inconsistencies between config.json and config.py.
+
+**Week 3: Performance and Long-term Stability**
+1.  **Long-running Tests:** Verify 10+ minute sessions work reliably.
+2.  **Performance Benchmarking:** Document our 130ms latency advantage.
+3.  **Memory and Resource Management:** Address potential leaks and improve cleanup.
+
+### Phase 2: Whispering Integration (AFTER Phase 1 completion)
+1.  **FastAPI Prototype:** Create OpenAI-compatible API server.
+2.  **Docker Integration:** Implement docker-compose setup.
+3.  **Whispering PR:** Submit minimal integration following Speaches pattern.
+
+*(Community engagement, WhisperLive communication, and broader Alpha testing are deferred until the core CLI/library is stable and documented. Whispering integration begins only after successful Phase 1 completion.)*

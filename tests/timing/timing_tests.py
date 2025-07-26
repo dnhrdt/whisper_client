@@ -29,14 +29,14 @@ class TimingTest:
         self.test_log = []
 
     def log_event(self, event_type: str, message: str, timestamp: float = None):
-        """Log event with timestamp"""
+        """Log event with timestamp."""
         if timestamp is None:
             timestamp = time.time()
 
         self.test_log.append({"timestamp": timestamp, "type": event_type, "message": message})
 
     def on_text_received(self, segments):
-        """Callback for received text segments"""
+        """Callback for received text segments."""
         timestamp = time.time()
         for segment in segments:
             text = segment.get("text", "").strip()
@@ -45,7 +45,7 @@ class TimingTest:
                 self.log_event("text", f"Received: {text}", timestamp)
 
     def save_test_results(self, test_name: str):
-        """Save test results"""
+        """Save test results."""
         results = {
             "test_name": test_name,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -67,7 +67,7 @@ class TimingTest:
             json.dump(results, f, indent=2, ensure_ascii=False)
 
     def analyze_results(self):
-        """Analyze test results"""
+        """Analyze test results."""
         if not self.test_log:
             return "No test results available"
 

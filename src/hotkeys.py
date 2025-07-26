@@ -29,7 +29,7 @@ class HotkeyManager:
         self.HOTKEYS = {"f13": (0, win32con.VK_F13), "f14": (0, win32con.VK_F14)}
 
     def register_hotkey(self, hotkey, callback):
-        """Registers a hotkey with callback"""
+        """Registers a hotkey with callback."""
         if hotkey not in self.HOTKEYS:
             log_error(logger, "⚠️ Unknown hotkey: %s", hotkey)
             return False
@@ -47,7 +47,7 @@ class HotkeyManager:
                 log_error(logger, "Error in callback for %s: %s", hotkey, e)
 
     def _check_hotkeys(self):
-        """Checks the status of registered hotkeys"""
+        """Checks the status of registered hotkeys."""
         key_states = {key: False for key in self.HOTKEYS}  # Stores the key state
 
         while self.running:
@@ -86,7 +86,7 @@ class HotkeyManager:
                 time.sleep(config.HOTKEY_ERROR_DELAY)  # Wait time after errors
 
     def start(self):
-        """Starts hotkey monitoring"""
+        """Starts hotkey monitoring."""
         if self.running:
             return
 
@@ -97,7 +97,7 @@ class HotkeyManager:
         log_debug(logger, "✓ Hotkey system started")
 
     def stop(self):
-        """Stops hotkey monitoring"""
+        """Stops hotkey monitoring."""
         if not self.running:
             return
 

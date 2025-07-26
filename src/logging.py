@@ -20,7 +20,7 @@ logger.setLevel(logging.DEBUG)
 
 
 class WhisperFormatter(logging.Formatter):
-    """Formatter that uses different formats based on log type"""
+    """Formatter that uses different formats based on log type."""
 
     def __init__(self, formats=None):
         super().__init__()
@@ -39,7 +39,7 @@ class WhisperFormatter(logging.Formatter):
 
 
 def log_connection(logger, message, *args, **kwargs):
-    """Log for connection events"""
+    """Log for connection events."""
     logger = logging.getLogger(logger.name)
     if args or kwargs:
         message = message % args if args else message % kwargs
@@ -47,7 +47,7 @@ def log_connection(logger, message, *args, **kwargs):
 
 
 def log_audio(logger, message, *args, **kwargs):
-    """Log for audio events"""
+    """Log for audio events."""
     logger = logging.getLogger(logger.name)
     if args or kwargs:
         message = message % args if args else message % kwargs
@@ -64,7 +64,7 @@ def log_audio(logger, message, *args, **kwargs):
 
 
 def log_text(logger, message, *args, **kwargs):
-    """Log for text events"""
+    """Log for text events."""
     logger = logging.getLogger(logger.name)
     if args or kwargs:
         message = message % args if args else message % kwargs
@@ -72,7 +72,7 @@ def log_text(logger, message, *args, **kwargs):
 
 
 def log_info(logger, message, *args, **kwargs):
-    """Log for info events"""
+    """Log for info events."""
     logger = logging.getLogger(logger.name)
     if args or kwargs:
         message = message % args if args else message % kwargs
@@ -80,7 +80,7 @@ def log_info(logger, message, *args, **kwargs):
 
 
 def log_warning(logger, message, *args, **kwargs):
-    """Log for warning events"""
+    """Log for warning events."""
     logger = logging.getLogger(logger.name)
     if args or kwargs:
         message = message % args if args else message % kwargs
@@ -88,7 +88,7 @@ def log_warning(logger, message, *args, **kwargs):
 
 
 def log_debug(logger, message, *args, **kwargs):
-    """Log for debug events"""
+    """Log for debug events."""
     logger = logging.getLogger(logger.name)
     if args or kwargs:
         message = message % args if args else message % kwargs
@@ -96,7 +96,7 @@ def log_debug(logger, message, *args, **kwargs):
 
 
 def log_error(logger, message, *args, **kwargs):
-    """Log for errors"""
+    """Log for errors."""
     logger = logging.getLogger(logger.name)
     if args or kwargs:
         message = message % args if args else message % kwargs
@@ -111,7 +111,7 @@ def log_error(logger, message, *args, **kwargs):
 
 
 def get_logger():
-    """Returns the global logger instance"""
+    """Returns the global logger instance."""
     print("Initializing logger...")  # Debug output
 
     # Remove existing handlers

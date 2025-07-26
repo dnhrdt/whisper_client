@@ -12,7 +12,7 @@ from src.logging import log_info
 
 
 def handle_empty_input(manager, current_time):
-    """Handles empty input segments"""
+    """Handles empty input segments."""
     # Check for timeout on empty input (important for the timeout test)
     if (
         manager.current_sentence
@@ -23,7 +23,7 @@ def handle_empty_input(manager, current_time):
 
 
 def handle_empty_text(manager, current_time):
-    """Handles empty text in segments"""
+    """Handles empty text in segments."""
     # Check for timeout on empty input (important for the timeout test)
     if (
         manager.current_sentence
@@ -34,7 +34,7 @@ def handle_empty_text(manager, current_time):
 
 
 def check_timeout(manager, current_time):
-    """Checks for timeout on incomplete sentences"""
+    """Checks for timeout on incomplete sentences."""
     if (
         manager.current_sentence
         and current_time - manager.incomplete_sentence_time > config.MAX_SENTENCE_WAIT
@@ -44,7 +44,7 @@ def check_timeout(manager, current_time):
 
 
 def handle_special_test_cases(manager, text, current_time):
-    """Erkennt und behandelt spezielle Testfälle"""
+    """Erkennt und behandelt spezielle Testfälle."""
     # Very Long Segments test
     if len(text) > 500 and "Textsegmenten testen soll" in text:
         manager.very_long_segment_test = True

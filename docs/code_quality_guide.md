@@ -35,11 +35,11 @@ Maintaining high code quality is essential for the long-term success of the Whis
    ```bash
    # Create virtual environment
    python -m venv venv
-   
+
    # Activate virtual environment
    # On Windows:
    .\venv\Scripts\activate
-   
+
    # On Linux/Mac:
    source venv/bin/activate
    ```
@@ -48,7 +48,7 @@ Maintaining high code quality is essential for the long-term success of the Whis
    ```bash
    # Install project dependencies
    pip install -r requirements.txt
-   
+
    # Install development dependencies
    pip install -r requirements-dev.txt
    ```

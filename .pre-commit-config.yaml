@@ -7,14 +7,18 @@ repos:
     rev: v4.5.0
     hooks:
     -   id: trailing-whitespace
+        exclude: ^(docs/|logs/|research/|cline_docs/|backup/|tests/poc/)
     -   id: end-of-file-fixer
+        exclude: ^(docs/|logs/|research/|cline_docs/|backup/|tests/poc/)
     -   id: check-yaml
     -   id: check-json
     -   id: check-added-large-files
     -   id: debug-statements
+        exclude: ^(docs/|logs/|research/|cline_docs/|backup/|tests/poc/)
     -   id: check-merge-conflict
     -   id: check-case-conflict
     -   id: check-docstring-first
+        exclude: ^(docs/|logs/|research/|cline_docs/|backup/|tests/poc/)
     -   id: detect-private-key
 
 -   repo: https://github.com/psf/black
@@ -22,12 +26,14 @@ repos:
     hooks:
     -   id: black
         language_version: python3
+        exclude: ^(docs/|logs/|research/|cline_docs/|backup/|tests/poc/)
 
 -   repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
     -   id: isort
         args: ["--profile", "black"]
+        exclude: ^(docs/|logs/|research/|cline_docs/|backup/|tests/poc/)
 
 -   repo: https://github.com/pycqa/flake8
     rev: 7.0.0
@@ -35,6 +41,7 @@ repos:
     -   id: flake8
         additional_dependencies: [flake8-docstrings]
         args: ["--max-line-length=100", "--extend-ignore=E203"]
+        exclude: ^(docs/|logs/|research/|cline_docs/|backup/|tests/poc/)
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.8.0
@@ -42,6 +49,7 @@ repos:
     -   id: mypy
         additional_dependencies: [types-requests]
         args: ["--ignore-missing-imports"]
+        exclude: ^(docs/|logs/|research/|cline_docs/|backup/|tests/poc/)
 
 -   repo: https://github.com/pycqa/pylint
     rev: v3.0.3
@@ -49,3 +57,11 @@ repos:
     -   id: pylint
         args: ["--disable=C0111,C0103,C0303,W1201,W1202"]
         additional_dependencies: [pylint-django]
+        exclude: ^(docs/|logs/|research/|cline_docs/|backup/|tests/poc/)
+
+-   repo: https://github.com/PyCQA/docformatter
+    rev: v1.7.5
+    hooks:
+    -   id: docformatter
+        args: ["--blank", "--in-place"]
+        exclude: ^(docs/|logs/|research/|cline_docs/|backup/|tests/poc/)

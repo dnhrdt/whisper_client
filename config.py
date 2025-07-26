@@ -129,7 +129,7 @@ SENTENCE_END_MARKERS = [".", "!", "?", "..."]  # Sentence end markers for text o
 
 # Output Settings
 class OutputMode:
-    """Available output modes"""
+    """Available output modes."""
 
     CLIPBOARD = "clipboard"  # Text to clipboard + Ctrl+V
     PROMPT = "prompt"  # Direct prompt integration

@@ -11,7 +11,7 @@ import enum
 
 
 class ConnectionState(enum.Enum):
-    """Enum for WebSocket connection states"""
+    """Enum for WebSocket connection states."""
 
     DISCONNECTED = 0
     CONNECTING = 1
